@@ -10,13 +10,13 @@
 // either express or implied. See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  objc_timer.cpp
+//  qm_objc_timer.cpp
 //  MicroMessenger
 //
 //  Created by yerungui on 12-12-10.
 //
 
-#include "comm/objc/objc_timer.h"
+#include "comm/objc/qm_objc_timer.h"
 #import <Foundation/Foundation.h>
 #include <list>
 
@@ -25,18 +25,18 @@
 
 using namespace marsMulti::comm;
 
-void onAlarm(long long _id)
+void qm_onAlarm(long long _id)
 {
 //    Alarm::OnAlarm(reinterpret_cast<Alarm*>(_id));
 }
 
-@interface TimerRuner : NSObject
--(void) Run:(NSTimer*)timer;
+@interface qm_TimerRuner : NSObject
+-(void) qm_Run:(NSTimer*)timer;
 @end
 
-struct TimerRecord
+struct qm_TimerRecord
 {
-    TimerRecord()
+    qm_TimerRecord()
     {
         id_ = 0;
         timer = nil;
@@ -45,18 +45,18 @@ struct TimerRecord
     
     long long id_;
     NSTimer* timer;
-    TimerRuner* timer_runer;
+    qm_TimerRuner* timer_runer;
 };
 
-static std::list<TimerRecord> gs_lst_timer_record;
+static std::list<qm_TimerRecord> gs_lst_timer_record;
 static Mutex gs_mutex;
 
-@implementation TimerRuner
+@implementation qm_TimerRuner
 
--(void) Run:(NSTimer*)timer
+-(void) qm_Run:(NSTimer*)timer
 {
     ScopedLock lock(gs_mutex);
-    for (std::list<TimerRecord>::iterator it = gs_lst_timer_record.begin(); it!=gs_lst_timer_record.end(); ++it)
+    for (std::list<qm_TimerRecord>::iterator it = gs_lst_timer_record.begin(); it!=gs_lst_timer_record.end(); ++it)
     {
         if (timer==it->timer)
         {
@@ -75,7 +75,7 @@ static Mutex gs_mutex;
             long long id_ = it->id_;
             gs_lst_timer_record.erase(it);
 
-            onAlarm(id_);
+            qm_onAlarm(id_);
             break;
         }
     }
@@ -83,30 +83,30 @@ static Mutex gs_mutex;
 
 @end
 
-bool StartAlarm(long long _id, int after)
+bool qm_StartAlarm(long long _id, int after)
 {
     ScopedLock lock(gs_mutex);
-    for (std::list<TimerRecord>::iterator it = gs_lst_timer_record.begin(); it!=gs_lst_timer_record.end(); ++it)
+    for (std::list<qm_TimerRecord>::iterator it = gs_lst_timer_record.begin(); it!=gs_lst_timer_record.end(); ++it)
     {
         if (_id==it->id_) return false;
     }
     
     NSTimeInterval  interval = (NSTimeInterval)after/1000;
     NSRunLoop *runLoop = [NSRunLoop mainRunLoop];
-    TimerRecord tr;
+    qm_TimerRecord tr;
     tr.id_ = _id;
-    tr.timer_runer = [[TimerRuner alloc] init];
-    tr.timer = [NSTimer timerWithTimeInterval:interval target:tr.timer_runer selector:@selector(Run:) userInfo:tr.timer repeats:NO];
+    tr.timer_runer = [[qm_TimerRuner alloc] init];
+    tr.timer = [NSTimer timerWithTimeInterval:interval target:tr.timer_runer selector:@selector(qm_Run:) userInfo:tr.timer repeats:NO];
     [tr.timer retain];
     [runLoop addTimer:tr.timer forMode:NSDefaultRunLoopMode];
     gs_lst_timer_record.push_back(tr);
     return true;
 }
 
-bool StopAlarm(long long _id)
+bool qm_StopAlarm(long long _id)
 {
     ScopedLock lock(gs_mutex);
-    for (std::list<TimerRecord>::iterator it = gs_lst_timer_record.begin(); it!=gs_lst_timer_record.end(); ++it)
+    for (std::list<qm_TimerRecord>::iterator it = gs_lst_timer_record.begin(); it!=gs_lst_timer_record.end(); ++it)
     {
         if (_id==it->id_)
         {
@@ -128,4 +128,4 @@ bool StopAlarm(long long _id)
     return false;
 }
 
-void comm_export_symbols_0(){}
+void qm_comm_export_symbols_0(){}

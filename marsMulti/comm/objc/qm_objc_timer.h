@@ -11,18 +11,18 @@
 // limitations under the License.
 
 //
-//  objc_timer.h
+//  qm_objc_timer.h
 //  MicroMessenger
 //
 //  Created by yerungui  on 12-12-10.
 //
 
-#ifndef __MicroMessenger__objc_timer__
-#define __MicroMessenger__objc_timer__
+#ifndef __MicroMessenger__qm_objc_timer__
+#define __MicroMessenger__qm_objc_timer__
 
 #include <sys/types.h>
 
-bool StartAlarm(int64_t _id, int after);
-bool StopAlarm(int64_t _id);
+bool qm_StartAlarm(int64_t _id, int after);
+bool qm_StopAlarm(int64_t _id);
 
-#endif /* defined(__MicroMessenger__objc_timer__) */
+#endif /* defined(__MicroMessenger__qm_objc_timer__) */

@@ -44,7 +44,7 @@
 #include <MacTypes.h>
 #include <functional>
 
-#include "comm/objc/objc_timer.h"
+#include "comm/objc/qm_objc_timer.h"
 #import "comm/objc/Reachability.h"
 
 #include "comm/thread/mutex.h"
