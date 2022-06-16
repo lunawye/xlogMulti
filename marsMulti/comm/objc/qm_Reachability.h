@@ -1,6 +1,6 @@
 /*
  
- File: Reachability.h
+ File: qm_Reachability.h
  Abstract: Basic demonstration of how to use the SystemConfiguration Reachablity APIs.
  
  Version: 2.2
@@ -62,24 +62,24 @@ typedef enum {
 
 #define kReachabilityChangedNotification @"kNetworkReachabilityChangedNotification"
 
-@interface MarsReachability: NSObject
+@interface qm_MarsReachability: NSObject
 {
-    BOOL localWiFiRef;
-    SCNetworkReachabilityRef reachabilityRef;
+    BOOL qm_localWiFiRef;
+    SCNetworkReachabilityRef qm_reachabilityRef;
 }
 
 // reachabilityWithHostName- Use to check the reachability of a particular host name. 
-+ (MarsReachability*) reachabilityWithHostName: (NSString*) hostName;
++ (qm_MarsReachability*) reachabilityWithHostName: (NSString*) hostName;
 
 // reachabilityWithAddress- Use to check the reachability of a particular IP address. 
-+ (MarsReachability*) reachabilityWithAddress: (const struct sockaddr*) hostAddress;
++ (qm_MarsReachability*) reachabilityWithAddress: (const struct sockaddr*) hostAddress;
 
 // reachabilityForInternetConnection- checks whether the default route is available.  
 //  Should be used by applications that do not connect to a particular host
-+ (MarsReachability*) reachabilityForInternetConnection;
++ (qm_MarsReachability*) reachabilityForInternetConnection;
 
 // reachabilityForLocalWiFi- checks whether a local wifi connection is available.
-+ (MarsReachability*) reachabilityForLocalWiFi;
++ (qm_MarsReachability*) reachabilityForLocalWiFi;
 
 + (MarsNetworkStatus) getCacheReachabilityStatus:(BOOL) flash;
 

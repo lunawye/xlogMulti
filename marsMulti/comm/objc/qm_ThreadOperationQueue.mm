@@ -40,43 +40,43 @@ public:
 
 @interface __CThreadWarp : NSObject
 {
-    void (*m_funp)(void*);
-    void* m_arg;
-    void (*m_fun)();
+    void (*qm_m_funp)(void*);
+    void* qm_m_arg;
+    void (*qm_m_fun)();
     
 }
 
--(void) Run;
-@property (nonatomic, assign)  void (*m_funp)(void*);
-@property (nonatomic, assign)  void (*m_fun)();
-@property (nonatomic, assign)  void* m_arg;
+-(void) qm_Run;
+@property (nonatomic, assign)  void (*qm_m_funp)(void*);
+@property (nonatomic, assign)  void (*qm_m_fun)();
+@property (nonatomic, assign)  void* qm_m_arg;
 @end
 
 @implementation __CThreadWarp
 
-@synthesize m_funp;
-@synthesize m_fun;
-@synthesize m_arg;
+@synthesize qm_m_funp;
+@synthesize qm_m_fun;
+@synthesize qm_m_arg;
 
 -(id) init
 {
     if (self = [super init]) {
-        m_funp = nil;
-        m_arg = nil;
-        m_fun = nil;
+        qm_m_funp = nil;
+        qm_m_arg = nil;
+        qm_m_fun = nil;
     }
     
     return self;
 }
 
--(void) Run
+-(void) qm_Run
 {
     SCOPE_POOL();
-    assert(nil!=m_funp || nil!=m_fun);
-    if (nil!=m_funp)
-        m_funp(m_arg);
+    assert(nil!=qm_m_funp || nil!=qm_m_fun);
+    if (nil!=qm_m_funp)
+        qm_m_funp(qm_m_arg);
     else
-        m_fun();
+        qm_m_fun();
         
 }
 @end
@@ -84,59 +84,59 @@ public:
 
 @interface __ThreadWarp : NSObject
 {
-    id m_target;
-    SEL m_sel;
-    id m_arg;
+    id qm_m_target;
+    SEL qm_m_sel;
+    id qm_m_arg;
 }
 
--(void) Run;
-@property (nonatomic, retain)  id m_target;
-@property (nonatomic, assign)  SEL m_sel;
-@property (nonatomic, retain)  id m_arg;
+-(void) qm_Run;
+@property (nonatomic, retain)  id qm_m_target;
+@property (nonatomic, assign)  SEL qm_m_sel;
+@property (nonatomic, retain)  id qm_m_arg;
 @end
 
 @implementation __ThreadWarp
 
-@synthesize m_target;
-@synthesize m_sel;
-@synthesize m_arg;
+@synthesize qm_m_target;
+@synthesize qm_m_sel;
+@synthesize qm_m_arg;
 
 -(id) init
 {
     if (self = [super init]) {
-        m_target = nil;
-        m_sel = 0;
-        m_arg = nil;
+        qm_m_target = nil;
+        qm_m_sel = 0;
+        qm_m_arg = nil;
     }
     
     return self;
 }
 
-- (void)dealloc {
-    self.m_target = nil;
-    self.m_arg = nil;
-    [super dealloc];
+- (void)qm_dealloc {
+    self.qm_m_target = nil;
+    self.qm_m_arg = nil;
+    [super qm_dealloc];
 }
 
--(void) Run
+-(void) qm_Run
 {
     SCOPE_POOL();
-    [m_target performSelector:m_sel withObject:m_arg];
+    [qm_m_target performSelector:qm_m_sel withObject:qm_m_arg];
 }
 @end
 
-@implementation ThreadQueue
+@implementation qm_ThreadQueue
 
-+(BOOL) RunWithTarget:(id)target selector:(SEL)sel object:(id)arg
++(BOOL) qm_RunWithTarget:(id)target selector:(SEL)sel object:(id)arg
 {
     SCOPE_POOL();
     __ThreadWarp* warp = [[__ThreadWarp alloc] init];
-    warp.m_target= target;
-    warp.m_sel= sel;
-    warp.m_arg = arg;
+    warp.qm_m_target= target;
+    warp.qm_m_sel= sel;
+    warp.qm_m_arg = arg;
     
     NSInvocationOperation* invocation = [[NSInvocationOperation alloc]
-                                         initWithTarget:warp selector:@selector(Run) object:nil];
+                                         initWithTarget:warp selector:@selector(qm_Run) object:nil];
     if (nil==invocation)
     {
         [warp release];
@@ -151,15 +151,15 @@ public:
 
 @end
 
-extern "C" BOOL RunWithTarget(void (*_funp)(void*), void* _arg)
+extern "C" BOOL qm_RunWithTarget(void (*_funp)(void*), void* _arg)
 {
     SCOPE_POOL();
     __CThreadWarp* warp = [[__CThreadWarp alloc] init];
-    warp.m_funp = _funp;
-    warp.m_arg = _arg;
+    warp.qm_m_funp = _funp;
+    warp.qm_m_arg = _arg;
     
     NSInvocationOperation* invocation = [[NSInvocationOperation alloc]
-                                         initWithTarget:warp selector:@selector(Run) object:nil];
+                                         initWithTarget:warp selector:@selector(qm_Run) object:nil];
     if (nil==invocation)
     {
         [warp release];
@@ -172,14 +172,14 @@ extern "C" BOOL RunWithTarget(void (*_funp)(void*), void* _arg)
     return YES;
 }
 
-extern "C" BOOL RunWithTargetNoParam(void (*_fun)())
+extern "C" BOOL qm_RunWithTargetNoParam(void (*_fun)())
 {
     SCOPE_POOL();
     __CThreadWarp* warp = [[__CThreadWarp alloc] init];
-    warp.m_fun = _fun;
+    warp.qm_m_fun = _fun;
     
     NSInvocationOperation* invocation = [[NSInvocationOperation alloc]
-                                         initWithTarget:warp selector:@selector(Run) object:nil];
+                                         initWithTarget:warp selector:@selector(qm_Run) object:nil];
     if (nil==invocation)
     {
         [warp release];

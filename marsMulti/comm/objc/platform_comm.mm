@@ -45,7 +45,7 @@
 #include <functional>
 
 #include "comm/objc/qm_objc_timer.h"
-#import "comm/objc/Reachability.h"
+#import "comm/objc/qm_Reachability.h"
 
 #include "comm/thread/mutex.h"
 #include "comm/thread/lock.h"
@@ -72,7 +72,7 @@ static MarsNetworkStatus __GetNetworkStatus()
 #if TARGET_OS_WATCH
     return ReachableViaWiFi;
 #else
-    return [MarsReachability getCacheReachabilityStatus:NO];
+    return [qm_MarsReachability getCacheReachabilityStatus:NO];
 #endif
 }
 
@@ -97,7 +97,7 @@ void ResetWiFiIdCallBack() {
 
 void FlushReachability() {
 #if !TARGET_OS_WATCH
-    [MarsReachability getCacheReachabilityStatus:YES];
+    [qm_MarsReachability getCacheReachabilityStatus:YES];
     marsMulti::comm::ScopedLock lock(sg_wifiinfo_mutex);
     sg_wifiinfo.ssid.clear();
     sg_wifiinfo.bssid.clear();
