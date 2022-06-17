@@ -21,12 +21,12 @@
 #ifndef TcpFSMHandler_H_
 #define TcpFSMHandler_H_
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 template<class InputIterator>
 bool TcpFSMHandler(InputIterator _first, InputIterator _last, marsMulti::comm::SocketBreaker& _breaker, bool _select_anyway)
 {
-	xverbose_function();
+	qm_xverbose_function();
     xgroup2_define(group);
 
     marsMulti::comm::SocketSelect sel(_breaker, true);
@@ -45,7 +45,7 @@ bool TcpFSMHandler(InputIterator _first, InputIterator _last, marsMulti::comm::S
 
     if (!have_runing_status && !_select_anyway)
     {
-        xinfo2(TSF"all end status") >> group;
+        qm_xinfo2(TSF"all end status") >> group;
         return false;
     }
 
@@ -59,10 +59,10 @@ bool TcpFSMHandler(InputIterator _first, InputIterator _last, marsMulti::comm::S
     }
 
     // select error
-    if (ret < 0) { xerror2(TSF"sel err ret:(%_, %_)", ret, sel.Errno()) >> group; return false;}
+    if (ret < 0) { qm_xerror2(TSF"sel err ret:(%_, %_)", ret, sel.Errno()) >> group; return false;}
     // user break
-    if (sel.IsException()) { xerror2(TSF"breaker exp") >> group; return false; }
-    if (sel.IsBreak()) { xdebug2(TSF"breaker break") >> group; return false; }
+    if (sel.IsException()) { qm_xerror2(TSF"breaker exp") >> group; return false; }
+    if (sel.IsBreak()) { qm_xdebug2(TSF"breaker break") >> group; return false; }
 
     for (InputIterator it = _first; it != _last; ++it)
     {
@@ -75,7 +75,7 @@ bool TcpFSMHandler(InputIterator _first, InputIterator _last, marsMulti::comm::S
 template<class InputIterator>
 void TcpFSMHandlerRunloop(InputIterator _first, InputIterator _last, marsMulti::comm::SocketBreaker& _breaker, bool _select_anyway)
 {
-    xinfo_function();
+    qm_xinfo_function();
 
      while (TcpFSMHandler(_first, _last, _breaker, _select_anyway)) {}
 }

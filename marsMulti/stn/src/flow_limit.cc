@@ -22,7 +22,7 @@
 
 #include <algorithm>
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/stn/stn.h"
 
@@ -50,7 +50,7 @@ FlowLimit::~FlowLimit()
 {}
 
 bool FlowLimit::Check(const marsMulti::stn::Task& _task, const void* _buffer, int _len) {
-    xverbose_function();
+    qm_xverbose_function();
 
     if (!_task.limit_flow) {
         return true;
@@ -59,7 +59,7 @@ bool FlowLimit::Check(const marsMulti::stn::Task& _task, const void* _buffer, in
     __FlashCurVol();
 
     if (cur_funnel_vol_ + _len > kMaxVol) {
-        xerror2(TSF"Task Info: ptr=%_, cmdid=%_, need_authed=%_, cgi:%_, channel_select=%_, limit_flow=%_, cur_funnel_vol_(%_)+_len(%_)=%_,MAX_VOL:%_ ",
+        qm_xerror2(TSF"Task Info: ptr=%_, cmdid=%_, need_authed=%_, cgi:%_, channel_select=%_, limit_flow=%_, cur_funnel_vol_(%_)+_len(%_)=%_,MAX_VOL:%_ ",
                 &_task, _task.cmdid, _task.need_authed, _task.cgi, _task.channel_select, _task.limit_flow, cur_funnel_vol_, _len, cur_funnel_vol_ + _len, kMaxVol);
 
         return false;
@@ -73,31 +73,31 @@ void FlowLimit::Active(bool _isactive) {
     __FlashCurVol();
 
     if (!_isactive) {
-        xdebug2(TSF"iCurFunnelVol=%0, INACTIVE_MIN_VOL=%1", cur_funnel_vol_, kInactiveMinvol);
+        qm_xdebug2(TSF"iCurFunnelVol=%0, INACTIVE_MIN_VOL=%1", cur_funnel_vol_, kInactiveMinvol);
 
         if (cur_funnel_vol_ > kInactiveMinvol)
             cur_funnel_vol_ = kInactiveMinvol;
     }
 
     funnel_speed_ = _isactive ? kActiveSpeed : kInactiveSpeed;
-    xdebug2(TSF"Active:%0, iFunnelSpeed=%1", _isactive, funnel_speed_);
+    qm_xdebug2(TSF"Active:%0, iFunnelSpeed=%1", _isactive, funnel_speed_);
 }
 
 void FlowLimit::__FlashCurVol() {
     uint64_t timeCur = ::gettickcount();
-	xassert2(timeCur >= time_lastflow_computer_, TSF"%_, %_", timeCur, time_lastflow_computer_);
+	qm_xassert2(timeCur >= time_lastflow_computer_, TSF"%_, %_", timeCur, time_lastflow_computer_);
     uint64_t interval = (timeCur - time_lastflow_computer_) / 1000;
     
     if (0 == interval) return;
 
-    xdebug2(TSF"iCurFunnelVol=%0, iFunnelSpeed=%1, interval=%2", cur_funnel_vol_, funnel_speed_, interval);
+    qm_xdebug2(TSF"iCurFunnelVol=%0, iFunnelSpeed=%1, interval=%2", cur_funnel_vol_, funnel_speed_, interval);
     uint64_t funnel_vol = interval * funnel_speed_;
     if (cur_funnel_vol_ > funnel_vol) {
         cur_funnel_vol_ -= funnel_vol;
     } else {
         cur_funnel_vol_ = 0;
     }
-    xdebug2(TSF"iCurFunnelVol=%0", cur_funnel_vol_);
+    qm_xdebug2(TSF"iCurFunnelVol=%0", cur_funnel_vol_);
 
     time_lastflow_computer_ = timeCur;
 }

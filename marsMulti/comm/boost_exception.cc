@@ -18,13 +18,13 @@
 //
 
 #include <exception>
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 
 namespace mars_boost {} namespace boost = mars_boost; namespace mars_boost {
 
     void throw_exception( std::exception const & e ) {
-        xfatal2(TSF"boost exception:%_", e.what());
+        qm_xfatal2(TSF"boost exception:%_", e.what());
 
     }
 }

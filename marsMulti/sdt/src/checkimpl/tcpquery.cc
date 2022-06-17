@@ -20,7 +20,7 @@
 
 #include "tcpquery.h"
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_autobuffer.h"
 #include "marsMulti/comm/socket/socketselect.h"
 
@@ -37,24 +37,24 @@ TcpQuery::TcpQuery(const char* _ip, uint16_t _port, unsigned int _conn_timeout, 
     , errcode_(0)
     , conn_timeout_(_conn_timeout) {
     if (!pipe_.IsCreateSuc()) {
-        xassert2(false, "TcpQuery create breaker error.");
+        qm_xassert2(false, "TcpQuery create breaker error.");
         status_ = kTcpInitErr;
     }
 
     sock_ = NetCheckerSocketUtils::makeNonBlockSocket(select_, ip_, port_, conn_timeout_, errcode_);
 
     if (sock_ < 0) {
-        xerror2(TSF"make socket connect error. ret: %0", sock_);
+        qm_xerror2(TSF"make socket connect error. ret: %0", sock_);
         status_ = kTcpConnectErr;
     } else {
-        xinfo2(TSF"make socket success.");
+        qm_xinfo2(TSF"make socket success.");
         status_ = kTcpConnected;
     }
 }
 
 TcpQuery::~TcpQuery() {
     free(ip_);
-    xinfo2(TSF"close fd in tcpquery,m_sock=%0", sock_);
+    qm_xinfo2(TSF"close fd in tcpquery,m_sock=%0", sock_);
 
     if (sock_ >= 0)
         ::socket_close(sock_);
@@ -73,7 +73,7 @@ TcpErrCode TcpQuery::tcp_receive(AutoBuffer& _recvbuf, unsigned int _size, int _
         TcpErrCode ret = NetCheckerSocketUtils::readnWithNonBlock(sock_, select_, _timeout, _recvbuf, _size, errcode_);
 
         if (kTimeoutErr == ret && _recvbuf.Length() > 0) {
-            xinfo2(TSF"receive timeout, success.");
+            qm_xinfo2(TSF"receive timeout, success.");
             ret = kTcpSucc;
         }
 

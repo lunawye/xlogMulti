@@ -29,7 +29,7 @@
 #ifdef ANDROID
 #include <unistd.h>
 #endif
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 enum TMemoryType {
     ECType = 0,

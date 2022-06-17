@@ -25,7 +25,7 @@
 #include "marsMulti/stn/stn.h"
 #include "marsMulti/comm/tickcount.h"
 #include "marsMulti/comm/socket/unix_socket.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/thread/mutex.h"
 #include "marsMulti/comm/thread/lock.h"
 #include "marsMulti/comm/tickcount.h"
@@ -91,7 +91,7 @@ namespace stn {
         }
 
         SOCKET GetSocket(const IPPortItem& _item) {
-            xverbose_function();
+            qm_xverbose_function();
             comm::ScopedLock lock(mutex_);
             if(!use_cache_ || _isBaned() || socket_pool_.empty()) {
                 return INVALID_SOCKET;
@@ -101,7 +101,7 @@ namespace stn {
             while(iter != socket_pool_.end()) {
                 if(iter->IsSame(_item)) {
                     if(iter->HasTimeout() || (_item.transport_protocol == Task::kTransportProtocolTCP && _IsSocketClosed(iter->socket_fd))) {
-                        xinfo2(TSF"remove timeout or closed socket, is timeout:%_", iter->HasTimeout());
+                        qm_xinfo2(TSF"remove timeout or closed socket, is timeout:%_", iter->HasTimeout());
                         iter->CloseSocket();
                         iter = socket_pool_.erase(iter);
                         continue;
@@ -110,32 +110,32 @@ namespace stn {
                     if (_item.transport_protocol == Task::kTransportProtocolTCP || iter->IsSubStream()){
                         SOCKET fd = iter->socket_fd;
                         socket_pool_.erase(iter);
-                        xinfo2(TSF"get from cache: ip:%_, port:%_, host:%_, fd:%_, size:%_", _item.str_ip, _item.port, _item.str_host, fd, socket_pool_.size());
+                        qm_xinfo2(TSF"get from cache: ip:%_, port:%_, host:%_, fd:%_, size:%_", _item.str_ip, _item.port, _item.str_host, fd, socket_pool_.size());
                         return fd;
                     }
                     
                     //create sub stream for quic
-                    xassert2(_item.transport_protocol == Task::kTransportProtocolQUIC);
+                    qm_xassert2(_item.transport_protocol == Task::kTransportProtocolQUIC);
                     int subfd = iter->CreateStream();
                     if (subfd == INVALID_SOCKET){
-                        xwarn2(TSF"create substream failed. url %_:%_ fd %_", _item.str_ip, _item.port, iter->socket_fd);
+                        qm_xwarn2(TSF"create substream failed. url %_:%_ fd %_", _item.str_ip, _item.port, iter->socket_fd);
                         socket_pool_.erase(iter);
                         return INVALID_SOCKET;
                     }
                     // recalc keepalive time
-                    xinfo2(TSF"get from cache url %_:%_ owner %_ stream %_", _item.str_ip, _item.port, iter->socket_fd, subfd);
+                    qm_xinfo2(TSF"get from cache url %_:%_ owner %_ stream %_", _item.str_ip, _item.port, iter->socket_fd, subfd);
                     iter->ResetTimeout();
                     return subfd;
                 }
                 iter++;
             }
-            xdebug2(TSF"can not find socket ip:%_, port:%_, host:%_, size:%_", _item.str_ip, _item.port, _item.str_host, socket_pool_.size());
+            qm_xdebug2(TSF"can not find socket ip:%_, port:%_, host:%_, size:%_", _item.str_ip, _item.port, _item.str_host, socket_pool_.size());
             return INVALID_SOCKET;
         }
         
         bool AddCache(CacheSocketItem& item) {
             comm::ScopedLock lock(mutex_);
-            xinfo2(TSF"add item to socket pool, ip:%_, port:%_, host:%_, fd:%_, timeout %_s size:%_", item.address_info.str_ip, item.address_info.port, item.address_info.str_host, item.socket_fd, item.timeout, socket_pool_.size());
+            qm_xinfo2(TSF"add item to socket pool, ip:%_, port:%_, host:%_, fd:%_, timeout %_s size:%_", item.address_info.str_ip, item.address_info.port, item.address_info.str_host, item.socket_fd, item.timeout, socket_pool_.size());
             socket_pool_.push_front(item);
             return true;
         }
@@ -147,19 +147,19 @@ namespace stn {
             auto iter = socket_pool_.begin();
             while(iter != socket_pool_.end()) {
                 if(iter->HasTimeout()) {
-                    xinfo2(TSF"remove timeout socket: ip:%_, port:%_, host:%_, fd:%_", iter->address_info.str_ip, iter->address_info.port, iter->address_info.str_host, iter->socket_fd);
+                    qm_xinfo2(TSF"remove timeout socket: ip:%_, port:%_, host:%_, fd:%_", iter->address_info.str_ip, iter->address_info.port, iter->address_info.str_host, iter->socket_fd);
                     iter->CloseSocket();
                     iter = socket_pool_.erase(iter);
                     continue;
                 }
                 iter++;
             }
-            xinfo2(TSF"after clean, size:%_", socket_pool_.size());
+            qm_xinfo2(TSF"after clean, size:%_", socket_pool_.size());
         }
 
         void Clear() {
             comm::ScopedLock lock(mutex_);
-            xinfo2(TSF"clear cache sockets");
+            qm_xinfo2(TSF"clear cache sockets");
             std::for_each(socket_pool_.begin(), socket_pool_.end(), [](CacheSocketItem& value) {
                 if(value.socket_fd != INVALID_SOCKET)
                     value.CloseSocket();
@@ -171,7 +171,7 @@ namespace stn {
             if(_is_reused && (!_has_received || !_is_decode_ok)) {
                 ban_start_tick_.gettickcount();
                 is_baned_ = true;
-                xinfo2(TSF"report ban");
+                qm_xinfo2(TSF"report ban");
             } else if(_is_reused && _has_received && _is_decode_ok) {
                 is_baned_ = false;
             }
@@ -180,7 +180,7 @@ namespace stn {
     private:
         bool _isBaned() {
             bool ret = is_baned_ && ban_start_tick_.isValid() && ban_start_tick_.gettickspan() <= BAN_INTERVAL;
-            xverbose2_if(ret, TSF"isban:%_", ret);
+            qm_xverbose2_if(ret, TSF"isban:%_", ret);
             return ret;
         }
 
@@ -195,12 +195,12 @@ namespace stn {
                 ssize_t nrecv = ::recv(fd, buff, 1, MSG_PEEK);
 #endif
                 if (0 == nrecv) {
-                    xerror2(TSF"socket already closed");
+                    qm_xerror2(TSF"socket already closed");
                     return true;
                 }
                 
                 if (0 > nrecv && !IS_NOBLOCK_READ_ERRNO(socket_errno)) {
-                    xerror2(TSF"socket error:(%_, %_)", socket_errno, strerror(socket_errno));
+                    qm_xerror2(TSF"socket error:(%_, %_)", socket_errno, strerror(socket_errno));
                     return true;
                 } else {
                     return false;

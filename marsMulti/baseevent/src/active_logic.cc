@@ -22,7 +22,7 @@
 #include "marsMulti/baseevent/active_logic.h"
 #include "marsMulti/baseevent/baseprjevent.h"
 #include "marsMulti/comm/singleton.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/thread/lock.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/bootrun.h"
@@ -74,7 +74,7 @@ ActiveLogic::ActiveLogic()
 , alarm_(boost::bind(&ActiveLogic::__OnInActive, this), false)
 , lastforegroundchangetime_(::gettickcount())
 {
-    xinfo_function(TSF"MQ:%_, this:%_", MessageQueue::GetDefMessageQueue(), this);
+    qm_xinfo_function(TSF"MQ:%_, this:%_", MessageQueue::GetDefMessageQueue(), this);
 
 #ifdef __ANDROID__
     GetSignalOnAlarm().connect(&onAlarm);
@@ -83,14 +83,14 @@ ActiveLogic::ActiveLogic()
 #ifndef __APPLE__
         if (!alarm_.Start(INACTIVE_TIMEOUT))
        	{
-            xerror2(TSF"m_alarm.Start false");
+            qm_xerror2(TSF"m_alarm.Start false");
     	}
 #endif
 }
 
 ActiveLogic::~ActiveLogic()
 {
-    xinfo_function();
+    qm_xinfo_function();
 	MessageQueue::CancelMessage(MessageQueue::DefAsyncInvokeHandler(MessageQueue::GetDefMessageQueue()), (MessageQueue::MessageTitle_t)this);
 	MessageQueue::WaitForRunningLockEnd(MessageQueue::DefAsyncInvokeHandler(MessageQueue::GetDefMessageQueue()));
 }
@@ -104,7 +104,7 @@ void ActiveLogic::OnForeground(bool _isforeground)
 	}
 
     xgroup2_define(group);
-    xinfo2(TSF"OnForeground:%0, change:%1, this:%2", _isforeground, _isforeground!=isforeground_, this) >> group;
+    qm_xinfo2(TSF"OnForeground:%0, change:%1, this:%2", _isforeground, _isforeground!=isforeground_, this) >> group;
 
     if (_isforeground == isforeground_) return;
 
@@ -119,7 +119,7 @@ void ActiveLogic::OnForeground(bool _isforeground)
 #ifndef __APPLE__
         if (!alarm_.Start(INACTIVE_TIMEOUT))
        	{
-            xerror2(TSF"m_alarm.Start false") >> group;
+            qm_xerror2(TSF"m_alarm.Start false") >> group;
     	}
 #endif
     }
@@ -129,7 +129,7 @@ void ActiveLogic::OnForeground(bool _isforeground)
 
     if (isnotify)
     {
-    	xinfo2(TSF"active change:%0", isactive_) >> group;
+    	qm_xinfo2(TSF"active change:%0", isactive_) >> group;
     	SignalActive(isactive_);
     }
 }
@@ -151,11 +151,11 @@ uint64_t ActiveLogic::LastForegroundChangeTime() const
 
 void ActiveLogic::__OnInActive()
 {
-    xdebug_function();
+    qm_xdebug_function();
     if (!isforeground_) isactive_ = false;
 
     bool  isactive = isactive_;
-    xinfo2(TSF"active change:%0", isactive_);
+    qm_xinfo2(TSF"active change:%0", isactive_);
     SignalActive(isactive);
 }
 

@@ -20,7 +20,7 @@ void Cs2Runtime_Comm::OnCreate() {
     signal(SIGPIPE, SIG_IGN);
 #endif
     appender_SetConsoleLog(true);  // just for test  //TODO
-    xwarn2(TSF"onCreate");
+    qm_xwarn2(TSF"onCreate");
     appender_open(EAppednerAsync, (::getAppFilePath() + "\\log").c_str(), "MM");
     MMLogLogic::InitLogInfo();
 #ifndef NDEBUG
@@ -29,23 +29,23 @@ void Cs2Runtime_Comm::OnCreate() {
 }
 
 void Cs2Runtime_Comm::OnDestroy() {
-    xwarn2(TSF"onDestroy");
+    qm_xwarn2(TSF"onDestroy");
 #ifdef _WIN32
     WSACleanup();
 #endif
 
     SINGLETON_RELEASE_ALL();
-    xwarn2(TSF"ReleaseXLogger---------------------------------------------------------");
+    qm_xwarn2(TSF"ReleaseXLogger---------------------------------------------------------");
     appender_close();
 }
 
 void Cs2Runtime_Comm::OnSingalCrash(int _sig) {
-    xverbose2(TSF"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc=%0", _sig);
+    qm_xverbose2(TSF"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc=%0", _sig);
     appender_close();
 }
 
 void Cs2Runtime_Comm::OnExceptionCrash() {
-    xverbose2(TSF"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+    qm_xverbose2(TSF"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
     appender_close();
 }
 

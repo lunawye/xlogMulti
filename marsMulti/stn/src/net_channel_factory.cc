@@ -20,7 +20,7 @@
 #include "net_channel_factory.h"
 
 #include "marsMulti/comm/messagequeue/message_queue.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 #include "longlink.h"
 #include "shortlink.h"
@@ -34,7 +34,7 @@ namespace ShortLinkChannelFactory {
     
 ShortLinkInterface* (*Create)(const mq::MessageQueue_t& _messagequeueid, NetSource& _netsource, const Task& _task, const ShortlinkConfig& _config)
 = [](const mq::MessageQueue_t& _messagequeueid, NetSource& _netsource, const Task& _task, const ShortlinkConfig& _config) -> ShortLinkInterface* {
-	xdebug2(TSF"use weak func Create");
+	qm_xdebug2(TSF"use weak func Create");
 	return new ShortLink(_messagequeueid, _netsource, _task, _config.use_proxy);
 };
     

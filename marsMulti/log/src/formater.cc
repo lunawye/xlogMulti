@@ -25,8 +25,8 @@
 #include <algorithm>
 
 
-#include "marsMulti/comm/xlogger/qm_xloggerbase.h"
-#include "marsMulti/comm/xlogger/loginfo_extract.h"
+#include "marsMulti/comm/qm_xlogger/qm_xloggerbase.h"
+#include "marsMulti/comm/qm_xlogger/loginfo_extract.h"
 #include "marsMulti/comm/ptrbuffer.h"
 
 #ifdef _WIN32

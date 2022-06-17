@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #endif
 
-#include "../xlogger/qm_xlogger.h"
+#include "../qm_xlogger/qm_xlogger.h"
 #include "util/comm_function.h"
 #include "util/scope_jenv.h"
 #include "util/scoped_jstring.h"
@@ -75,7 +75,7 @@ void ResetWiFiIdCallBack() {
         if (cb) {\
             return (cb->fun);\
         }\
-        xwarn2("platform native callback is null");\
+        qm_xwarn2("platform native callback is null");\
         return (default_value);\
     }
 
@@ -86,7 +86,7 @@ void ResetWiFiIdCallBack() {
             (cb->fun);\
             return;\
         }\
-        xwarn2("platform native callback is null");\
+        qm_xwarn2("platform native callback is null");\
         return;\
     }
 
@@ -110,7 +110,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_startAlarm, KPlatformCommC2Java, "
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_startAlarm)
 #endif
 bool startAlarm(int type, int64_t id, int after) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(startAlarm(type, id, after), false);
     #endif
@@ -122,7 +122,7 @@ bool startAlarm(int type, int64_t id, int after) {
     ScopeJEnv scopeJEnv(cacheInstance->GetJvm());
     JNIEnv* env = scopeJEnv.GetEnv();
     jboolean ret = JNU_CallStaticMethodByMethodInfo(env, KPlatformCommC2Java_startAlarm, (jint)type, (jint)id, (jint)after).z;
-    xdebug2(TSF"id= %0, after= %1, type= %2, ret= %3", id, after, type, (bool)ret);
+    qm_xdebug2(TSF"id= %0, after= %1, type= %2, ret= %3", id, after, type, (bool)ret);
     return (bool)ret;
 }
 
@@ -132,7 +132,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_stopAlarm, KPlatformCommC2Java, "s
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_stopAlarm)
 #endif
 bool stopAlarm(int64_t  id) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(stopAlarm(id), false);
     #endif
@@ -144,7 +144,7 @@ bool stopAlarm(int64_t  id) {
     VarCache* cacheInstance = VarCache::Singleton();
     ScopeJEnv scopeJEnv(cacheInstance->GetJvm());
     jboolean ret = JNU_CallStaticMethodByMethodInfo(scopeJEnv.GetEnv(), KPlatformCommC2Java_stopAlarm, (jint)id).z;
-    xdebug2(TSF"id= %0, ret= %1", id, (bool)ret);
+    qm_xdebug2(TSF"id= %0, ret= %1", id, (bool)ret);
     return (bool)ret;
 }
 #endif
@@ -155,7 +155,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_getProxyInfo, KPlatformCommC2Java,
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getProxyInfo)
 #endif
 bool getProxyInfo(int& port, std::string& strProxy, const std::string& _host) {
-    xverbose_function();
+    qm_xverbose_function();
 
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getProxyInfo(port, strProxy, _host), false);
@@ -181,7 +181,7 @@ bool getProxyInfo(int& port, std::string& strProxy, const std::string& _host) {
     ret = JNU_CallStaticMethodByMethodInfo(env, KPlatformCommC2Java_getProxyInfo, stringbufferObj).i;
 
     if (ret <= 0) {
-        xinfo2(TSF"getProxyInfo port == 0, no proxy");
+        qm_xinfo2(TSF"getProxyInfo port == 0, no proxy");
         env->DeleteLocalRef(stringbufferObj);
         port = 0;
         strProxy = "";
@@ -205,7 +205,7 @@ bool getProxyInfo(int& port, std::string& strProxy, const std::string& _host) {
 
     // free the local reference
     env->DeleteLocalRef(stringbufferObj);
-    xverbose2(TSF"strProxy= %0, port= %1", strProxy.c_str(), port);
+    qm_xverbose2(TSF"strProxy= %0, port= %1", strProxy.c_str(), port);
     return !strProxy.empty();
 }
 
@@ -215,7 +215,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_getNetInfo, KPlatformCommC2Java, "
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getNetInfo)
 #endif
 int getNetInfo() {
-	xverbose_function();
+	qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getNetInfo(), -1);
     #endif
@@ -233,7 +233,7 @@ int getNetInfo() {
     jint netType = JNU_CallStaticMethodByMethodInfo(env, KPlatformCommC2Java_getNetInfo).i;
     g_NetInfo = netType;
 
-    xverbose2(TSF"netInfo= %0", netType);
+    qm_xverbose2(TSF"netInfo= %0", netType);
     return (int)netType;
 }
 
@@ -243,7 +243,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_getStatisticsNetType, KPlatformCom
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getStatisticsNetType)
 #endif
 int getNetTypeForStatistics(){
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getNetTypeForStatistics(), -1);
     #endif
@@ -261,7 +261,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_getCurRadioAccessNetworkInfo, KPla
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getCurRadioAccessNetworkInfo)
 #endif
 bool getCurRadioAccessNetworkInfo(RadioAccessNetworkInfo& _raninfo) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getCurRadioAccessNetworkInfo(_raninfo), false);
     #endif
@@ -309,7 +309,7 @@ bool getCurRadioAccessNetworkInfo(RadioAccessNetworkInfo& _raninfo) {
     default:
         break;
     }
-    xverbose2(TSF"netInfo= %0, %1", netType, _raninfo.radio_access_network);
+    qm_xverbose2(TSF"netInfo= %0, %1", netType, _raninfo.radio_access_network);
 
     return !_raninfo.radio_access_network.empty();
 }
@@ -323,7 +323,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_getCurWifiInfo, KPlatformCommC2Jav
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getCurWifiInfo)
 #endif
 bool getCurWifiInfo(WifiInfo& wifiInfo, bool _force_refresh) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getCurWifiInfo(wifiInfo, _force_refresh), false);
     #endif
@@ -345,7 +345,7 @@ bool getCurWifiInfo(WifiInfo& wifiInfo, bool _force_refresh) {
     jobject retObj = JNU_CallStaticMethodByMethodInfo(env, KPlatformCommC2Java_getCurWifiInfo).l;
 
     if (NULL == retObj) {
-        xwarn2(TSF"getCurWifiInfo error return null");
+        qm_xwarn2(TSF"getCurWifiInfo error return null");
         return false;
     }
 
@@ -374,7 +374,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_getCurSIMInfo, KPlatformCommC2Java
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getCurSIMInfo)
 #endif
 bool getCurSIMInfo(SIMInfo& simInfo) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getCurSIMInfo(simInfo), false);
     #endif
@@ -395,7 +395,7 @@ bool getCurSIMInfo(SIMInfo& simInfo) {
     jobject retObj = JNU_CallStaticMethodByMethodInfo(env, KPlatformCommC2Java_getCurSIMInfo).l;
 
     if (NULL == retObj) {
-        xwarn2(TSF"getCurSIMInfo error return null");
+        qm_xwarn2(TSF"getCurSIMInfo error return null");
         return false;
     }
 
@@ -411,7 +411,7 @@ bool getCurSIMInfo(SIMInfo& simInfo) {
 
     xgroup2_define(group);
     ScopedJstring icJstr(env, ispCodeJstr);
-    xdebug2(TSF"ispCode:%0, ", icJstr.GetChar()) >> group;
+    qm_xdebug2(TSF"ispCode:%0, ", icJstr.GetChar()) >> group;
 
     g_sim_info.isp_code = icJstr.GetChar();
     env->DeleteLocalRef(ispCodeJstr);
@@ -419,7 +419,7 @@ bool getCurSIMInfo(SIMInfo& simInfo) {
     if (NULL == ispNameJstr) { return true;    }  // isp name may NULL or empty
 
     ScopedJstring inJstr(env, ispNameJstr);
-    xdebug2(TSF"ispName:%0", inJstr.GetChar()) >> group;
+    qm_xdebug2(TSF"ispName:%0", inJstr.GetChar()) >> group;
 
     g_sim_info.isp_name = inJstr.GetChar();
     env->DeleteLocalRef(ispNameJstr);
@@ -435,7 +435,7 @@ bool getCurSIMInfo(SIMInfo& simInfo) {
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getAPNInfo)
 #endif
 bool getAPNInfo(APNInfo& info) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getAPNInfo(info), false);
     #endif
@@ -457,7 +457,7 @@ bool getAPNInfo(APNInfo& info) {
     jobject retObj = JNU_CallStaticMethodByName(env, cacheInstance->GetClass(env, KPlatformCommC2Java), "getAPNInfo", "()Lcom/tencent/marsMulti/comm/PlatformComm$APNInfo;").l;
 
     if (NULL == retObj) {
-        xinfo2(TSF"getAPNInfo error return null");
+        qm_xinfo2(TSF"getAPNInfo error return null");
         return false;
     }
 
@@ -490,7 +490,7 @@ DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_getSignal)
 #endif
 
 unsigned int getSignal(bool isWifi) {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(getSignal(isWifi), 0);
     #endif
@@ -503,7 +503,7 @@ unsigned int getSignal(bool isWifi) {
 
     jlong signal = JNU_CallStaticMethodByMethodInfo(scopeJEnv.GetEnv(), KPlatformCommC2Java_getSignal, isWifi).j;
 
-    xverbose2(TSF"Signal Strength= %0, wifi:%1", signal, isWifi);
+    qm_xverbose2(TSF"Signal Strength= %0, wifi:%1", signal, isWifi);
     return (unsigned int)signal;
 }
 
@@ -513,7 +513,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_isNetworkConnected, KPlatformCommC
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_isNetworkConnected)
 #endif
 bool isNetworkConnected() {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(isNetworkConnected(), false);
     #endif
@@ -525,7 +525,7 @@ bool isNetworkConnected() {
     ScopeJEnv scopeJEnv(cacheInstance->GetJvm());
 
     jboolean ret = JNU_CallStaticMethodByMethodInfo(scopeJEnv.GetEnv(), KPlatformCommC2Java_isNetworkConnected).z;
-    xverbose2(TSF"ret= %0", (bool)ret);
+    qm_xverbose2(TSF"ret= %0", (bool)ret);
     return (bool)ret;
 }
 
@@ -542,7 +542,7 @@ DEFINE_FIND_STATIC_METHOD(KPlatformCommC2Java_wakeupLock_new, KPlatformCommC2Jav
 DEFINE_FIND_EMPTY_STATIC_METHOD(KPlatformCommC2Java_wakeupLock_new)
 #endif
 void* wakeupLock_new() {
-    xverbose_function();
+    qm_xverbose_function();
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(wakeupLock_new(), nullptr);
     #endif
@@ -558,17 +558,17 @@ void* wakeupLock_new() {
     if (ret) {
         jobject newref = env->NewGlobalRef(ret);
         env->DeleteLocalRef(ret);
-        xdebug2(TSF"newref= %0", newref);
+        qm_xdebug2(TSF"newref= %0", newref);
         return newref;
     } else {
-        xerror2(TSF"wakeupLock_new return null");
+        qm_xerror2(TSF"wakeupLock_new return null");
         return NULL;
     }
 }
 
 void  wakeupLock_delete(void* _object) {
-    xverbose_function();
-    xdebug2(TSF"_object= %0", _object);
+    qm_xverbose_function();
+    qm_xdebug2(TSF"_object= %0", _object);
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(wakeupLock_delete(_object));
     #endif
@@ -585,9 +585,9 @@ void  wakeupLock_delete(void* _object) {
 }
 
 void  wakeupLock_Lock(void* _object) {
-    xverbose_function();
-    xassert2(_object);
-    xdebug2(TSF"_object= %0", _object);
+    qm_xverbose_function();
+    qm_xassert2(_object);
+    qm_xdebug2(TSF"_object= %0", _object);
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(wakeupLock_Lock(_object));
     #endif
@@ -602,10 +602,10 @@ void  wakeupLock_Lock(void* _object) {
 }
 
 void  wakeupLock_Lock_Timeout(void* _object, int64_t _timeout) {
-    xverbose_function();
-    xassert2(_object);
-    xassert2(0 < _timeout);
-    xverbose2(TSF"_object= %0, _timeout= %1", _object, _timeout);
+    qm_xverbose_function();
+    qm_xassert2(_object);
+    qm_xassert2(0 < _timeout);
+    qm_xverbose2(TSF"_object= %0, _timeout= %1", _object, _timeout);
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(wakeupLock_Lock_Timeout(_object, _timeout));
     #endif
@@ -620,9 +620,9 @@ void  wakeupLock_Lock_Timeout(void* _object, int64_t _timeout) {
 }
 
 void  wakeupLock_Unlock(void* _object) {
-    xverbose_function();
-    xassert2(_object);
-    xdebug2(TSF"_object= %0", _object);
+    qm_xverbose_function();
+    qm_xassert2(_object);
+    qm_xdebug2(TSF"_object= %0", _object);
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(wakeupLock_Unlock(_object));
     #endif
@@ -637,8 +637,8 @@ void  wakeupLock_Unlock(void* _object) {
 }
 
 bool  wakeupLock_IsLocking(void* _object) {
-    xverbose_function();
-    xassert2(_object);
+    qm_xverbose_function();
+    qm_xassert2(_object);
     #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(wakeupLock_IsLocking(_object), false);
     #endif
@@ -650,7 +650,7 @@ bool  wakeupLock_IsLocking(void* _object) {
     ScopeJEnv scopeJEnv(cacheInstance->GetJvm());
     JNIEnv* env = scopeJEnv.GetEnv();
     jboolean ret = JNU_CallMethodByName(env, (jobject)_object, "isLocking", "()Z").z;
-    xdebug2(TSF"_object= %0, ret= %1", _object, (bool)ret);
+    qm_xdebug2(TSF"_object= %0, ret= %1", _object, (bool)ret);
     return (bool)ret;
 }
 

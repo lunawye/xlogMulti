@@ -25,7 +25,7 @@
 
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/messagequeue/message_queue.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 using namespace marsMulti::stn;
 using namespace marsMulti::comm;
@@ -46,7 +46,7 @@ static bool __compare_task(const ZombieTask& first, const ZombieTask& second)
 ZombieTaskManager::ZombieTaskManager(MessageQueue::MessageQueue_t _messagequeueid)
 		: asyncreg_(MessageQueue::InstallAsyncHandler(_messagequeueid))
 		, net_core_last_start_task_time_(gettickcount()) {
-            xinfo2(TSF"handler:(%_,%_)", asyncreg_.Get().queue, asyncreg_.Get().seq);
+            qm_xinfo2(TSF"handler:(%_,%_)", asyncreg_.Get().queue, asyncreg_.Get().seq);
         }
 
 ZombieTaskManager::~ZombieTaskManager()
@@ -66,7 +66,7 @@ bool ZombieTaskManager::SaveTask(const Task& _task, unsigned int _taskcosttime)
 
     lsttask_.push_back(zombie_task);
     
-    xinfo2(TSF"task end callback zombie savetask cgi:%_, cmdid:%_, taskid:%_", _task.cgi, _task.cmdid, _task.taskid);
+    qm_xinfo2(TSF"task end callback zombie savetask cgi:%_, cmdid:%_, taskid:%_", _task.cgi, _task.cmdid, _task.taskid);
 
     MessageQueue::SingletonMessage(false, asyncreg_.Get(),
                                     MessageQueue::Message((MessageQueue::MessageTitle_t)this,
@@ -83,7 +83,7 @@ bool ZombieTaskManager::StopTask(uint32_t _taskid)
     {
         if (_taskid == first->task.taskid)
         {
-            xinfo2(TSF"find the task taskid:%0", _taskid);
+            qm_xinfo2(TSF"find the task taskid:%0", _taskid);
             lsttask_.erase(first);
             return true;
         }
@@ -93,7 +93,7 @@ bool ZombieTaskManager::StopTask(uint32_t _taskid)
 }
 
 bool ZombieTaskManager::HasTask(uint32_t _taskid) const{
-    xverbose_function();
+    qm_xverbose_function();
 
     std::list<ZombieTask>::const_iterator first = lsttask_.begin();
     std::list<ZombieTask>::const_iterator last = lsttask_.end();
@@ -125,7 +125,7 @@ void ZombieTaskManager::OnNetCoreStartTask()
 
 void ZombieTaskManager::__StartTask()
 {
-    xassert2(fun_start_task_);
+    qm_xassert2(fun_start_task_);
 
     if (lsttask_.empty()) return;
     
@@ -139,10 +139,10 @@ void ZombieTaskManager::__StartTask()
 
         if ((cur_time - it->save_time) >= (uint64_t)it->task.total_timeout)
         {
-            xinfo2(TSF"task end callback zombie start timeout cgi:%_, cmdid:%_, taskid:%_, err(%_, %_), cost:%_", it->task.cgi, it->task.cmdid, it->task.taskid, kEctLocal, kEctLocalTaskTimeout, cur_time - it->save_time);
+            qm_xinfo2(TSF"task end callback zombie start timeout cgi:%_, cmdid:%_, taskid:%_, err(%_, %_), cost:%_", it->task.cgi, it->task.cmdid, it->task.taskid, kEctLocal, kEctLocalTaskTimeout, cur_time - it->save_time);
             fun_callback_(kEctLocal,  kEctLocalTaskTimeout, kTaskFailHandleTaskEnd, it->task, (unsigned int)(cur_time - it->save_time));
         } else {
-            xinfo2(TSF"task start zombie cgi:%_, cmdid:%_, taskid:%_,", it->task.cgi, it->task.cmdid, it->task.taskid);
+            qm_xinfo2(TSF"task start zombie cgi:%_, cmdid:%_, taskid:%_,", it->task.cgi, it->task.cmdid, it->task.taskid);
             it->task.total_timeout -= (cur_time - it->save_time);
             fun_start_task_(it->task);
         }
@@ -151,7 +151,7 @@ void ZombieTaskManager::__StartTask()
 
 void ZombieTaskManager::__TimerChecker()
 {
-    xassert2(fun_callback_);
+    qm_xassert2(fun_callback_);
 
     std::list<ZombieTask>& lsttask = lsttask_;
     uint64_t cur_time = ::gettickcount();
@@ -161,11 +161,11 @@ void ZombieTaskManager::__TimerChecker()
     {
         if ((cur_time - it->save_time) >= (uint64_t)it->task.total_timeout)
         {
-            xinfo2(TSF"task end callback zombie timeout cgi:%_, cmdid:%_, taskid:%_, err(%_, %_), cost:%_", it->task.cgi, it->task.cmdid, it->task.taskid, kEctLocal, kEctLocalTaskTimeout, cur_time - it->save_time);
+            qm_xinfo2(TSF"task end callback zombie timeout cgi:%_, cmdid:%_, taskid:%_, err(%_, %_), cost:%_", it->task.cgi, it->task.cmdid, it->task.taskid, kEctLocal, kEctLocalTaskTimeout, cur_time - it->save_time);
             fun_callback_(kEctLocal,  kEctLocalTaskTimeout, kTaskFailHandleTaskEnd, it->task, (unsigned int)(cur_time - it->save_time));
             it = lsttask.erase(it);
         } else if ((cur_time - it->save_time) >= RETRY_INTERVAL && (cur_time - netCoreLastStartTaskTime) >= RETRY_INTERVAL) {
-            xinfo2(TSF"task start zombie cgi:%_, cmdid:%_, taskid:%_,", it->task.cgi, it->task.cmdid, it->task.taskid);
+            qm_xinfo2(TSF"task start zombie cgi:%_, cmdid:%_, taskid:%_,", it->task.cgi, it->task.cmdid, it->task.taskid);
             it->task.total_timeout -= (cur_time - it->save_time);
             fun_start_task_(it->task);
             it = lsttask.erase(it);

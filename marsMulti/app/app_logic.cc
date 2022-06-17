@@ -36,7 +36,7 @@
 #include "marsMulti/comm/objc/data_protect_attr.h"
 #endif
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/bootrun.h"
 #include "marsMulti/comm/thread/mutex.h"
 #include "marsMulti/comm/thread/lock.h"
@@ -68,7 +68,7 @@ void SetCallback(Callback* const callback) {
 
     
     static void __GetProxyInfo(const std::string& _host, uint64_t _timetick) {
-        xinfo_function(TSF"timetick:%_, host:%_", _timetick, _host);
+        qm_xinfo_function(TSF"timetick:%_, host:%_", _timetick, _host);
     
         marsMulti::comm::ProxyInfo proxy_info;
         if (!sg_callback->GetProxyInfo(_host, proxy_info)) {
@@ -127,7 +127,7 @@ void SetCallback(Callback* const callback) {
 #endif
     
     marsMulti::comm::ProxyInfo GetProxyInfo(const std::string& _host) {
-        xassert2(sg_callback != NULL);
+        qm_xassert2(sg_callback != NULL);
         
 #if !TARGET_OS_IPHONE
         marsMulti::comm::ProxyInfo proxy_info;
@@ -155,7 +155,7 @@ void SetCallback(Callback* const callback) {
     }
 
     std::string GetAppFilePath() {
-        xassert2(sg_callback != NULL);
+        qm_xassert2(sg_callback != NULL);
 
         std::string path = sg_callback->GetAppFilePath();
 #ifdef __APPLE__
@@ -166,29 +166,29 @@ void SetCallback(Callback* const callback) {
     }
     
 	AccountInfo GetAccountInfo() {
-		xassert2(sg_callback != NULL);
+		qm_xassert2(sg_callback != NULL);
 		return sg_callback->GetAccountInfo();
 	}
 
 	std::string GetUserName() {
-		xassert2(sg_callback != NULL);
+		qm_xassert2(sg_callback != NULL);
 		AccountInfo info = sg_callback->GetAccountInfo();
 		return info.username;
 	}
 
 	std::string GetRecentUserName() {
-		xassert2(sg_callback != NULL);
+		qm_xassert2(sg_callback != NULL);
 		return GetUserName();
 	}
 
 	unsigned int GetClientVersion() {
-		xassert2(sg_callback != NULL);
+		qm_xassert2(sg_callback != NULL);
 		return sg_callback->GetClientVersion();
 	}
 
 
 	DeviceInfo GetDeviceInfo() {
-		xassert2(sg_callback != NULL);
+		qm_xassert2(sg_callback != NULL);
         
     static DeviceInfo device_info;
     if (!device_info.devicename.empty() || !device_info.devicetype.empty()) {

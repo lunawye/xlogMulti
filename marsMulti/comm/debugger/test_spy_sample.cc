@@ -18,7 +18,7 @@
 //
 
 #include "comm/debugger/test_spy_sample.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 #include "comm/debugger/testspy.h"
 
@@ -39,7 +39,7 @@ void Test_Spy_Sample::TestFun0()
     int i = 0;
     SPY_ATTACH_VARIABLE("TestFun0 i", i);
     i++;
-    xinfo2(TSF"Test");
+    qm_xinfo2(TSF"Test");
 
     SPY_DETACH_VARIABLE("TestFun0 i");
 }
@@ -47,6 +47,6 @@ void Test_Spy_Sample::TestFun0()
 int Test_Spy_Sample::__TestFun1(int i)
 {
     SPY_HOOK_THIS_API(__TestFun1, i);
-    xinfo2(TSF"Test");
+    qm_xinfo2(TSF"Test");
     return i+1;
 }

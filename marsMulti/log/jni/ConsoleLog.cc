@@ -19,8 +19,8 @@
 #include <string.h>
 #include <android/log.h>
 
-#include "marsMulti/comm/xlogger/qm_xloggerbase.h"
-#include "marsMulti/comm/xlogger/loginfo_extract.h"
+#include "marsMulti/comm/qm_xlogger/qm_xloggerbase.h"
+#include "marsMulti/comm/qm_xlogger/loginfo_extract.h"
 #include "marsMulti/comm/qm_autobuffer.h"
 
 

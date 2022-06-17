@@ -27,7 +27,7 @@
 
 #include "marsMulti/comm/socket/udpclient.h"
 #include "marsMulti/comm/qm_time_utils.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/stn/proto/longlink_packer.h"
 
 using namespace marsMulti::stn;
@@ -46,24 +46,24 @@ SignallingKeeper::SignallingKeeper(const LongLink& _longlink, MessageQueue::Mess
 , udp_client_(ip_, port_, this)
 , use_UDP_(_use_UDP)
 {
-    xinfo2(TSF"SignallingKeeper messagequeue_id=%_, handler:(%_,%_)", MessageQueue::Handler2Queue(msgreg_.Get()), msgreg_.Get().queue, msgreg_.Get().seq);
+    qm_xinfo2(TSF"SignallingKeeper messagequeue_id=%_, handler:(%_,%_)", MessageQueue::Handler2Queue(msgreg_.Get()), msgreg_.Get().queue, msgreg_.Get().seq);
 }
 
 SignallingKeeper::~SignallingKeeper()
 {
-    xinfo_function();
+    qm_xinfo_function();
     Stop();
 }
 
 
 void SignallingKeeper::SetStrategy(unsigned int _period, unsigned int _keep_time)
 {
-    xinfo2(TSF"signal keeper period:%0, keepTime:%1", _period, _keep_time);
-    xassert2(_period > 0);
-    xassert2(_keep_time > 0);
+    qm_xinfo2(TSF"signal keeper period:%0, keepTime:%1", _period, _keep_time);
+    qm_xassert2(_period > 0);
+    qm_xassert2(_keep_time > 0);
     if (_period == 0 || _keep_time == 0)
     {
-        xerror2(TSF"wrong strategy");
+        qm_xerror2(TSF"wrong strategy");
         return;
     }
     
@@ -75,7 +75,7 @@ void SignallingKeeper::OnNetWorkDataChanged(const char*, ssize_t, ssize_t)
 {
     if (!keeping_) return;
     uint64_t now = ::gettickcount();
-    xassert2(now >= last_touch_time_);
+    qm_xassert2(now >= last_touch_time_);
     
     if (now < last_touch_time_ || now - last_touch_time_ > g_keepTime)
     {
@@ -94,7 +94,7 @@ void SignallingKeeper::OnNetWorkDataChanged(const char*, ssize_t, ssize_t)
 
 void SignallingKeeper::Keep()
 {
-    xinfo2(TSF"start signalling, period:%0, keepTime:%1, use udp:%2, keeping_:%3", g_period, g_keepTime, use_UDP_, keeping_);
+    qm_xinfo2(TSF"start signalling, period:%0, keepTime:%1, use udp:%2, keeping_:%3", g_period, g_keepTime, use_UDP_, keeping_);
     last_touch_time_ = ::gettickcount();
 
     if (!keeping_)
@@ -106,7 +106,7 @@ void SignallingKeeper::Keep()
 
 void SignallingKeeper::Stop()
 {
-    xinfo2(TSF"stop signalling");
+    qm_xinfo2(TSF"stop signalling");
     
     if (keeping_ && postid_ != MessageQueue::KNullPost) {
         keeping_ = false;
@@ -145,7 +145,7 @@ void SignallingKeeper::__SendSignallingBuffer()
 
 void SignallingKeeper::__OnTimeOut()
 {
-    xdebug2(TSF"sent signalling, period:%0", g_period);
+    qm_xdebug2(TSF"sent signalling, period:%0", g_period);
     __SendSignallingBuffer();
 }
 

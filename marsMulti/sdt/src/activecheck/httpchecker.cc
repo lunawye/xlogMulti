@@ -21,7 +21,7 @@
 #include "httpchecker.h"
 
 #include "marsMulti/comm/singleton.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/sdt/constants.h"
 #include "marsMulti/sdt/sdt_logic.h"
@@ -43,28 +43,28 @@ namespace sdt {
 }
 
 HttpChecker::HttpChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 HttpChecker::~HttpChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 int HttpChecker::StartDoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
     return BaseChecker::StartDoCheck(_check_request);
 }
 
 
 void HttpChecker::__DoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
 
     for (CheckIPPorts_Iterator iter = _check_request.shortlink_items.begin(); iter != _check_request.shortlink_items.end(); ++iter) {
     	std::string host = iter->first;
     	for (std::vector<CheckIPPort>::iterator ipport = iter->second.begin(); ipport != iter->second.end(); ++ipport) {
             
             if (is_canceled_) {
-                xinfo2(TSF"HttpChecker is canceled.");
+                qm_xinfo2(TSF"HttpChecker is canceled.");
                 return;
             }
             
@@ -88,10 +88,10 @@ void HttpChecker::__DoCheck(CheckRequestProfile& _check_request) {
     		profile.rtt = cost_time;
 
             if (ret >= 0) {
-                xinfo2(TSF"http check, host: %_, ret: %_", profile.url, profile.status_code);
+                qm_xinfo2(TSF"http check, host: %_, ret: %_", profile.url, profile.status_code);
             }
             else {
-                xinfo2(TSF"http check, host: %_, ret: %_", profile.url, profile.status_code);
+                qm_xinfo2(TSF"http check, host: %_, ret: %_", profile.url, profile.status_code);
             }
 
             _check_request.checkresult_profiles.push_back(profile);
@@ -100,7 +100,7 @@ void HttpChecker::__DoCheck(CheckRequestProfile& _check_request) {
 			if (_check_request.total_timeout != UNUSE_TIMEOUT) {
 				_check_request.total_timeout -= cost_time;
 				if (_check_request.total_timeout <= 0) {
-					xinfo2(TSF"http check, host: %_, timeout.", host);
+					qm_xinfo2(TSF"http check, host: %_, timeout.", host);
 					break;
 				}
 			}

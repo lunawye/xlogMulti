@@ -38,7 +38,7 @@ public:
     virtual ~LongLinkMetaData();
     std::shared_ptr<LongLink> Channel() {
         if(!longlink_) {
-            xassert2(false, TSF"null longlink, name:%_", config_.name.c_str());
+            qm_xassert2(false, TSF"null longlink, name:%_", config_.name.c_str());
             return nullptr;
         }
         return longlink_;

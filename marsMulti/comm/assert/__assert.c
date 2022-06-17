@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "comm/xlogger/qm_xloggerbase.h"
+#include "comm/qm_xlogger/qm_xloggerbase.h"
 #include "comm/compiler_util.h"
 
 

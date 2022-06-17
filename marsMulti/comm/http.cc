@@ -25,7 +25,7 @@
 #include <algorithm>
 #endif //WIN32
 #include "comm/qm_strutil.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 namespace http {
 
@@ -38,7 +38,7 @@ bool less::operator()(const std::string& __x, const std::string& __y) const {
 }
 
 inline char* string_strnstr(const char* src, const char* sfind, int pos1) {
-    xassert2(src != NULL && sfind != NULL);
+    qm_xassert2(src != NULL && sfind != NULL);
 
     if (src == NULL || sfind == NULL)
         return NULL;
@@ -71,7 +71,7 @@ static THttpVersion __GetHttpVersion(const std::string& _strVersion) {
         }
     }
 
-    xerror2(TSF"invalid httpversion:%_", _strVersion);
+    qm_xerror2(TSF"invalid httpversion:%_", _strVersion);
     return kVersion_Unknow;
 }
 
@@ -173,11 +173,11 @@ bool RequestLine::FromString(const std::string& _requestline) {
     std::vector<std::string> strVer;
     strutil::SplitToken(str, KStringSpace, strVer);
 
-    xassert2(strVer.size() >= 3);
+    qm_xassert2(strVer.size() >= 3);
 
     if (strVer.size() < 3) {
-//        xerror2(TSF"requestline:%_, strver:%_", _requestline.c_str(), str.c_str());
-        xassert2(false, TSF"requestline:%_, strver:%_", _requestline.c_str(), str.c_str());
+//        qm_xerror2(TSF"requestline:%_, strver:%_", _requestline.c_str(), str.c_str());
+        qm_xassert2(false, TSF"requestline:%_, strver:%_", _requestline.c_str(), str.c_str());
         return false;
     }
 
@@ -191,7 +191,7 @@ bool RequestLine::FromString(const std::string& _requestline) {
     }
 
     if (kUnknown == httpmethod) {
-        xerror2(TSF"invalid http method:%_", strVer[0].c_str());
+        qm_xerror2(TSF"invalid http method:%_", strVer[0].c_str());
         return false;
     }
 
@@ -266,10 +266,10 @@ bool StatusLine::FromString(const std::string& _statusline) {
     std::vector<std::string> strVer;
     strutil::SplitToken(str, KStringSpace, strVer);
 
-    xassert2(strVer.size() >= 2);
+    qm_xassert2(strVer.size() >= 2);
 
     if (strVer.size() < 2) {
-        xerror2(TSF"strVer.size() < 2, _statusline=%0", _statusline.c_str());
+        qm_xerror2(TSF"strVer.size() < 2, _statusline=%0", _statusline.c_str());
         return false;
     }
 
@@ -376,7 +376,7 @@ void HeaderFields::Manipulate(const std::pair<const std::string, std::string>& _
     std::string v = _headerfield.second;
     if (strutil::Trim(v).empty()){
         // empty value means remove header
-        xwarn2(TSF"remove field %_ from request.", _headerfield.first);
+        qm_xwarn2(TSF"remove field %_ from request.", _headerfield.first);
         headers_.erase(_headerfield.first);
     }else{
         InsertOrUpdate(_headerfield);
@@ -610,10 +610,10 @@ const HeaderFields& Builder::Fields() const {
 }
 
 void Builder::BlockBody(IBlockBodyProvider* _body, bool _manage) {
-    xassert2(streambody_ == NULL);
+    qm_xassert2(streambody_ == NULL);
 
     if (NULL != streambody_) {
-        xerror2(TSF"setBlockBody, but streambody had set");
+        qm_xerror2(TSF"setBlockBody, but streambody had set");
         return;
     }
 
@@ -628,10 +628,10 @@ void Builder::BlockBody(IBlockBodyProvider* _body, bool _manage) {
 }
 
 void Builder::StreamBody(IStreamBodyProvider* _body, bool _manage) {
-    xassert2(blockbody_ == NULL);
+    qm_xassert2(blockbody_ == NULL);
 
     if (NULL != blockbody_) {
-        xerror2(TSF"setStreamBody, but blockbody had set");
+        qm_xerror2(TSF"setStreamBody, but blockbody had set");
         return;
     }
 
@@ -726,14 +726,14 @@ Parser::~Parser() {
 
 Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* consumed_bytes, bool only_parse_header/* = false*/) {
     if((NULL == _buffer || 0 == _length) && Fields().IsConnectionClose() && recvstatus_==kBody) {
-        xwarn2(TSF"status:%_", recvstatus_);
+        qm_xwarn2(TSF"status:%_", recvstatus_);
         recvstatus_ = kEnd;
         bodyreceiver_->EndData();
         return  recvstatus_;
     }
     
     if ((NULL == _buffer || 0 == _length)){
-        xwarn2(TSF"Recv(%_, %_), status:%_", NULL==_buffer?"NULL":_buffer, _length, recvstatus_);
+        qm_xwarn2(TSF"Recv(%_, %_), status:%_", NULL==_buffer?"NULL":_buffer, _length, recvstatus_);
         return recvstatus_;
     }
     
@@ -763,7 +763,7 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
                 char* pBuf = (char*)recvbuf_.Ptr();
                 char* pos = string_strnstr(pBuf, KStringCRLF, (int)recvbuf_.Length());
                 if (NULL == pos && 8 * 1024 < recvbuf_.Length()) {
-                    xerror2(TSF"wrong first line 8k buffer no found CRLF");
+                    qm_xerror2(TSF"wrong first line 8k buffer no found CRLF");
                     recvstatus_ = kFirstLineError;
                     return recvstatus_;
                 }
@@ -791,7 +791,7 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
                 }
                 
                 if (!parseFirstlineSuc) {
-                    xerror2(TSF"wrong first line: %0", firstline);
+                    qm_xerror2(TSF"wrong first line: %0", firstline);
                     recvstatus_ = kFirstLineError;
                     return recvstatus_;
                 }
@@ -820,7 +820,7 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
                 char* pos = string_strnstr(pBuf, "\r\n\r\n", (int)recvbuf_.Length());
                 
                 if (NULL == pos && 128 * 1024 < recvbuf_.Length()) {
-                    xerror2(TSF"wrong header fields 128k buffer no found CRLFCRLF");
+                    qm_xerror2(TSF"wrong header fields 128k buffer no found CRLFCRLF");
                     recvstatus_ = kHeaderFieldsError;
                     return recvstatus_;
                 }
@@ -847,14 +847,14 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
                 
                 headerlength_ = headerslength;
                 if (only_parse_header){
-                    xwarn2(TSF"only parse headers.");
+                    qm_xwarn2(TSF"only parse headers.");
                     return recvstatus_;
                 }
             }
                 break;
                 
             case kBody: {
-                xassert2(bodyreceiver_);
+                qm_xassert2(bodyreceiver_);
                 
                 if (bodyreceiver_) {
                     // chunked
@@ -920,7 +920,7 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
                         } else if (int64_t(recvbuf_.Length() + bodyreceiver_->Length()) <= contentLength)
                             appendlen = int64_t(recvbuf_.Length());
                         else {
-                            xwarn2(TSF"recv len bigger than contentlen, (%_, %_, %_)", recvbuf_.Length(), bodyreceiver_->Length(), contentLength);
+                            qm_xwarn2(TSF"recv len bigger than contentlen, (%_, %_, %_)", recvbuf_.Length(), bodyreceiver_->Length(), contentLength);
                             appendlen = contentLength - int64_t(bodyreceiver_->Length());
                         }
                         
@@ -954,7 +954,7 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
         }
     }
     
-    xassert2(false, TSF"status:%_", recvstatus_);
+    qm_xassert2(false, TSF"status:%_", recvstatus_);
     return recvstatus_;
 }
 
@@ -962,7 +962,7 @@ Parser::TRecvStatus Parser::Recv(const void* _buffer, size_t _length, size_t* co
 Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
 
     if (NULL == _recv_buffer.Ptr() || 0 == _recv_buffer.Length()) {
-        xwarn2(TSF"Recv(%_, %_), status:%_", _recv_buffer.Ptr() , _recv_buffer.Length(), recvstatus_);
+        qm_xwarn2(TSF"Recv(%_, %_), status:%_", _recv_buffer.Ptr() , _recv_buffer.Length(), recvstatus_);
         return recvstatus_;
     }
 
@@ -990,7 +990,7 @@ Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
             char* pos = string_strnstr(pBuf, KStringCRLF, (int)_recv_buffer.Length());
 
             if (NULL == pos && 8 * 1024 < _recv_buffer.Length()) {
-                xerror2(TSF"wrong first line 8k buffer no found CRLF");
+                qm_xerror2(TSF"wrong first line 8k buffer no found CRLF");
                 recvstatus_ = kFirstLineError;
                 return recvstatus_;
             }
@@ -1018,7 +1018,7 @@ Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
             }
 
             if (!parseFirstlineSuc) {
-                xerror2(TSF"wrong first line: %0", firstline);
+                qm_xerror2(TSF"wrong first line: %0", firstline);
                 recvstatus_ = kFirstLineError;
                 return recvstatus_;
             }
@@ -1034,7 +1034,7 @@ Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
             char* pos = string_strnstr(pBuf, "\r\n\r\n", (int)_recv_buffer.Length());
 
             if (NULL == pos && 128 * 1024 < _recv_buffer.Length()) {
-                xerror2(TSF"wrong header fields 128k buffer no found CRLFCRLF");
+                qm_xerror2(TSF"wrong header fields 128k buffer no found CRLFCRLF");
                 recvstatus_ = kHeaderFieldsError;
                 return recvstatus_;
             }
@@ -1058,7 +1058,7 @@ Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
         break;
 
         case kBody: {
-            xassert2(bodyreceiver_);
+            qm_xassert2(bodyreceiver_);
 
             if (bodyreceiver_) {
                 // chunked
@@ -1115,7 +1115,7 @@ Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
                     if (int64_t(_recv_buffer.Length() + bodyreceiver_->Length()) <= contentLength)
                         appendlen = int64_t(_recv_buffer.Length());
                     else {
-                        xwarn2(TSF"contentLength:%_, body.len:%_, recv len:%_", contentLength, int64_t(bodyreceiver_->Length()), _recv_buffer.Length());
+                        qm_xwarn2(TSF"contentLength:%_, body.len:%_, recv len:%_", contentLength, int64_t(bodyreceiver_->Length()), _recv_buffer.Length());
                         appendlen = contentLength - int64_t(bodyreceiver_->Length());
                     }
 
@@ -1145,7 +1145,7 @@ Parser::TRecvStatus Parser::Recv(AutoBuffer& _recv_buffer) {
         }
     }
 
-    xassert2(false, TSF"status:%_", recvstatus_);
+    qm_xassert2(false, TSF"status:%_", recvstatus_);
     return recvstatus_;
 }
 

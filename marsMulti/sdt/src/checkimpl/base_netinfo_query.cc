@@ -7,7 +7,7 @@
 //
 #include "base_netinfo_query.h"
 #include "marsMulti/comm/platform_comm.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/socket/qm_local_ipstack.h"
 #include "marsMulti/comm/network/getgateway.h"
 #include "marsMulti/comm/network/getdnssvraddrs.h"
@@ -33,7 +33,7 @@ const BaseNetInfo& BaseNetInfo::Query() {
 }
 
 void BaseNetInfo::__QueryNetType() {
-    xinfo_function();
+    qm_xinfo_function();
     nettype_ = ::getNetInfo();
     XMessage xmsg;
     switch (nettype_) {
@@ -60,18 +60,18 @@ void BaseNetInfo::__QueryNetType() {
             break;
             
         default:
-            xassert2(false, TSF"nettype_:%_", nettype_);
+            qm_xassert2(false, TSF"nettype_:%_", nettype_);
             break;
     }
     detail_nettype_info_.append(xmsg.String());
 }
 void BaseNetInfo::__QueryIPStack() {
-    xinfo_function();
+    qm_xinfo_function();
     ip_stack_ = local_ipstack_detect_log(ipstack_detect_info_);
 }
 
 void BaseNetInfo::__QueryNetConfig(){
-    xinfo_function();
+    qm_xinfo_function();
     //默认网关
     XMessage xmsg1;
     in6_addr addr6_gateway;

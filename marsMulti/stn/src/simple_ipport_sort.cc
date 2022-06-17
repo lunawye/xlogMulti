@@ -32,7 +32,7 @@
 #include "marsMulti/comm/socket/unix_socket.h"
 
 #include "marsMulti/comm/qm_time_utils.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/platform_comm.h"
 
 #include "marsMulti/app/app.h"
@@ -176,7 +176,7 @@ void SimpleIPPortSort::InitHistory2BannedList(bool _savexml) {
         const char* netinfoChr = record->Attribute(kNetInfo);
 
         if (netinfoChr && (0 == strcmp(netinfoChr, curr_netinfo.c_str()))) {
-            xwarn2(TSF"netinfoChr:%_, curr_netinfo.c_str():%_", netinfoChr, curr_netinfo.c_str());
+            qm_xwarn2(TSF"netinfoChr:%_, curr_netinfo.c_str():%_", netinfoChr, curr_netinfo.c_str());
             break;
         }
     }
@@ -293,7 +293,7 @@ bool SimpleIPPortSort::__IsBanned(std::vector<BanItem>::iterator _iter) const {
         if (ban_time > kMaxBanTime) {
             ban_time = kMaxBanTime;
         }
-        xinfo2(TSF"%_:%_ ban time:%_", _iter->ip, _iter->port, ban_time);
+        qm_xinfo2(TSF"%_:%_ ban time:%_", _iter->ip, _iter->port, ban_time);
     }
     
     if (_iter->last_fail_time.gettickspan() < ban_time) {
@@ -350,7 +350,7 @@ bool SimpleIPPortSort::__CanUpdate(const std::string& _ip, uint16_t _port, bool 
 void SimpleIPPortSort::__FilterbyBanned(std::vector<IPPortItem>& _items) const {
     for (std::vector<IPPortItem>::iterator it = _items.begin(); it != _items.end();) {
         if (__IsBanned(it->str_ip, it->port) || __IsServerBan(it->str_ip)) {
-            xwarn2(TSF"ip:%0, port:%1, is ban!!", it->str_ip, it->port);
+            qm_xwarn2(TSF"ip:%0, port:%1, is ban!!", it->str_ip, it->port);
             it = _items.erase(it);
         } else {
             ++it;
@@ -364,9 +364,9 @@ bool SimpleIPPortSort::__IsServerBan(const std::string& _ip) const {
     if (iter == _server_bans_.end()) return false;
     
     uint64_t now = ::gettickcount();
-    xassert2(now >= iter->second, TSF"%_:%_", now, iter->second);
+    qm_xassert2(now >= iter->second, TSF"%_:%_", now, iter->second);
     if (now - iter->second < kServerBanTime) {
-        xwarn2(TSF"ip %0 is ban by server, haha!", _ip.c_str());
+        qm_xwarn2(TSF"ip %0 is ban by server, haha!", _ip.c_str());
         return true;
     }
 
@@ -414,7 +414,7 @@ void SimpleIPPortSort::__SortbyBanned(std::vector<IPPortItem>& _items, bool _use
     
     items_history.erase(std::remove_copy_if(_items.begin(), _items.end(), items_history.begin(), !boost::bind<bool>(find_lambda, _1)), items_history.end());
     items_new.erase(std::remove_copy_if(_items.begin(), _items.end(), items_new.begin(), find_lambda), items_new.end());
-    xassert2(_items.size() == items_history.size()+items_new.size(), TSF"_item:%_, history:%_, new:%_", _items.size(), items_history.size(), items_new.size());
+    qm_xassert2(_items.size() == items_history.size()+items_new.size(), TSF"_item:%_, history:%_, new:%_", _items.size(), items_history.size(), items_new.size());
     
     //sort history
     std::sort(items_history.begin(), items_history.end(),
@@ -426,8 +426,8 @@ void SimpleIPPortSort::__SortbyBanned(std::vector<IPPortItem>& _items, bool _use
                   std::vector<BanItem>::const_iterator  l = std::find_if(_ban_fail_list_.begin(), _ban_fail_list_.end(), boost::bind<bool>(find_lr_lambda, _1, _l));
                   std::vector<BanItem>::const_iterator  r = std::find_if(_ban_fail_list_.begin(), _ban_fail_list_.end(), boost::bind<bool>(find_lr_lambda, _1, _r));
                       
-                  xassert2(l != _ban_fail_list_.end());
-                  xassert2(r != _ban_fail_list_.end());
+                  qm_xassert2(l != _ban_fail_list_.end());
+                  qm_xassert2(r != _ban_fail_list_.end());
                   
                  if(l == _ban_fail_list_.end() || r == _ban_fail_list_.end())
                   return false;
@@ -448,7 +448,7 @@ void SimpleIPPortSort::__SortbyBanned(std::vector<IPPortItem>& _items, bool _use
    //merge
     _items.clear();
 
-//    xinfo2(TSF"use ipv6 %_ ", _use_IPv6);
+//    qm_xinfo2(TSF"use ipv6 %_ ", _use_IPv6);
 
     //v6 version
     if (!_use_IPv6) {//not use V6
@@ -534,23 +534,23 @@ void SimpleIPPortSort::__PickIpItemRandom(std::vector<IPPortItem>& _items, std::
         _items.push_back(_items_new.front());
         _items_new.pop_front();
     } else {
-        xassert2(false, TSF"ran:%_, history:%_, new:%_", ran, _items_history.size(), _items_new.size());
+        qm_xassert2(false, TSF"ran:%_, history:%_, new:%_", ran, _items_history.size(), _items_new.size());
     }
 }
 
 
 
 void SimpleIPPortSort::SortandFilter(std::vector<IPPortItem>& _items, int _needcount, bool _use_IPv6) const {
-//    xinfo2(TSF"needcount %_, use ipv6 %_ ", _needcount, _use_IPv6);
+//    qm_xinfo2(TSF"needcount %_, use ipv6 %_ ", _needcount, _use_IPv6);
     ScopedLock lock(mutex_);
     __FilterbyBanned(_items);
     for (size_t i=0; i<_items.size(); i++) {
-		xdebug2(TSF"after FilterbyBanned list ip: %_ ", _items[i].str_ip);
+		qm_xdebug2(TSF"after FilterbyBanned list ip: %_ ", _items[i].str_ip);
 	}
     __SortbyBanned(_items, _use_IPv6);
 
     for (size_t i=0; i<_items.size(); i++) {
-		xdebug2(TSF"after SortbyBanned list ip: %_ ", _items[i].str_ip);
+		qm_xdebug2(TSF"after SortbyBanned list ip: %_ ", _items[i].str_ip);
 	}
     
     if (_needcount < (int)_items.size()) _items.resize(_needcount);

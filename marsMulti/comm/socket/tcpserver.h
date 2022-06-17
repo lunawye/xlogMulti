@@ -27,7 +27,7 @@
 #include "comm/thread/condition.h"
 #include "comm/thread/thread.h"
 
-class XLogger;
+class QM_XLogger;
 class TcpServer;
 
 namespace marsMulti {

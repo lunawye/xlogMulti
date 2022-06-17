@@ -23,7 +23,7 @@
 #include "boost/bind.hpp"
 
 #include "marsMulti/comm/thread/lock.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/singleton.h"
 #include "marsMulti/comm/messagequeue/message_queue.h"
 #include "marsMulti/sdt/constants.h"
@@ -43,11 +43,11 @@ SdtCore::SdtCore()
     , check_list_(std::list<BaseChecker*>())
     , cancel_(false)
     , checking_(false) {
-    xinfo_function();
+    qm_xinfo_function();
 }
 
 SdtCore::~SdtCore() {
-    xinfo_function();
+    qm_xinfo_function();
 
     cancel_ = true;
 
@@ -59,7 +59,7 @@ SdtCore::~SdtCore() {
 }
 
 void SdtCore::StartCheck(CheckIPPorts& _longlink_items, CheckIPPorts& _shortlink_items, int _mode, int _timeout) {
-    xinfo_function();
+    qm_xinfo_function();
     comm::ScopedLock lock(checking_mutex_);
 
     if (checking_) return;
@@ -71,7 +71,7 @@ void SdtCore::StartCheck(CheckIPPorts& _longlink_items, CheckIPPorts& _shortlink
 }
 
 void SdtCore::__InitCheckReq(CheckIPPorts& _longlink_items, CheckIPPorts& _shortlink_items, int _mode, int _timeout) {
-	xverbose_function();
+	qm_xverbose_function();
 	checking_ = true;
 
 	check_request_.Reset();
@@ -99,7 +99,7 @@ void SdtCore::__InitCheckReq(CheckIPPorts& _longlink_items, CheckIPPorts& _short
 }
 
 void SdtCore::__Reset() {
-    xinfo_function();
+    qm_xinfo_function();
 
     //check_request_.report
 
@@ -118,7 +118,7 @@ void SdtCore::__Reset() {
 }
 
 void SdtCore::__RunOn() {
-    xinfo_function();
+    qm_xinfo_function();
 
     for (std::list<BaseChecker*>::iterator iter = check_list_.begin(); iter != check_list_.end(); ++iter) {
         if (cancel_ || check_request_.check_status == kCheckFinish)
@@ -127,7 +127,7 @@ void SdtCore::__RunOn() {
         (*iter)->StartDoCheck(check_request_);
     }
 
-    xinfo2(TSF"all checkers end! cancel_=%_, check_request_.check_status_=%_, check_list__size=%_", cancel_, check_request_.check_status, check_list_.size());
+    qm_xinfo2(TSF"all checkers end! cancel_=%_, check_request_.check_status_=%_, check_list__size=%_", cancel_, check_request_.check_status, check_list_.size());
 
     __DumpCheckResult();
     __Reset();
@@ -140,16 +140,16 @@ void SdtCore::__DumpCheckResult() {
     for (; iter != check_request_.checkresult_profiles.end(); ++iter) {
         switch(iter->netcheck_type) {
         case kTcpCheck:
-        	xinfo2(TSF"tcp check result, error_code:%_, ip:%_, port:%_, network_type:%_, rtt:%_", iter->error_code, iter->ip, iter->port, iter->network_type, iter->rtt);
+        	qm_xinfo2(TSF"tcp check result, error_code:%_, ip:%_, port:%_, network_type:%_, rtt:%_", iter->error_code, iter->ip, iter->port, iter->network_type, iter->rtt);
         	break;
         case kHttpCheck:
-        	xinfo2(TSF"http check result, status_code:%_, url:%_, ip:%_, port:%_, network_type:%_, rtt:%_", iter->status_code, iter->url, iter->ip, iter->port, iter->network_type, iter->rtt);
+        	qm_xinfo2(TSF"http check result, status_code:%_, url:%_, ip:%_, port:%_, network_type:%_, rtt:%_", iter->status_code, iter->url, iter->ip, iter->port, iter->network_type, iter->rtt);
         	break;
         case kPingCheck:
-        	xinfo2(TSF"ping check result, error_code:%_, ip:%_, network_type:%_, loss_rate:%_, rtt:%_", iter->error_code, iter->ip, iter->network_type, iter->loss_rate, iter->rtt_str);
+        	qm_xinfo2(TSF"ping check result, error_code:%_, ip:%_, network_type:%_, loss_rate:%_, rtt:%_", iter->error_code, iter->ip, iter->network_type, iter->loss_rate, iter->rtt_str);
         	break;
         case kDnsCheck:
-        	xinfo2(TSF"dns check result, error_code:%_, domain_name:%_, network_type:%_, ip1:%_, rtt:%_", iter->error_code, iter->domain_name, iter->network_type, iter->ip1, iter->rtt);
+        	qm_xinfo2(TSF"dns check result, error_code:%_, domain_name:%_, network_type:%_, ip1:%_, rtt:%_", iter->error_code, iter->domain_name, iter->network_type, iter->ip1, iter->rtt);
         	break;
         }
     }
@@ -157,7 +157,7 @@ void SdtCore::__DumpCheckResult() {
 }
 
 void SdtCore::CancelCheck() {
-    xinfo_function();
+    qm_xinfo_function();
     cancel_ = true;
     for (std::list<BaseChecker*>::iterator iter = check_list_.begin(); iter != check_list_.end(); ++iter) {
         (*iter)->CancelDoCheck();
@@ -165,7 +165,7 @@ void SdtCore::CancelCheck() {
 }
 
 void SdtCore::CancelAndWait() {
-    xinfo_function();
+    qm_xinfo_function();
     CancelCheck();
     thread_.join();
 }

@@ -3,7 +3,7 @@
 #include "comm\platform_comm.h"
 
 #include "runtime2cs.h"
-#include "comm\xlogger\qm_xlogger.h"
+#include "comm\qm_xlogger\qm_xlogger.h"
 #include "runtime_utils.h"
 
 namespace marsMulti {

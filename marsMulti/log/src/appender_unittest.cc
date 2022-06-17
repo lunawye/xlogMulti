@@ -1,4 +1,4 @@
-#include "marsMulti/comm/xlogger/qm_xloggerbase.h"
+#include "marsMulti/comm/qm_xlogger/qm_xloggerbase.h"
 #include "gtest/gtest.h"
 
 #include <cstring>

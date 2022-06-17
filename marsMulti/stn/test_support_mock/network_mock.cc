@@ -84,7 +84,7 @@ CMMLongLinkSpeedTestItem::~CMMLongLinkSpeedTestItem()
 
 void CMMLongLinkSpeedTestItem::HandleFDISSet(SocketSelect& _sel)
 {
-	xverbose_function();
+	qm_xverbose_function();
 }
 
 void CMMLongLinkSpeedTestItem::HandleSetFD(SocketSelect& _sel) 

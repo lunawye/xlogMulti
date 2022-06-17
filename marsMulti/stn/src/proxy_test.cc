@@ -26,7 +26,7 @@
 #include "marsMulti/comm/socket/socket_address.h"
 #include "marsMulti/comm/socket/qm_local_ipstack.h"
 #include "marsMulti/comm/socket/block_socket.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 #include "marsMulti/comm/platform_comm.h"
 #include "marsMulti/comm/qm_http.h"
@@ -51,10 +51,10 @@ ProxyTest::~ProxyTest() {
 }
 
 bool ProxyTest::ProxyIsAvailable(const marsMulti::comm::ProxyInfo _proxy_info, const std::string& _host, const std::vector<std::string>& _hardcode_ips) {
-    xinfo_function(TSF"type:%_ host:%_ ip:%_:%_ username:%_ test_host:%_ hardcode_ip:%_", _proxy_info.type, _proxy_info.host, _proxy_info.ip, _proxy_info.port, _proxy_info.username, _host, _hardcode_ips.empty()?"": _hardcode_ips.front());
+    qm_xinfo_function(TSF"type:%_ host:%_ ip:%_:%_ username:%_ test_host:%_ hardcode_ip:%_", _proxy_info.type, _proxy_info.host, _proxy_info.ip, _proxy_info.port, _proxy_info.username, _host, _hardcode_ips.empty()?"": _hardcode_ips.front());
     
     if (!_proxy_info.IsValid() ||( _host.empty() && _hardcode_ips.empty())) {
-        xerror2(TSF"parameter is invalid");
+        qm_xerror2(TSF"parameter is invalid");
         return false;
     }
     
@@ -67,7 +67,7 @@ bool ProxyTest::ProxyIsAvailable(const marsMulti::comm::ProxyInfo _proxy_info, c
 
     socket_close(sock);
     
-    xinfo2(TSF"test proxy status code:%_", status_code);
+    qm_xinfo2(TSF"test proxy status code:%_", status_code);
     
     return status_code == 200 || status_code == 497 || (status_code > 300 && status_code < 400);
 
@@ -83,7 +83,7 @@ SOCKET ProxyTest::__Connect(const marsMulti::comm::ProxyInfo& _proxy_info, const
         } else {
             std::vector<std::string> proxy_ips;
             if (!dns_util_.GetDNS().GetHostByName(_proxy_info.host, proxy_ips) || proxy_ips.empty()) {
-                xwarn2(TSF"dns proxy host error, host:%_", _proxy_info.host);
+                qm_xwarn2(TSF"dns proxy host error, host:%_", _proxy_info.host);
                 return INVALID_SOCKET;
             }
             proxy_ip = proxy_ips.front();
@@ -99,7 +99,7 @@ SOCKET ProxyTest::__Connect(const marsMulti::comm::ProxyInfo& _proxy_info, const
     } else {
         std::vector<std::string> test_ips;
         if (!dns_util_.GetDNS().GetHostByName(_host, test_ips) || test_ips.empty()) {
-            xwarn2(TSF"dns test_host error, host:%_", _host);
+            qm_xwarn2(TSF"dns test_host error, host:%_", _host);
             if (_hardcode_ips.empty()) {
                 return INVALID_SOCKET;
             }
@@ -117,7 +117,7 @@ SOCKET ProxyTest::__Connect(const marsMulti::comm::ProxyInfo& _proxy_info, const
     
     
     if (vecaddr.empty()) {
-        xerror2("test proxy socket close sock:-1 vecaddr empty");
+        qm_xerror2("test proxy socket close sock:-1 vecaddr empty");
         return INVALID_SOCKET;
     }
     
@@ -133,9 +133,9 @@ SOCKET ProxyTest::__Connect(const marsMulti::comm::ProxyInfo& _proxy_info, const
     delete proxy_addr;
     
     if (INVALID_SOCKET == sock) {
-        xwarn2(TSF"test proxy connect fail sock:-1, costtime:%0", com_connect.TotalCost());
+        qm_xwarn2(TSF"test proxy connect fail sock:-1, costtime:%0", com_connect.TotalCost());
     } else {
-        xinfo2(TSF"test proxy connect suc sock:%_, net:%_", sock, ::getNetInfo());
+        qm_xinfo2(TSF"test proxy connect suc sock:%_, net:%_", sock, ::getNetInfo());
     }
     
     return sock;
@@ -208,12 +208,12 @@ int ProxyTest::__ReadWrite(SOCKET _sock, const marsMulti::comm::ProxyInfo& _prox
     int send_ret = block_socket_send(_sock, (const unsigned char*)out_buff.Ptr(), (unsigned int)out_buff.Length(), testproxybreak_, err_code);
     
     if (send_ret < 0) {
-        xerror2(TSF"test proxy Error, ret:%0, errno:%1, nread:%_, nwrite:%_", send_ret, strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
+        qm_xerror2(TSF"test proxy Error, ret:%0, errno:%1, nread:%_, nwrite:%_", send_ret, strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
         return -1;
     }
     
     if (testproxybreak_.IsBreak()) {
-        xwarn2(TSF"test proxy break, sent:%_ nread:%_, nwrite:%_", send_ret, socket_nread(_sock), socket_nwrite(_sock));
+        qm_xwarn2(TSF"test proxy break, sent:%_ nread:%_, nwrite:%_", send_ret, socket_nread(_sock), socket_nwrite(_sock));
         return -1;
     }
     
@@ -229,21 +229,21 @@ int ProxyTest::__ReadWrite(SOCKET _sock, const marsMulti::comm::ProxyInfo& _prox
         int recv_ret = block_socket_recv(_sock, recv_buf, BUFFER_SIZE, testproxybreak_, err_code, 5000);
         
         if (recv_ret < 0) {
-            xerror2(TSF"read block socket return false, error:%0, nread:%_, nwrite:%_", strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
+            qm_xerror2(TSF"read block socket return false, error:%0, nread:%_, nwrite:%_", strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
             break;
         }
         
         if (testproxybreak_.IsBreak()) {
-            xinfo2(TSF"user cancel, nread:%_, nwrite:%_", socket_nread(_sock), socket_nwrite(_sock));
+            qm_xinfo2(TSF"user cancel, nread:%_, nwrite:%_", socket_nread(_sock), socket_nwrite(_sock));
             break;
         }
         
         if (recv_ret == 0 && SOCKET_ERRNO(ETIMEDOUT) == err_code) {
-            xerror2(TSF"read timeout error:(%_,%_), nread:%_, nwrite:%_ ", err_code, strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
+            qm_xerror2(TSF"read timeout error:(%_,%_), nread:%_, nwrite:%_ ", err_code, strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
             continue;
         }
         if (recv_ret == 0) {
-            xerror2(TSF"remote disconnect, nread:%_, nwrite:%_", err_code, strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
+            qm_xerror2(TSF"remote disconnect, nread:%_, nwrite:%_", err_code, strerror(err_code), socket_nread(_sock), socket_nwrite(_sock));
             break;
         }
         
@@ -253,21 +253,21 @@ int ProxyTest::__ReadWrite(SOCKET _sock, const marsMulti::comm::ProxyInfo& _prox
         }
         
         if (parse_status == http::Parser::kFirstLineError) {
-            xerror2(TSF"http head not receive yet,but socket closed, length:%0, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(_sock), socket_nwrite(_sock));
+            qm_xerror2(TSF"http head not receive yet,but socket closed, length:%0, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(_sock), socket_nwrite(_sock));
             break;
         } else if (parse_status == http::Parser::kHeaderFieldsError) {
-            xerror2(TSF"parse http head failed, but socket closed, length:%0, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(_sock), socket_nwrite(_sock));
+            qm_xerror2(TSF"parse http head failed, but socket closed, length:%0, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(_sock), socket_nwrite(_sock));
             break;
         } else if (parse_status == http::Parser::kBodyError) {
-            xerror2(TSF"content_length_ != buf_body_.Lenght(), Head:%0, http dump:%1 \n headers size:%2" , parser.Fields().ContentLength(), xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
+            qm_xerror2(TSF"content_length_ != buf_body_.Lenght(), Head:%0, http dump:%1 \n headers size:%2" , parser.Fields().ContentLength(), xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
             break;
         } else if (parse_status == http::Parser::kEnd) {
             if (status_code != 200) {
-                xerror2(TSF"@%0, status_code_ != 200, code:%1, http dump:%2 \n headers size:%3", this, status_code, xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
+                qm_xerror2(TSF"@%0, status_code_ != 200, code:%1, http dump:%2 \n headers size:%3", this, status_code, xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
             }
             break;
         } else {
-            xdebug2(TSF"http parser status:%_ ", parse_status);
+            qm_xdebug2(TSF"http parser status:%_ ", parse_status);
         }
     }
     

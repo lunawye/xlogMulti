@@ -21,24 +21,24 @@
 #include "basechecker.h"
 
 #include "marsMulti/comm/thread/lock.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 using namespace marsMulti::sdt;
 
 BaseChecker::BaseChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 BaseChecker::~BaseChecker() {
-    xverbose_function();
+    qm_xverbose_function();
     CancelDoCheck();
 }
 
 int BaseChecker::StartDoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
     // timeout and finish net checker.
     if (_check_request.total_timeout <= 0) {
-        xinfo2(TSF"req.total_timeout_=%_, check finish!", _check_request.total_timeout);
+        qm_xinfo2(TSF"req.total_timeout_=%_, check finish!", _check_request.total_timeout);
         _check_request.check_status = kCheckFinish;
         return 0;
     }
@@ -47,11 +47,11 @@ int BaseChecker::StartDoCheck(CheckRequestProfile& _check_request) {
 }
 
 int BaseChecker::CancelDoCheck() {
-    xinfo_function();
+    qm_xinfo_function();
     is_canceled_ = true;
     return 1;
 }
 
 void BaseChecker::__DoCheck(CheckRequestProfile& _check_request) {
-    xverbose_function();
+    qm_xverbose_function();
 }

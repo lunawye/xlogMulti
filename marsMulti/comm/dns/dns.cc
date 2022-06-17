@@ -20,7 +20,7 @@
 
 #include "dns/dns.h"
 #include "socket/unix_socket.h"
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #include "qm_time_utils.h"
 #include "socket/socket_address.h"
 #include "thread/condition.h"
@@ -61,7 +61,7 @@ static Condition sg_condition;
 static Mutex sg_mutex;
 
 static void __GetIP() {
-    xverbose_function();
+    qm_xverbose_function();
 
     auto start_time = ::gettickcount();
     
@@ -82,16 +82,16 @@ static void __GetIP() {
     }
 
     lock.unlock();
-    xdebug2(TSF"dnsfunc is null: %_, %_", host_name, (dnsfunc == NULL));
+    qm_xdebug2(TSF"dnsfunc is null: %_, %_", host_name, (dnsfunc == NULL));
     if (NULL == dnsfunc) {
         
         //
         xgroup2_define(log_group);
         std::vector<socket_address> dnssvraddrs;
         marsMulti::comm::getdnssvraddrs(dnssvraddrs);
-        xinfo2("dns server:") >> log_group;
+        qm_xinfo2("dns server:") >> log_group;
         for (std::vector<socket_address>::iterator iter = dnssvraddrs.begin(); iter != dnssvraddrs.end(); ++iter) {
-            xinfo2(TSF"%_:%_ ", iter->ip(), iter->port()) >> log_group;
+            qm_xinfo2(TSF"%_:%_ ", iter->ip(), iter->port()) >> log_group;
         }
         
         //
@@ -120,7 +120,7 @@ static void __GetIP() {
         }
 
         if (error != 0) {
-            xwarn2(TSF"error, error:%_/%_, hostname:%_, ipstack:%_", error, strerror(error), host_name.c_str(), ipstack);
+            qm_xwarn2(TSF"error, error:%_/%_, hostname:%_, ipstack:%_", error, strerror(error), host_name.c_str(), ipstack);
 
             if (iter != sg_dnsinfo_vec.end()) iter->status = kGetIPFail;
 
@@ -138,7 +138,7 @@ static void __GetIP() {
                     sockaddr_in* addr_in = (sockaddr_in*)single->ai_addr;
 //                    struct in_addr convertAddr;
                     if (INADDR_ANY == addr_in->sin_addr.s_addr || INADDR_NONE == addr_in->sin_addr.s_addr) {
-                        xwarn2(TSF"hehe, addr_in->sin_addr.s_addr:%0", addr_in->sin_addr.s_addr);
+                        qm_xwarn2(TSF"hehe, addr_in->sin_addr.s_addr:%0", addr_in->sin_addr.s_addr);
                         continue;
                     }
                 }
@@ -149,7 +149,7 @@ static void __GetIP() {
                 const char* ip = sock_addr.ip();
 
                 if (!socket_address(ip, 0).valid_server_address(false, true)) {
-                    xerror2(TSF"ip is invalid, ip:%0", ip);
+                    qm_xerror2(TSF"ip is invalid, ip:%0", ip);
                     continue;
                 }
 
@@ -158,14 +158,14 @@ static void __GetIP() {
             
             //
             xgroup2_define(ip_group);
-            xinfo2(TSF"host %_ resolved iplist: ", host_name) >> ip_group;
+            qm_xinfo2(TSF"host %_ resolved iplist: ", host_name) >> ip_group;
             for(auto ip : iter->result){
-                xinfo2(TSF"%_,", ip) >> ip_group;
+                qm_xinfo2(TSF"%_,", ip) >> ip_group;
             }
             
             freeaddrinfo(result);
             iter->status = kGetIPSuc;
-            xinfo2(TSF"cost time: %_", (::gettickcount() - start_time)) >> ip_group;
+            qm_xinfo2(TSF"cost time: %_", (::gettickcount() - start_time)) >> ip_group;
             sg_condition.notifyAll();
         }
     } else {
@@ -196,9 +196,9 @@ DNS::~DNS() {
 }
 
 bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>& ips, long millsec, DNSBreaker* _breaker, bool _longlink_host) {
-    xverbose_function("host: %s, longlink: %d", _host_name.c_str(), _longlink_host);
+    qm_xverbose_function("host: %s, longlink: %d", _host_name.c_str(), _longlink_host);
 
-    xassert2(!_host_name.empty());
+    qm_xassert2(!_host_name.empty());
 
     if (_host_name.empty()) {
         return false;
@@ -212,7 +212,7 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
     int startRet = thread.start();
 
     if (startRet != 0) {
-        xerror2(TSF"start the thread fail");
+        qm_xerror2(TSF"start the thread fail");
         return false;
     }
 
@@ -242,7 +242,7 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
                 break;
         }
 
-        xassert2(it != sg_dnsinfo_vec.end());
+        qm_xassert2(it != sg_dnsinfo_vec.end());
         
         if (it != sg_dnsinfo_vec.end()){
 
@@ -266,11 +266,11 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
                     std::vector<dnsinfo>::iterator iter = sg_dnsinfo_vec.begin();
                     int i = 0;
                     for (; iter != sg_dnsinfo_vec.end(); ++iter) {
-                        xerror2(TSF"sg_info_vec[%_]:%_", i++, DNSInfoToString(*iter));
+                        qm_xerror2(TSF"sg_info_vec[%_]:%_", i++, DNSInfoToString(*iter));
                     }
                     if (monitor_func_)
                         monitor_func_(kDNSThreadIDError);
-                    xassert2(false, TSF"_host_name:%_, it->host_name:%_", _host_name, it->host_name);
+                    qm_xassert2(false, TSF"_host_name:%_, it->host_name:%_", _host_name, it->host_name);
                     return false;
                 }
             }
@@ -278,12 +278,12 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
             if (kGetIPTimeout == it->status || kGetIPCancel == it->status || kGetIPFail == it->status) {
                 if (_breaker) _breaker->dnsstatus = NULL;
 
-                xinfo2(TSF "dns get ip status:%_ host:%_, func:%_", it->status, it->host_name, it->dns_func);
+                qm_xinfo2(TSF "dns get ip status:%_ host:%_, func:%_", it->status, it->host_name, it->dns_func);
                 sg_dnsinfo_vec.erase(it);
                 return false;
             }
 
-            xassert2(false, "%d", it->status);
+            qm_xassert2(false, "%d", it->status);
 
             if (_breaker) _breaker->dnsstatus = NULL;
 
@@ -296,7 +296,7 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
 }
 
 void DNS::Cancel(const std::string& _host_name) {
-    xverbose_function();
+    qm_xverbose_function();
     ScopedLock lock(sg_mutex);
 
     for (unsigned int i = 0; i < sg_dnsinfo_vec.size(); ++i) {

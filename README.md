@@ -195,7 +195,7 @@ const char* attrName = "com.apple.MobileBackup";
 u_int8_t attrValue = 1;
 setxattr([logPath UTF8String], attrName, &attrValue, sizeof(attrValue), 0, 0);
 
-// init xlogger
+// init qm_xlogger
 #if DEBUG
 xlogger_SetLevel(kLevelDebug);
 appender_set_console_log(true);
@@ -598,7 +598,7 @@ const char* attrName = "com.apple.MobileBackup";
 u_int8_t attrValue = 1;
 setxattr([logPath UTF8String], attrName, &attrValue, sizeof(attrValue), 0, 0);
 
-// init xlogger
+// init qm_xlogger
 #if DEBUG
 xlogger_SetLevel(kLevelDebug);
 appender_set_console_log(true);

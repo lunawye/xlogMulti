@@ -12,17 +12,17 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 #if defined(__ANDROID__)
 std::string get_local_route_table(){
     const char* cmd = "ip route list table all";
-    xinfo2(TSF"popen cmd=%_", cmd);
+    qm_xinfo2(TSF"popen cmd=%_", cmd);
     
     std::string result;
     FILE* pp = popen(cmd, "r");
     if (!pp) {
-        xerror2(TSF"popen error:%_", strerror(errno));
+        qm_xerror2(TSF"popen error:%_", strerror(errno));
         return result;
     }
     

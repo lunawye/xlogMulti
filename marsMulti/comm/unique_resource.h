@@ -1,7 +1,7 @@
 #pragma once
 
 #include <utility>
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/socket/unix_socket.h"
 
 #ifndef NDEBUG
@@ -15,7 +15,7 @@ namespace internal{
         }
         static void Free(SOCKET sock){
 #ifndef NDEBUG
-            xassert2(marsMulti::comm::FDInfo::QueryFD(sock).IsSocket());
+            qm_xassert2(marsMulti::comm::FDInfo::QueryFD(sock).IsSocket());
 #endif
             socket_close(sock);
         }
@@ -27,7 +27,7 @@ namespace internal{
         }
         static void Free(int fd){
 #ifndef NDEBUG
-            xassert2(marsMulti::comm::FDInfo::QueryFD(fd).IsFile());
+            qm_xassert2(marsMulti::comm::FDInfo::QueryFD(fd).IsFile());
 #endif
             close(fd);
         }
@@ -39,7 +39,7 @@ namespace internal{
         }
         static void Free(FILE* fp){
 #ifndef NDEBUG
-            xassert2(fp != nullptr);
+            qm_xassert2(fp != nullptr);
 #endif
             fclose(fp);
         }
@@ -51,7 +51,7 @@ class UniqueResource{
 public:
     struct Data : public Traits{
         explicit Data(const T& t):v(t){
-            xdebug2_if(v != Traits::InvalidValue(), TSF"%_ resource %_ acquired.", this, v);
+            qm_xdebug2_if(v != Traits::InvalidValue(), TSF"%_ resource %_ acquired.", this, v);
         }
         T v;
     }data_;
@@ -80,7 +80,7 @@ public:
     }
     void reset(const element_type& v = traits_type::InvalidValue()){
         if (data_.v != traits_type::InvalidValue() && data_.v == v){
-            xassert2(false, "can't reset self!!!!");
+            qm_xassert2(false, "can't reset self!!!!");
             return;
         }
         _Free();
@@ -108,7 +108,7 @@ private:
     void _Free(){
         if (data_.v != traits_type::InvalidValue()){
             data_.Free(data_.v);
-            xdebug2(TSF"%_ resource %_ released.", this, data_.v);
+            qm_xdebug2(TSF"%_ resource %_ released.", this, data_.v);
             data_.v = traits_type::InvalidValue();
         }
     }

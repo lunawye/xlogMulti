@@ -25,7 +25,7 @@
 #include <map>
 #include "marsMulti/comm/thread/mutex.h"
 #include "marsMulti/comm/thread/lock.h"
-#include "marsMulti/comm/xlogger/xlogger_category.h"
+#include "marsMulti/comm/qm_xlogger/xlogger_category.h"
 
 using namespace marsMulti::comm;
 namespace marsMulti {

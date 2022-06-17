@@ -22,7 +22,7 @@
 #include <string>
 #include <android/log.h>
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "assert/__assert.h"
 #include "var_cache.h"
 #include "qm_autobuffer.h"
@@ -150,7 +150,7 @@ static void jniLogException(JNIEnv* env)
 
     char szbuffer[1024] = {0};
     printStackTrace(env, exception, szbuffer, sizeof(szbuffer));
-    xerror2(TSF"jni exception %_", szbuffer);
+    qm_xerror2(TSF"jni exception %_", szbuffer);
     __android_log_write(ANDROID_LOG_WARN, "marsMulti::jniexception", szbuffer);
 }
 

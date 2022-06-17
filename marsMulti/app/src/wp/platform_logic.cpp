@@ -21,10 +21,10 @@ std::string getUserNameNoLog()
 
 std::string getUserName()
 {
-	xverbose_function();
+	qm_xverbose_function();
 
 	std::string userName = getUserNameNoLog();
-    xdebug2(TSF"userName= %0", userName);
+    qm_xdebug2(TSF"userName= %0", userName);
     return userName;
 }
 
@@ -32,7 +32,7 @@ std::string getUserName()
 //wp�ͷ��ص�ǰusername
 std::string getRecentUserName()
 {
-	xverbose_function();
+	qm_xverbose_function();
 
 	return getUserName();
 }
@@ -44,18 +44,18 @@ unsigned int getClientVersionNoLog()
 
 unsigned int getClientVersion()
 {
-	xverbose_function();
+	qm_xverbose_function();
 
 	unsigned int clientVersion = getClientVersionNoLog();
 
-    xdebug2(TSF"clientVersion= %0", clientVersion);
+    qm_xdebug2(TSF"clientVersion= %0", clientVersion);
     return clientVersion;	 
 }
 
 
 AccountInfo getAccountInfo()
 {
-	xverbose_function();
+	qm_xverbose_function();
 	AccountInfo accountInfo;
 	AccountInfoRef^ inforef = Runtime2Cs_Logic::Singleton()->getAccountInfo();
 	if(inforef != nullptr)
@@ -71,7 +71,7 @@ AccountInfo getAccountInfo()
 
 void getUplodLogExtrasInfo(std::string& _extrasinfo)
 {
-	xverbose_function();
+	qm_xverbose_function();
 	String^ psExInfo = Runtime2Cs_Logic::Singleton()->getUplodLogExtrasInfo();
 	
 	//std::wstring wsExinfo2(TSFpsExInfo->Data());
@@ -79,19 +79,19 @@ void getUplodLogExtrasInfo(std::string& _extrasinfo)
 }
 void getWatchDogPath(std::string& _watchDogPath)
 {
-	xverbose_function();
+	qm_xverbose_function();
 	_watchDogPath = getAppFilePath();
 	_watchDogPath += "\\watchdog\\";
 }
 void getKVCommPath(std::string& _kvCommPath)
 {
-	xverbose_function();
+	qm_xverbose_function();
 	_kvCommPath = getAppFilePath();
 	_kvCommPath += "\\kvcomm\\";
 }
 void getCrashFilePath(std::string& filePath, int timespan)
 {
-	xverbose_function();
+	qm_xverbose_function();
 	String^ psfilePath = Runtime2Cs_Logic::Singleton()->getCrashFilePath(timespan);
 	
 	//std::wstring wsfilePath(psfilePath->Data());

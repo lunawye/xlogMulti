@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "marsMulti/comm/qm_autobuffer.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/jni/util/var_cache.h"
 #include "marsMulti/comm/jni/util/scope_jenv.h"
 #include "marsMulti/comm/jni/util/comm_function.h"
@@ -53,7 +53,7 @@ DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_reportSignalDetectResults)
 #endif
 void (*ReportNetCheckResult)(const std::vector<CheckResultProfile>& _check_results)
 = [](const std::vector<CheckResultProfile>& _check_results) {
-	xverbose_function();
+	qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     auto native_cb = sdn_native_callback_instance.lock();

@@ -18,7 +18,7 @@
  */
 #include <vector>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/socket/qm_local_ipstack.h"
 #include "comm/platform_comm.h"
 #include "comm/network/getgateway.h"
@@ -88,7 +88,7 @@ std::string GetDetailNetInfo(bool _need_wifi_ssid) {
             break;
 
         default:
-            xassert2(false);
+            qm_xassert2(false);
             break;
     }
         

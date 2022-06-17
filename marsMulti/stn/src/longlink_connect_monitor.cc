@@ -26,7 +26,7 @@
 #include "marsMulti/app/app.h"
 #include "marsMulti/baseevent/active_logic.h"
 #include "marsMulti/comm/thread/lock.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/socket/unix_socket.h"
 #include "marsMulti/comm/platform_comm.h"
@@ -90,7 +90,7 @@ static std::string error_msg;
 
 static void __LongLinkStateToSystemLog(LongLink::TLongLinkStatus _status) {
 #ifdef __ANDROID__
-    xinfo_function();
+    qm_xinfo_function();
     std::stringstream logger;
     logger << "longlink state: ";
     uint64_t current_time = ::gettickcount();
@@ -116,7 +116,7 @@ static void __LongLinkStateToSystemLog(LongLink::TLongLinkStatus _status) {
         alarm_reason = "prepare to reconnect alarm";
     }   
     logger << current_time;
-    xinfo_trace(TSF"longlink_progress %_", logger.str().data());
+    qm_xinfo_trace(TSF"longlink_progress %_", logger.str().data());
 #endif
 }
 
@@ -141,15 +141,15 @@ static unsigned long __Interval(int _type, const ActiveLogic& _activelogic) {
     if (__CurActiveState(_activelogic) == kInactive || __CurActiveState(_activelogic) == kForgroundActive) {  // now - LastForegroundChangeTime>10min
         if (!_activelogic.IsActive() && GetAccountInfo().username.empty()) {
             interval = kNoAccountInfoInactiveInterval;
-            xwarn2(TSF"no account info and inactive, interval:%_", interval);
+            qm_xwarn2(TSF"no account info and inactive, interval:%_", interval);
 
         } else if (kNoNet == getNetInfo()) {
             interval = interval * kNoNetSaltRate + kNoNetSaltRise;
-            xinfo2(TSF"no net, interval:%0", interval);
+            qm_xinfo2(TSF"no net, interval:%0", interval);
 
         } else if (GetAccountInfo().username.empty()) {
             interval = interval * kNoAccountInfoSaltRate + kNoAccountInfoSaltRise;
-            xinfo2(TSF"no account info, interval:%0", interval);
+            qm_xinfo2(TSF"no account info, interval:%0", interval);
 
         } else {
             // default value
@@ -175,7 +175,7 @@ LongLinkConnectMonitor::LongLinkConnectMonitor(ActiveLogic& _activelogic, LongLi
     , is_keep_alive_(_is_keep_alive)
     , current_interval_index_(0)
     , rebuild_longlink_(false) {
-        xinfo2(TSF"handler:(%_,%_)", asyncreg_.Get().queue,asyncreg_.Get().seq);
+        qm_xinfo2(TSF"handler:(%_,%_)", asyncreg_.Get().queue,asyncreg_.Get().seq);
         if(is_keep_alive_) {
             activelogic_.SignalActive.connect(boost::bind(&LongLinkConnectMonitor::__OnSignalActive, this, _1));
             activelogic_.SignalForeground.connect(boost::bind(&LongLinkConnectMonitor::__OnSignalForeground, this, _1));
@@ -188,7 +188,7 @@ LongLinkConnectMonitor::LongLinkConnectMonitor(ActiveLogic& _activelogic, LongLi
 }
 
 LongLinkConnectMonitor::~LongLinkConnectMonitor() {
-    xinfo_function();
+    qm_xinfo_function();
 #ifdef __APPLE__
     __StopTimer();
 #endif
@@ -208,9 +208,9 @@ void LongLinkConnectMonitor::DisconnectAllSlot() {
 }
 
 bool LongLinkConnectMonitor::MakeSureConnected() {
-    xdebug_function();
+    qm_xdebug_function();
     if(longlink_.IsSvrTrigOff()) {
-        xinfo2(TSF"server trig off");
+        qm_xinfo2(TSF"server trig off");
         return false;
     }
     __IntervalConnect(kTaskConnect);
@@ -218,7 +218,7 @@ bool LongLinkConnectMonitor::MakeSureConnected() {
 }
 
 bool LongLinkConnectMonitor::NetworkChange() {
-    xinfo_function();
+    qm_xinfo_function();
 #ifdef __APPLE__
     __StopTimer();
 
@@ -237,7 +237,7 @@ bool LongLinkConnectMonitor::NetworkChange() {
 #endif
     longlink_.Disconnect(LongLink::kNetworkChange);
 
-    xinfo_trace(TSF"longlink_progress network change time: %_", gettickcount());
+    qm_xinfo_trace(TSF"longlink_progress network change time: %_", gettickcount());
 
     return 0 == __IntervalConnect(kNetworkChangeConnect);
 }
@@ -245,7 +245,7 @@ bool LongLinkConnectMonitor::NetworkChange() {
 
 uint64_t LongLinkConnectMonitor::__IntervalConnect(int _type) {
     if(longlink_.IsSvrTrigOff()) {
-        xinfo2(TSF"server trig off");
+        qm_xinfo2(TSF"server trig off");
         return 0;
     }
     if (LongLink::kConnecting == longlink_.ConnectStatus() || LongLink::kConnected == longlink_.ConnectStatus()) return 0;
@@ -254,18 +254,18 @@ uint64_t LongLinkConnectMonitor::__IntervalConnect(int _type) {
     uint64_t posttime = gettickcount() - longlink_.Profile().dns_time;
     uint64_t buffer = activelogic_.IsActive() ? 0 : kInactiveBuffer;    //in case doze mode
 
-    xinfo_trace(TSF"longlink_progress next connect interval: %_, process active state: %_, process foreground: %_", interval, activelogic_.IsActive(), activelogic_.IsForeground());
-    xinfo2(TSF"next connect interval: %_, posttime: %_, buffer: %_, _type: %_", interval, posttime, buffer, _type);
+    qm_xinfo_trace(TSF"longlink_progress next connect interval: %_, process active state: %_, process foreground: %_", interval, activelogic_.IsActive(), activelogic_.IsForeground());
+    qm_xinfo2(TSF"next connect interval: %_, posttime: %_, buffer: %_, _type: %_", interval, posttime, buffer, _type);
 
     if (activelogic_.IsActive() || _type == kNetworkChangeConnect) {
         if ((posttime + buffer) >= interval) {
             bool newone = false;
             bool ret = longlink_.MakeSureConnected(&newone);
-            xinfo2(TSF"process active made interval connect interval:%0, posttime:%_, newone:%_, connectstatus:%_, ret:%_", interval, posttime, newone, longlink_.ConnectStatus(), ret);
+            qm_xinfo2(TSF"process active made interval connect interval:%0, posttime:%_, newone:%_, connectstatus:%_, ret:%_", interval, posttime, newone, longlink_.ConnectStatus(), ret);
             return 0;
         } else {
             uint64_t inter = interval - posttime;
-            xinfo2(TSF"final interval %_", inter);
+            qm_xinfo2(TSF"final interval %_", inter);
             return inter;
         }
     }
@@ -275,7 +275,7 @@ uint64_t LongLinkConnectMonitor::__IntervalConnect(int _type) {
         rebuild_longlink_ = false;
         bool newone = false;
         bool ret = longlink_.MakeSureConnected(&newone);
-        xinfo2(TSF"rebuild now");
+        qm_xinfo2(TSF"rebuild now");
         return 0;
     }
 
@@ -290,14 +290,14 @@ uint64_t LongLinkConnectMonitor::__IntervalConnect(int _type) {
     }
     int time_interval = reconnect_interval[current_interval_index_];
     int interval_final = time_interval * 1000 - posttime;
-    xinfo2(TSF"after select interval_final %_ ", interval_final);
+    qm_xinfo2(TSF"after select interval_final %_ ", interval_final);
     interval_final = std::max(interval_final, 0);
     interval_final = std::min(interval_final, (int)kUpOrDownThreshold);
-    xinfo2(TSF"index %_ posttime %_, interval_final %_", current_interval_index_, posttime, interval_final);
+    qm_xinfo2(TSF"index %_ posttime %_, interval_final %_", current_interval_index_, posttime, interval_final);
     if (interval_final == 0) {
         bool newone = false;
         bool ret = longlink_.MakeSureConnected(&newone);
-        xinfo2(TSF"rebuild now, connect interval:%0, posttime:%_, newone:%_, connectstatus:%_, ret:%_", interval, posttime, newone, longlink_.ConnectStatus(), ret);
+        qm_xinfo2(TSF"rebuild now, connect interval:%0, posttime:%_, newone:%_, connectstatus:%_, ret:%_", interval, posttime, newone, longlink_.ConnectStatus(), ret);
         return 0;
     } else {
         return (uint64_t)interval_final;
@@ -305,7 +305,7 @@ uint64_t LongLinkConnectMonitor::__IntervalConnect(int _type) {
 }
 
 uint64_t LongLinkConnectMonitor::__AutoIntervalConnect() {
-    xdebug_function();
+    qm_xdebug_function();
     rebuild_alarm_.Cancel();
     wake_alarm_.Cancel();
     
@@ -313,10 +313,10 @@ uint64_t LongLinkConnectMonitor::__AutoIntervalConnect() {
 
     if (0 == remain) return remain;
 
-    xinfo2(TSF"start auto connect after:%0, channel id:%1", remain, longlink_.ChannelId().c_str());
+    qm_xinfo2(TSF"start auto connect after:%0, channel id:%1", remain, longlink_.ChannelId().c_str());
     rebuild_alarm_.Start((int)remain);
 
-    xinfo_trace(TSF"longlink_progress set rebuild alarm, reason: rebuild longlink alarm, current time: %_, next rebuild time interval: %_", gettickcount(), remain);
+    qm_xinfo_trace(TSF"longlink_progress set rebuild alarm, reason: rebuild longlink alarm, current time: %_, next rebuild time interval: %_", gettickcount(), remain);
 #ifdef __ANDROID__
     alarm_reason = "rebuild alarm";
 #endif
@@ -327,18 +327,18 @@ uint64_t LongLinkConnectMonitor::__AutoIntervalConnect() {
 void LongLinkConnectMonitor::__OnSignalForeground(bool _isForeground) {
     ASYNC_BLOCK_START
     if(longlink_.IsSvrTrigOff()) {
-        xinfo2(TSF"server trig off");
+        qm_xinfo2(TSF"server trig off");
         return;
     }
 #ifdef __APPLE__
-    xinfo2(TSF"forground:%_ time:%_ tick:%_", _isForeground, timeMs(), gettickcount());
+    qm_xinfo2(TSF"forground:%_ time:%_ tick:%_", _isForeground, timeMs(), gettickcount());
 
     if (_isForeground) {
-        xinfo2(TSF"longlink:%_ time:%_ %_ %_", longlink_.ConnectStatus(), tickcount_t().gettickcount().get(), longlink_.GetLastRecvTime().get(), int64_t(tickcount_t().gettickcount() - longlink_.GetLastRecvTime()));
+        qm_xinfo2(TSF"longlink:%_ time:%_ %_ %_", longlink_.ConnectStatus(), tickcount_t().gettickcount().get(), longlink_.GetLastRecvTime().get(), int64_t(tickcount_t().gettickcount() - longlink_.GetLastRecvTime()));
         
         if ((longlink_.ConnectStatus() == LongLink::kConnected) &&
                 (tickcount_t().gettickcount() - longlink_.GetLastRecvTime() > tickcountdiff_t(4.5 * 60 * 1000))) {
-            xwarn2(TSF"sock long time no send data, close it");
+            qm_xwarn2(TSF"sock long time no send data, close it");
             __ReConnect();
         }
     }
@@ -351,7 +351,7 @@ void LongLinkConnectMonitor::__OnSignalForeground(bool _isForeground) {
 void LongLinkConnectMonitor::__OnSignalActive(bool _isactive) {
     ASYNC_BLOCK_START
     if(longlink_.IsSvrTrigOff()) {
-        xinfo2(TSF"server trig off");
+        qm_xinfo2(TSF"server trig off");
         return;
     }
     __AutoIntervalConnect();
@@ -359,9 +359,9 @@ void LongLinkConnectMonitor::__OnSignalActive(bool _isactive) {
 }
 
 void LongLinkConnectMonitor::__OnLongLinkStatuChanged(LongLink::TLongLinkStatus _status, const std::string& _channel_id) {
-    xinfo2(TSF"longlink status change: %_ ", _status);
+    qm_xinfo2(TSF"longlink status change: %_ ", _status);
     if(longlink_.IsSvrTrigOff()) {
-        xinfo2(TSF"server trig off");
+        qm_xinfo2(TSF"server trig off");
         return;
     }
 
@@ -371,7 +371,7 @@ void LongLinkConnectMonitor::__OnLongLinkStatuChanged(LongLink::TLongLinkStatus 
     if (LongLink::kConnectFailed == _status || LongLink::kDisConnected == _status) {
         wake_alarm_.Start(500);
     } else if (LongLink::kConnected == _status) {
-        xinfo2(TSF"cancel auto connect");
+        qm_xinfo2(TSF"cancel auto connect");
     }
 
     status_ = _status;
@@ -387,17 +387,17 @@ void LongLinkConnectMonitor::__OnLongLinkStatuChanged(LongLink::TLongLinkStatus 
 }
 
 void LongLinkConnectMonitor::__OnAlarm(bool _rebuild_longlink) {
-    xinfo2(TSF"rebuild longlink %_", _rebuild_longlink);
+    qm_xinfo2(TSF"rebuild longlink %_", _rebuild_longlink);
     rebuild_longlink_ = _rebuild_longlink;
     __AutoIntervalConnect();
     if (rebuild_longlink_) {
-        xinfo_trace(TSF"longlink_progress onalarm log, reason: %_, alarm after %_ millsecond, spend time %_", alarm_reason, rebuild_alarm_.After(), rebuild_alarm_.ElapseTime());
+        qm_xinfo_trace(TSF"longlink_progress onalarm log, reason: %_, alarm after %_ millsecond, spend time %_", alarm_reason, rebuild_alarm_.After(), rebuild_alarm_.ElapseTime());
     }
 }
 
 #ifdef __APPLE__
 bool LongLinkConnectMonitor::__StartTimer() {
-    xdebug_function();
+    qm_xdebug_function();
 
     conti_suc_count_ = 0;
 
@@ -414,7 +414,7 @@ bool LongLinkConnectMonitor::__StartTimer() {
 
 
 bool LongLinkConnectMonitor::__StopTimer() {
-    xdebug_function();
+    qm_xdebug_function();
 
     ScopedLock lock(testmutex_);
 
@@ -460,18 +460,18 @@ void LongLinkConnectMonitor::__Run() {
 }
 
 void LongLinkConnectMonitor::__ReConnect() {
-    xinfo_function();
-    xassert2(fun_longlink_reset_);
+    qm_xinfo_function();
+    qm_xassert2(fun_longlink_reset_);
     fun_longlink_reset_();
 }
 
 
 void LongLinkConnectMonitor::OnHeartbeatAlarmSet(uint64_t _interval) {
-    xinfo_trace(TSF"longlink_progress on_heartbeat_set, time: %_, time interval:%_", gettickcount(), _interval);
+    qm_xinfo_trace(TSF"longlink_progress on_heartbeat_set, time: %_, time interval:%_", gettickcount(), _interval);
 }
 
 void LongLinkConnectMonitor::OnHeartbeatAlarmReceived(bool _is_noop_timeout) {
-    xinfo_trace(TSF"longlink_progress on_heartbeat_alarm, time: %_, is_noop_timeout:%_", gettickcount(), _is_noop_timeout);
+    qm_xinfo_trace(TSF"longlink_progress on_heartbeat_alarm, time: %_, is_noop_timeout:%_", gettickcount(), _is_noop_timeout);
 }
 
 

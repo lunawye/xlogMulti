@@ -25,7 +25,7 @@
 #include "boost/bind.hpp"
 
 #include "marsMulti/comm/thread/lock.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/qm_autobuffer.h"
 #include "marsMulti/comm/move_wrapper.h"
@@ -72,11 +72,11 @@ LongLinkTaskManager::LongLinkTaskManager(NetSource& _netsource, ActiveLogic& _ac
     , meta_mutex_(true)
 #endif
 {
-    xinfo_function(TSF"handler:(%_,%_)", asyncreg_.Get().queue, asyncreg_.Get().seq);
+    qm_xinfo_function(TSF"handler:(%_,%_)", asyncreg_.Get().queue, asyncreg_.Get().seq);
 }
 
 LongLinkTaskManager::~LongLinkTaskManager() {
-    xinfo_function();
+    qm_xinfo_function();
     asyncreg_.CancelAndWait();
     __BatchErrorRespHandle("", kEctLocal, kEctLocalReset, kTaskFailHandleTaskEnd, Task::kInvalidTaskID, false);
 
@@ -92,14 +92,14 @@ LongLinkTaskManager::~LongLinkTaskManager() {
 }
 
 bool LongLinkTaskManager::StartTask(const Task& _task, int _channel) {
-    xverbose_function();
-    xdebug2(TSF"taskid=%0", _task.taskid);
+    qm_xverbose_function();
+    qm_xdebug2(TSF"taskid=%0", _task.taskid);
 
     TaskProfile task(_task);
     task.link_type = _channel;
 
     if(_channel == Task::kChannelMinorLong) {   //already fixed host redirect, getted real host
-        xassert2(!_task.minorlong_host_list.empty());
+        qm_xassert2(!_task.minorlong_host_list.empty());
         task.channel_name = _task.minorlong_host_list.empty() ? "" : _task.minorlong_host_list.front();
     } else {
         task.channel_name = _task.channel_name;
@@ -113,18 +113,18 @@ bool LongLinkTaskManager::StartTask(const Task& _task, int _channel) {
 }
 
 bool LongLinkTaskManager::StopTask(uint32_t _taskid) {
-    xverbose_function();
+    qm_xverbose_function();
 
     std::list<TaskProfile>::iterator first = lst_cmd_.begin();
     std::list<TaskProfile>::iterator last = lst_cmd_.end();
 
     while (first != last) {
         if (_taskid == first->task.taskid) {
-            xinfo2(TSF"find the task taskid:%0", _taskid);
+            qm_xinfo2(TSF"find the task taskid:%0", _taskid);
 
             auto longlink = GetLongLink(first->channel_name);
             if(longlink == nullptr) {
-                xwarn2(TSF"longlink nullptr name:%_", first->channel_name);
+                qm_xwarn2(TSF"longlink nullptr name:%_", first->channel_name);
                 return false;
             }
 
@@ -140,7 +140,7 @@ bool LongLinkTaskManager::StopTask(uint32_t _taskid) {
 }
 
 bool LongLinkTaskManager::HasTask(uint32_t _taskid) const {
-    xverbose_function();
+    qm_xverbose_function();
 
     std::list<TaskProfile>::const_iterator first = lst_cmd_.begin();
     std::list<TaskProfile>::const_iterator last = lst_cmd_.end();
@@ -156,7 +156,7 @@ bool LongLinkTaskManager::HasTask(uint32_t _taskid) const {
 }
 
 void LongLinkTaskManager::ClearTasks() {
-    xverbose_function();
+    qm_xverbose_function();
     MetaScopedLock lock(meta_mutex_);
     for(auto item : longlink_metas_) {
         item.second->Channel()->Disconnect(LongLink::kReset);
@@ -186,7 +186,7 @@ void LongLinkTaskManager::TouchTasks() {
 }
 
 void LongLinkTaskManager::RedoTasks() {
-    xinfo_function();
+    qm_xinfo_function();
     MetaScopedLock lock(meta_mutex_);
     for(auto longlink : longlink_metas_) {
         longlink.second->Checker()->CancelConnect();
@@ -199,10 +199,10 @@ void LongLinkTaskManager::RedoTasks() {
 }
 
 void LongLinkTaskManager::__RedoTasks(const std::string& _name, bool need_lock_link) {
-    xinfo_function(TSF"channel name:%_", _name);
+    qm_xinfo_function(TSF"channel name:%_", _name);
 
     if (lst_cmd_.empty()) {
-        xerror2(TSF"task list is empty!");
+        qm_xerror2(TSF"task list is empty!");
     }
     
     std::list<TaskProfile>::iterator first = lst_cmd_.begin();
@@ -212,7 +212,7 @@ void LongLinkTaskManager::__RedoTasks(const std::string& _name, bool need_lock_l
         std::list<TaskProfile>::iterator next = first;
         ++next;
         
-        xinfo2(TSF"task channel name:%_, cgi:%_", first->channel_name, first->task.cgi);
+        qm_xinfo2(TSF"task channel name:%_, cgi:%_", first->channel_name, first->task.cgi);
         if(!_name.empty() && first->channel_name != _name) {
             first = next;
             continue;
@@ -221,10 +221,10 @@ void LongLinkTaskManager::__RedoTasks(const std::string& _name, bool need_lock_l
         auto link_name = (_name.empty() ? first->channel_name : _name);
         auto longlink = need_lock_link ? GetLongLink(link_name) : GetLongLinkNoLock(link_name);
         if (longlink && first->running_id) {
-            xinfo2(TSF "task redo, taskid:%_", first->task.taskid);
+            qm_xinfo2(TSF "task redo, taskid:%_", first->task.taskid);
             __SingleRespHandle(first, kEctLocal, kEctLocalCancel, kTaskFailHandleDefault, longlink->Channel()->Profile());
         } else {
-            xerror2(TSF"didn't find longlink or running id is empty, task channel name:%_, running id:%_", first->channel_name, first->running_id);
+            qm_xerror2(TSF"didn't find longlink or running id is empty, task channel name:%_, running id:%_", first->channel_name, first->running_id);
             __DumpLongLinkChannelInfo();
         }
         
@@ -242,14 +242,14 @@ void LongLinkTaskManager::__RedoTasks(const std::string& _name, bool need_lock_l
 }
 
 void LongLinkTaskManager::RetryTasks(ErrCmdType _err_type, int _err_code, int _fail_handle, uint32_t _src_taskid, std::string _user_id) {
-    xverbose_function();
+    qm_xverbose_function();
     __BatchErrorRespHandleByUserId(_user_id, _err_type, _err_code, _fail_handle, _src_taskid);
     __RunLoop();
 }
 
 
 void LongLinkTaskManager::__RunLoop() {
-    xinfo_function();
+    qm_xinfo_function();
     if (lst_cmd_.empty()) {
 #ifdef ANDROID
         /*cancel the last wakeuplock*/
@@ -277,7 +277,7 @@ void LongLinkTaskManager::__RunLoop() {
 }
 
 void LongLinkTaskManager::__RunOnTimeout() {
-    xdebug_function();
+    qm_xdebug_function();
 
     std::list<TaskProfile>::iterator first = lst_cmd_.begin();
     std::list<TaskProfile>::iterator last = lst_cmd_.end();
@@ -294,7 +294,7 @@ void LongLinkTaskManager::__RunOnTimeout() {
 
         if (first->running_id && 0 < first->transfer_profile.start_send_time) {
             if (0 == first->transfer_profile.last_receive_pkg_time && cur_time - first->transfer_profile.start_send_time >= first->transfer_profile.first_pkg_timeout) {
-                xerror2(TSF"task first-pkg timeout taskid:%_,  nStartSendTime=%_, nfirstpkgtimeout=%_",
+                qm_xerror2(TSF"task first-pkg timeout taskid:%_,  nStartSendTime=%_, nfirstpkgtimeout=%_",
                         first->task.taskid, first->transfer_profile.start_send_time / 1000, first->transfer_profile.first_pkg_timeout / 1000);
                 socket_timeout_code = kEctLongFirstPkgTimeout;
                 src_taskid = first->task.taskid;
@@ -303,7 +303,7 @@ void LongLinkTaskManager::__RunOnTimeout() {
             }
 
             if (0 < first->transfer_profile.last_receive_pkg_time && cur_time - first->transfer_profile.last_receive_pkg_time >= ((kMobile != getNetInfo()) ? kWifiPackageInterval : kGPRSPackageInterval)) {
-                xerror2(TSF"task pkg-pkg timeout, taskid:%_, nLastRecvTime=%_, pkg-pkg timeout=%_",
+                qm_xerror2(TSF"task pkg-pkg timeout, taskid:%_, nLastRecvTime=%_, pkg-pkg timeout=%_",
                         first->task.taskid, first->transfer_profile.last_receive_pkg_time / 1000, ((kMobile != getNetInfo()) ? kWifiPackageInterval : kGPRSPackageInterval) / 1000);
                 socket_timeout_code = kEctLongPkgPkgTimeout;
                 src_taskid = first->task.taskid;
@@ -311,7 +311,7 @@ void LongLinkTaskManager::__RunOnTimeout() {
             }
             
             if (cur_time - first->transfer_profile.start_send_time >= first->transfer_profile.read_write_timeout) {
-                xerror2(TSF"task read-write timeout, taskid:%_, , nStartSendTime=%_, nReadWriteTimeOut=%_",
+                qm_xerror2(TSF"task read-write timeout, taskid:%_, , nStartSendTime=%_, nReadWriteTimeOut=%_",
                         first->task.taskid, first->transfer_profile.start_send_time / 1000, first->transfer_profile.read_write_timeout / 1000);
                 socket_timeout_code = kEctLongReadWriteTimeout;
                 src_taskid = first->task.taskid;
@@ -323,7 +323,7 @@ void LongLinkTaskManager::__RunOnTimeout() {
 
         if (longlink && cur_time - first->start_task_time >= first->task_timeout) {
 	        auto longlink_channel = longlink->Channel();
-            xerror2(TSF"task timeout, taskid:%_, nStartSendTime=%_, cur_time=%_, timeout:%_",
+            qm_xerror2(TSF"task timeout, taskid:%_, nStartSendTime=%_, cur_time=%_, timeout:%_",
                     first->task.taskid, first->transfer_profile.start_send_time / 1000, cur_time / 1000, first->task_timeout / 1000);
             if(batchMap.find(first->channel_name) == batchMap.end()) {
                 socket_timeout_code = kEctLongTaskTimeout;
@@ -340,7 +340,7 @@ void LongLinkTaskManager::__RunOnTimeout() {
         if(item.second.first == kEctLongTaskTimeout) {
             __BatchErrorRespHandle(item.first, kEctNetMsgXP, kEctLocalTaskTimeout, kTaskFailHandleDefault, item.second.second);
         } else {
-	        xassert2(fun_notify_network_err_);
+	        qm_xassert2(fun_notify_network_err_);
 	        auto longlink_channel = GetLongLink(item.first)->Channel();
 	        if(longlink_channel)
 		        fun_notify_network_err_(item.first, __LINE__, kEctNetMsgXP, item.second.first, longlink_channel->Profile().ip,  longlink_channel->Profile().port);
@@ -350,7 +350,7 @@ void LongLinkTaskManager::__RunOnTimeout() {
 }
 
 void LongLinkTaskManager::__RunOnStartTask() {
-    xdebug_function();
+    qm_xdebug_function();
     std::list<TaskProfile>::iterator first = lst_cmd_.begin();
     std::list<TaskProfile>::iterator last = lst_cmd_.end();
 
@@ -372,7 +372,7 @@ void LongLinkTaskManager::__RunOnStartTask() {
 
         //重试间隔, 不影响第一次发送的任务
         if (first->task.retry_count > first->remain_retry_count && !canretry) {
-            xdebug2_if(canprint, TSF"retry interval:%0, curtime:%1, lastbatcherrortime_:%2, curtime-m_lastbatcherrortime:%3",
+            qm_xdebug2_if(canprint, TSF"retry interval:%0, curtime:%1, lastbatcherrortime_:%2, curtime-m_lastbatcherrortime:%3",
                        retry_interval_, curtime, lastbatcherrortime_, curtime - lastbatcherrortime_);
             
             canprint = false;
@@ -388,14 +388,14 @@ void LongLinkTaskManager::__RunOnStartTask() {
         if (!task.longlink_host_list.empty()) {
             host = task.longlink_host_list.front();
         }
-        xinfo2(TSF"host ip to callback is %_, task's channel name:%_", host, first->channel_name);
+        qm_xinfo2(TSF"host ip to callback is %_, task's channel name:%_", host, first->channel_name);
 
         // make sure login
         if (first->task.need_authed) {
             bool ismakesureauthsuccess = MakesureAuthed(host, first->task.user_id);
-            xinfo2(TSF"makesureauth host:%_, auth result:%_, cgi:%_, channal name:%_", host, ismakesureauthsuccess,first->task.cgi, first->channel_name);
+            qm_xinfo2(TSF"makesureauth host:%_, auth result:%_, cgi:%_, channal name:%_", host, ismakesureauthsuccess,first->task.cgi, first->channel_name);
             if (!ismakesureauthsuccess) {
-                xinfo2_if(curtime % 3 == 0, TSF"makeSureAuth retsult=%0", ismakesureauthsuccess);
+                qm_xinfo2_if(curtime % 3 == 0, TSF"makeSureAuth retsult=%0", ismakesureauthsuccess);
                 first = next;
                 continue;
             }
@@ -407,7 +407,7 @@ void LongLinkTaskManager::__RunOnStartTask() {
 
         auto longlink = GetLongLink(first->channel_name);
 	    if(longlink == nullptr) {
-		    xerror2(TSF"longlink nullptr:%_", first->channel_name);
+		    qm_xerror2(TSF"longlink nullptr:%_", first->channel_name);
 		    first = next;
 		    continue;
 	    }
@@ -421,7 +421,7 @@ void LongLinkTaskManager::__RunOnStartTask() {
 				continue;
 			}
 			// 雪崩检测
-			xassert2(fun_anti_avalanche_check_);
+			qm_xassert2(fun_anti_avalanche_check_);
 			if (!fun_anti_avalanche_check_(first->task, bufreq.Ptr(), (int)bufreq.Length())) {
 				__SingleRespHandle(first, kEctLocal, kEctLocalAntiAvalanche, kTaskFailHandleTaskEnd, longlink_channel->Profile());
 				first = next;
@@ -430,7 +430,7 @@ void LongLinkTaskManager::__RunOnStartTask() {
            first->antiavalanche_checked = true;
         }
 
-        xassert2(first->antiavalanche_checked);
+        qm_xassert2(first->antiavalanche_checked);
         longlink->Channel()->SvrTrigOff();
 		if (!longlink->Monitor()->MakeSureConnected()) {
             if (0 != first->task.channel_id) {
@@ -455,7 +455,7 @@ void LongLinkTaskManager::__RunOnStartTask() {
 				continue;
 			}
 			// 雪崩检测
-			xassert2(fun_anti_avalanche_check_);
+			qm_xassert2(fun_anti_avalanche_check_);
 			if (!fun_anti_avalanche_check_(first->task, bufreq.Ptr(), (int)bufreq.Length())) {
 				__SingleRespHandle(first, kEctLocal, kEctLocalAntiAvalanche, kTaskFailHandleTaskEnd, longlink_channel->Profile());
 				first = next;
@@ -465,7 +465,7 @@ void LongLinkTaskManager::__RunOnStartTask() {
 
         std::string intercept_data;
         if (task_intercept_.GetInterceptTaskInfo(first->task.cgi, intercept_data)) {
-            xwarn2(TSF"task has been intercepted");
+            qm_xwarn2(TSF"task has been intercepted");
             AutoBuffer body;
             AutoBuffer extension;
             int err_code = 0;
@@ -488,12 +488,12 @@ void LongLinkTaskManager::__RunOnStartTask() {
         first->running_id = longlink_channel->Send(bufreq, buffer_extension, first->task);
 
         if (!first->running_id) {
-            xwarn2(TSF"task add into longlink readwrite fail cgi:%_, cmdid:%_, taskid:%_", first->task.cgi, first->task.cmdid, first->task.taskid);
+            qm_xwarn2(TSF"task add into longlink readwrite fail cgi:%_, cmdid:%_, taskid:%_", first->task.cgi, first->task.cmdid, first->task.taskid);
             first = next;
             continue;
         }
 
-        xinfo2(TSF"task add into longlink readwrite suc cgi:%_, cmdid:%_, taskid:%_, size:%_, channel name:%_, timeout(firstpkg:%_, rw:%_, task:%_), retry:%_, curtime:%_, start_send_time:%_, sendonly:%_", first->task.cgi, first->task.cmdid, first->task.taskid, first->transfer_profile.send_data_size, first->channel_name,  first->transfer_profile.first_pkg_timeout / 1000,
+        qm_xinfo2(TSF"task add into longlink readwrite suc cgi:%_, cmdid:%_, taskid:%_, size:%_, channel name:%_, timeout(firstpkg:%_, rw:%_, task:%_), retry:%_, curtime:%_, start_send_time:%_, sendonly:%_", first->task.cgi, first->task.cmdid, first->task.taskid, first->transfer_profile.send_data_size, first->channel_name,  first->transfer_profile.first_pkg_timeout / 1000,
                first->transfer_profile.read_write_timeout / 1000, first->task_timeout / 1000, first->remain_retry_count, curtime, first->start_task_time, first->task.send_only);
 
         if (first->task.send_only) {
@@ -506,12 +506,12 @@ void LongLinkTaskManager::__RunOnStartTask() {
 }
 
 bool LongLinkTaskManager::__SingleRespHandle(std::list<TaskProfile>::iterator _it, ErrCmdType _err_type, int _err_code, int _fail_handle, const ConnectProfile& _connect_profile) {
-    xinfo_function();
-    xassert2(kEctServer != _err_type);
-    xassert2(_it != lst_cmd_.end());
+    qm_xinfo_function();
+    qm_xassert2(kEctServer != _err_type);
+    qm_xassert2(_it != lst_cmd_.end());
 
     if(_it == lst_cmd_.end()) {
-        xerror2(TSF"TaskProfile is in the end");
+        qm_xerror2(TSF"TaskProfile is in the end");
         return false;
     }
     
@@ -529,17 +529,17 @@ bool LongLinkTaskManager::__SingleRespHandle(std::list<TaskProfile>::iterator _i
     size_t receive_data_size = _it->transfer_profile.receive_data_size;
     size_t received_size = _it->transfer_profile.received_size;
     
-    xassert2((kEctOK == _err_type) == (kTaskFailHandleNoError == _fail_handle), TSF"type:%_, handle:%_", _err_type, _fail_handle);
+    qm_xassert2((kEctOK == _err_type) == (kTaskFailHandleNoError == _fail_handle), TSF"type:%_, handle:%_", _err_type, _fail_handle);
 
     if (0 >= _it->remain_retry_count || kEctOK == _err_type || kTaskFailHandleTaskEnd == _fail_handle || kTaskFailHandleTaskTimeout == _fail_handle) {
-        xlog2(kEctOK == _err_type ? kLevelInfo : kLevelWarn, TSF"task end callback  long cmdid:%_, err(%_, %_, %_), ", _it->task.cmdid, _err_type, _err_code, _fail_handle)
+        qm_xlog2(kEctOK == _err_type ? kLevelInfo : kLevelWarn, TSF"task end callback  long cmdid:%_, err(%_, %_, %_), ", _it->task.cmdid, _err_type, _err_code, _fail_handle)
         (TSF"svr(%_:%_, %_, %_), ", _connect_profile.ip, _connect_profile.port, IPSourceTypeString[_connect_profile.ip_type], _connect_profile.host)
         (TSF"cli(%_, %_, n:%_, sig:%_, link:%_), ", _it->transfer_profile.external_ip, _connect_profile.local_ip, _connect_profile.net_type,  _connect_profile.disconn_signal, ChannelTypeString[_connect_profile.link_type])
         (TSF"cost(s:%_, r:%_%_%_, c:%_, rw:%_), all:%_, retry:%_, ", _it->transfer_profile.send_data_size, receive_data_size-received_size? string_cast(received_size).str():"", receive_data_size-received_size? "/":"", receive_data_size, _connect_profile.conn_rtt, (_it->transfer_profile.start_send_time == 0 ? 0 : curtime - _it->transfer_profile.start_send_time), (curtime - _it->start_task_time), _it->remain_retry_count)
         (TSF"cgi:%_, taskid:%_, tid:%_, context id:%_", _it->task.cgi, _it->task.taskid, _connect_profile.tid, _it->task.user_id);
 
         if(_err_type != kEctOK && _err_type != kEctServer) {
-            xinfo_trace(TSF"cgi trace error: (%_, %_), cost:%_, rtt:%_, svr:(%_, %_, %_)", _err_type, _err_code, (curtime - _it->start_task_time), _connect_profile.conn_rtt,
+            qm_xinfo_trace(TSF"cgi trace error: (%_, %_), cost:%_, rtt:%_, svr:(%_, %_, %_)", _err_type, _err_code, (curtime - _it->start_task_time), _connect_profile.conn_rtt,
                     _connect_profile.ip, _connect_profile.port, IPSourceTypeString[_connect_profile.ip_type]);
         }
 
@@ -565,7 +565,7 @@ bool LongLinkTaskManager::__SingleRespHandle(std::list<TaskProfile>::iterator _i
         return true;
     }
 
-    xlog2(kEctOK == _err_type ? kLevelInfo : kLevelWarn, TSF"task end retry  long cmdid:%_, err(%_, %_, %_), ", _it->task.cmdid, _err_type, _err_code, _fail_handle)
+    qm_xlog2(kEctOK == _err_type ? kLevelInfo : kLevelWarn, TSF"task end retry  long cmdid:%_, err(%_, %_, %_), ", _it->task.cmdid, _err_type, _err_code, _fail_handle)
     (TSF"svr(%_:%_, %_, %_), ", _connect_profile.ip, _connect_profile.port, IPSourceTypeString[_connect_profile.ip_type], _connect_profile.host)
     (TSF"cli(%_, %_, n:%_, sig:%_, link:%_), ", _it->transfer_profile.external_ip, _connect_profile.local_ip, _connect_profile.net_type, _connect_profile.disconn_signal, ChannelTypeString[_connect_profile.link_type])
     (TSF"cost(s:%_, r:%_%_%_, c:%_, rw:%_), all:%_, retry:%_, ", _it->transfer_profile.send_data_size, receive_data_size-received_size? string_cast(received_size).str():"", receive_data_size-received_size? "/":"", receive_data_size, _connect_profile.conn_rtt, (_it->transfer_profile.start_send_time == 0 ? 0 : curtime - _it->transfer_profile.start_send_time), (curtime - _it->start_task_time), _it->remain_retry_count)
@@ -595,15 +595,15 @@ void LongLinkTaskManager::__BatchErrorRespHandleByUserId(const std::string& _use
 }
 
 void LongLinkTaskManager::__BatchErrorRespHandle(const std::string _name, ErrCmdType _err_type, int _err_code, int _fail_handle, uint32_t _src_taskid, bool _callback_runing_task_only) {
-    xinfo2(TSF"batch error, channel name:%_, src id:%_ callback:%_, errcode:%_, errtype:%_, fail handle:%_", _name, _src_taskid, _callback_runing_task_only, _err_code, _err_type, _fail_handle);
-    xassert2(kEctOK != _err_type);
-    xassert2(kTaskFailHandleTaskTimeout != _fail_handle);
+    qm_xinfo2(TSF"batch error, channel name:%_, src id:%_ callback:%_, errcode:%_, errtype:%_, fail handle:%_", _name, _src_taskid, _callback_runing_task_only, _err_code, _err_type, _fail_handle);
+    qm_xassert2(kEctOK != _err_type);
+    qm_xassert2(kTaskFailHandleTaskTimeout != _fail_handle);
 
     std::list<TaskProfile>::iterator first = lst_cmd_.begin();
     std::list<TaskProfile>::iterator last = lst_cmd_.end();
 
     if (lst_cmd_.empty()) {
-        xerror2(TSF"task list is empty!");
+        qm_xerror2(TSF"task list is empty!");
     }
 
     while (first != last) {
@@ -611,13 +611,13 @@ void LongLinkTaskManager::__BatchErrorRespHandle(const std::string _name, ErrCmd
         ++next;
 
         if (_callback_runing_task_only && !first->running_id) {
-            xwarn2(TSF"runnng id %_", first->running_id);
+            qm_xwarn2(TSF"runnng id %_", first->running_id);
             first = next;
             continue;
         }
 
         if(!_name.empty() && first->channel_name != _name) {
-            xwarn2(TSF"task channel name:%_", first->channel_name);
+            qm_xwarn2(TSF"task channel name:%_", first->channel_name);
             first = next;
             continue;
         }
@@ -630,7 +630,7 @@ void LongLinkTaskManager::__BatchErrorRespHandle(const std::string _name, ErrCmd
 	        else
 		        __SingleRespHandle(first, _err_type, 0, _fail_handle, profile);
         } else {
-            xerror2(TSF"didn't find longlink, task channel name:%_", first->channel_name);
+            qm_xerror2(TSF"didn't find longlink, task channel name:%_", first->channel_name);
             __DumpLongLinkChannelInfo();
         }
 
@@ -695,25 +695,25 @@ void LongLinkTaskManager::__OnResponse(const std::string& _name, ErrCmdType _err
     
     auto longlink_meta = GetLongLink(_name);
     if(longlink_meta == nullptr) {
-        xwarn2(TSF"longlink response but longlink destroyed name:%_", _name);
+        qm_xwarn2(TSF"longlink response but longlink destroyed name:%_", _name);
         return;
     }
     
     auto longlink = longlink_meta->Channel();
     if (kEctOK == _error_type && longlink->Encoder().longlink_ispush(_cmdid, _taskid, body, extension))  {
-        xinfo2(TSF"task push seq:%_, cmdid:%_, len:(%_, %_)", _taskid, _cmdid, body->Length(), extension->Length());
+        qm_xinfo2(TSF"task push seq:%_, cmdid:%_, len:(%_, %_)", _taskid, _cmdid, body->Length(), extension->Length());
         
         if (fun_on_push_)
             fun_on_push_(_name, _cmdid, _taskid, body, extension);
         else
-            xassert2(false);
+            qm_xassert2(false);
         return;
     }
     
     std::list<TaskProfile>::iterator it = __Locate(_taskid);
 
     if (kEctOK != _error_type) {
-        xwarn2(TSF"task error, taskid:%_, cmdid:%_, error_type:%_, error_code:%_", _taskid, _cmdid, _error_type, _error_code);
+        qm_xwarn2(TSF"task error, taskid:%_, cmdid:%_, error_type:%_, error_code:%_", _taskid, _cmdid, _error_type, _error_code);
         if (_error_code == kEctHandshakeMisunderstand && it != lst_cmd_.end()) {
             it->remain_retry_count ++;
         }
@@ -723,7 +723,7 @@ void LongLinkTaskManager::__OnResponse(const std::string& _name, ErrCmdType _err
 
     
     if (lst_cmd_.end() == it) {
-        xwarn2_if(Task::kInvalidTaskID != _taskid, TSF"task no found task:%0, cmdid:%1, ect:%2, errcode:%3",
+        qm_xwarn2_if(Task::kInvalidTaskID != _taskid, TSF"task no found task:%0, cmdid:%1, ect:%2, errcode:%3",
                   _taskid, _cmdid, _error_type, _error_code);
         return;
     }
@@ -743,41 +743,41 @@ void LongLinkTaskManager::__OnResponse(const std::string& _name, ErrCmdType _err
         {
             dynamic_timeout_.CgiTaskStatistic(it->task.cgi, (unsigned int)it->transfer_profile.send_data_size + (unsigned int)body->Length(), ::gettickcount() - it->transfer_profile.start_send_time);
             __SingleRespHandle(it, kEctOK, err_code, handle_type, _connect_profile);
-            xassert2(fun_notify_network_err_);
+            qm_xassert2(fun_notify_network_err_);
             fun_notify_network_err_(_name, __LINE__, kEctOK, err_code, _connect_profile.ip, _connect_profile.port);
         }
             break;
         case kTaskFailHandleSessionTimeout:
         {
-            xassert2(fun_notify_retry_all_tasks);
-            xwarn2(TSF"task decode error session timeout taskid:%_, cmdid:%_, cgi:%_", it->task.taskid, it->task.cmdid, it->task.cgi);
+            qm_xassert2(fun_notify_retry_all_tasks);
+            qm_xwarn2(TSF"task decode error session timeout taskid:%_, cmdid:%_, cgi:%_", it->task.taskid, it->task.cmdid, it->task.cgi);
             fun_notify_retry_all_tasks(kEctEnDecode, err_code, handle_type, it->task.taskid, it->task.user_id);
         }
             break;
         case kTaskFailHandleRetryAllTasks:
         {
-            xassert2(fun_notify_retry_all_tasks);
-            xwarn2(TSF"task decode error retry all task taskid:%_, cmdid:%_, cgi:%_", it->task.taskid, it->task.cmdid, it->task.cgi);
+            qm_xassert2(fun_notify_retry_all_tasks);
+            qm_xwarn2(TSF"task decode error retry all task taskid:%_, cmdid:%_, cgi:%_", it->task.taskid, it->task.cmdid, it->task.cgi);
             fun_notify_retry_all_tasks(kEctEnDecode, err_code, handle_type, it->task.taskid, it->task.user_id);
         }
             break;
         case kTaskFailHandleTaskEnd:
         {
-            xwarn2(TSF"task decode error taskid:%_, cmdid:%_, handle_type:%_", it->task.taskid, it->task.cmdid, handle_type);
+            qm_xwarn2(TSF"task decode error taskid:%_, cmdid:%_, handle_type:%_", it->task.taskid, it->task.cmdid, handle_type);
             __SingleRespHandle(it, kEctEnDecode, err_code, handle_type, _connect_profile);
         }
             break;
         case kTaskFailHandleDefault:
         {
-            xerror2(TSF"task decode error taskid:%_, handle_type:%_, err_code:%_, body dump:%_", it->task.taskid, handle_type, err_code, xdump(body->Ptr(), body->Length()));
+            qm_xerror2(TSF"task decode error taskid:%_, handle_type:%_, err_code:%_, body dump:%_", it->task.taskid, handle_type, err_code, xdump(body->Ptr(), body->Length()));
             __BatchErrorRespHandle(it->channel_name, kEctEnDecode, err_code, handle_type, it->task.taskid);
-            xassert2(fun_notify_network_err_);
+            qm_xassert2(fun_notify_network_err_);
             fun_notify_network_err_(_name, __LINE__, kEctEnDecode, err_code, _connect_profile.ip, _connect_profile.port);
         }
             break;
         case kTaskSlientHandleTaskEnd:
         {
-            xinfo2(TSF"task slient error taskid:%_, svr(%_:%_, %_, %_), handle_type:%_, err_code:%_, body dump:%_", it->task.taskid, _connect_profile.ip,
+            qm_xinfo2(TSF"task slient error taskid:%_, svr(%_:%_, %_, %_), handle_type:%_, err_code:%_, body dump:%_", it->task.taskid, _connect_profile.ip,
                     _connect_profile.port, IPSourceTypeString[_connect_profile.ip_type], _connect_profile.host, handle_type, err_code,
                     xlogger_memory_dump(body->Ptr(), std::min<size_t>(body->Length(), 1024)));
 
@@ -786,9 +786,9 @@ void LongLinkTaskManager::__OnResponse(const std::string& _name, ErrCmdType _err
             break;
         default:
         {
-			xassert2(false, TSF"task decode error fail_handle:%_, taskid:%_, context id:%_", handle_type, it->task.taskid, it->task.user_id);
+			qm_xassert2(false, TSF"task decode error fail_handle:%_, taskid:%_, context id:%_", handle_type, it->task.taskid, it->task.user_id);
 			__BatchErrorRespHandle(it->channel_name, kEctEnDecode, err_code, handle_type, it->task.taskid);
-			xassert2(fun_notify_network_err_);
+			qm_xassert2(fun_notify_network_err_);
 			fun_notify_network_err_(_name, __LINE__, kEctEnDecode, handle_type, _connect_profile.ip, _connect_profile.port);
 			break;
 		}
@@ -798,7 +798,7 @@ void LongLinkTaskManager::__OnResponse(const std::string& _name, ErrCmdType _err
 
 void LongLinkTaskManager::__OnSend(uint32_t _taskid) {
     RETURN_LONKLINK_SYNC2ASYNC_FUNC(boost::bind(&LongLinkTaskManager::__OnSend, this, _taskid));
-    xverbose_function();
+    qm_xverbose_function();
 
     std::list<TaskProfile>::iterator it = __Locate(_taskid);
 
@@ -806,13 +806,13 @@ void LongLinkTaskManager::__OnSend(uint32_t _taskid) {
     	if (it->transfer_profile.first_start_send_time == 0)
     		it->transfer_profile.first_start_send_time = ::gettickcount();
         it->transfer_profile.start_send_time = ::gettickcount();
-        xdebug2(TSF"taskid:%_, starttime:%_", it->task.taskid, it->transfer_profile.start_send_time / 1000);
+        qm_xdebug2(TSF"taskid:%_, starttime:%_", it->task.taskid, it->transfer_profile.start_send_time / 1000);
     }
 }
 
 void LongLinkTaskManager::__OnRecv(uint32_t _taskid, size_t _cachedsize, size_t _totalsize) {
     RETURN_LONKLINK_SYNC2ASYNC_FUNC(boost::bind(&LongLinkTaskManager::__OnRecv, this, _taskid, _cachedsize, _totalsize));
-    xverbose_function();
+    qm_xverbose_function();
     std::list<TaskProfile>::iterator it = __Locate(_taskid);
 
     if (lst_cmd_.end() != it) {
@@ -823,9 +823,9 @@ void LongLinkTaskManager::__OnRecv(uint32_t _taskid, size_t _cachedsize, size_t 
         it->transfer_profile.received_size = _cachedsize;
         it->transfer_profile.receive_data_size = _totalsize;
         it->transfer_profile.last_receive_pkg_time = ::gettickcount();
-        xdebug2(TSF"taskid:%_, cachedsize:%_, _totalsize:%_", it->task.taskid, _cachedsize, _totalsize);
+        qm_xdebug2(TSF"taskid:%_, cachedsize:%_, _totalsize:%_", it->task.taskid, _cachedsize, _totalsize);
     } else {
-        xwarn2(TSF"not found taskid:%_ cachedsize:%_, _totalsize:%_", _taskid, _cachedsize, _totalsize);
+        qm_xwarn2(TSF"not found taskid:%_ cachedsize:%_, _totalsize:%_", _taskid, _cachedsize, _totalsize);
     }
 }
 
@@ -938,7 +938,7 @@ ConnectProfile LongLinkTaskManager::GetConnectProfile(uint32_t _taskid) {
 bool LongLinkTaskManager::AddLongLink(LonglinkConfig& _config) {
     auto longlink = GetLongLink(_config.name);
     if(longlink != nullptr) {
-        xwarn2(TSF"already have longlink name:%_", _config.name);
+        qm_xwarn2(TSF"already have longlink name:%_", _config.name);
         return false;
     }
     
@@ -948,7 +948,7 @@ bool LongLinkTaskManager::AddLongLink(LonglinkConfig& _config) {
         longlink_id = 1;
     }
     longlink_id_[_config.name] = longlink_id;
-    xinfo2(TSF"new longlink name:%_, id:%_", _config.name, longlink_id);
+    qm_xinfo2(TSF"new longlink name:%_, id:%_", _config.name, longlink_id);
     _config.need_tls = !__ForbidUseTls(_config.host_list);
     longlink_metas_[_config.name] = std::make_shared<LongLinkMetaData>(_config, netsource_, active_logic_, asyncreg_.Get().queue);
     longlink = GetLongLinkNoLock(_config.name);
@@ -969,7 +969,7 @@ bool LongLinkTaskManager::AddLongLink(LonglinkConfig& _config) {
 }
 
 void LongLinkTaskManager::ReleaseLongLink(const std::string _name) {
-    xinfo_function(TSF"release longlink:%_", _name);
+    qm_xinfo_function(TSF"release longlink:%_", _name);
     MetaScopedLock lock(meta_mutex_);
     auto longlink = GetLongLinkNoLock(_name);
     if(longlink == nullptr)
@@ -1001,14 +1001,14 @@ void LongLinkTaskManager::ReleaseLongLink(const std::string _name) {
 //#ifdef __APPLE__
 //        longlink->Monitor()->fun_longlink_reset_ = NULL;
 //#endif
-        xinfo2(TSF"destroy long link %_ ", _name);
+        qm_xinfo2(TSF"destroy long link %_ ", _name);
     // }, AYNC_HANDLER);
     }
 }
 
 void LongLinkTaskManager::ReleaseLongLink(std::shared_ptr<LongLinkMetaData> _linkmeta){
     std::string name = _linkmeta->Config().name;
-    xinfo_function(TSF"release longlink:%_", name);
+    qm_xinfo_function(TSF"release longlink:%_", name);
 
     auto task = lst_cmd_.begin();
     while(task != lst_cmd_.end()) {
@@ -1055,17 +1055,17 @@ void LongLinkTaskManager::AddForbidTlsHost(const std::vector<std::string>& _host
         host_str += "," ;
         forbid_tls_host_.insert(h);
     }
-    xinfo2(TSF"forbid tls hosts: %_", host_str);
+    qm_xinfo2(TSF"forbid tls hosts: %_", host_str);
 }
 
 bool LongLinkTaskManager::__ForbidUseTls(const std::vector<std::string>& _host_list) {
 	ScopedLock lock(mutex_);
-    xinfo2(TSF"host size: %_, %_", _host_list.size(), forbid_tls_host_.size());
+    qm_xinfo2(TSF"host size: %_, %_", _host_list.size(), forbid_tls_host_.size());
     if (_host_list.empty() || forbid_tls_host_.empty()) {
         return false;
     }
     for (size_t i=0; i<_host_list.size(); i++) {
-        xinfo2(TSF"host: %_", _host_list[i]);
+        qm_xinfo2(TSF"host: %_", _host_list[i]);
         if (forbid_tls_host_.find(_host_list[i]) != forbid_tls_host_.end()) {
             return true;
         }
@@ -1076,7 +1076,7 @@ bool LongLinkTaskManager::__ForbidUseTls(const std::vector<std::string>& _host_l
 void LongLinkTaskManager::__DumpLongLinkChannelInfo() {
     MetaScopedLock lock(meta_mutex_);
     for(auto& item : longlink_metas_) {
-        xinfo2(TSF"longlink channel name:%_, null:%_", item.first, item.second == nullptr);
+        qm_xinfo2(TSF"longlink channel name:%_, null:%_", item.first, item.second == nullptr);
     }
 }
 
@@ -1084,5 +1084,5 @@ void LongLinkTaskManager::__OnHandshakeCompleted(uint32_t _version, marsMulti::s
     if (on_handshake_ready_) {
         on_handshake_ready_(_version, _from);
     }
-    xinfo2(TSF"receive tls version: %_", _version);
+    qm_xinfo2(TSF"receive tls version: %_", _version);
 }

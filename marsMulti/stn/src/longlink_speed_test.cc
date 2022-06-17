@@ -20,7 +20,7 @@
 
 #include "longlink_speed_test.h"
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/socket/unix_socket.h"
 #include "marsMulti/comm/socket/socket_address.h"
 #include "marsMulti/comm/qm_autobuffer.h"
@@ -53,19 +53,19 @@ LongLinkSpeedTestItem::LongLinkSpeedTestItem(const std::string& _ip, uint16_t _p
     socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (socket_ == INVALID_SOCKET) {
-        xerror2(TSF"socket create error, errno:%0", strerror(errno));
+        qm_xerror2(TSF"socket create error, errno:%0", strerror(errno));
         return;
     }
 
     // set the socket to unblocked model
 #ifdef _WIN32 
-    if (0 != socket_ipv6only(socket_, 0)){ xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
+    if (0 != socket_ipv6only(socket_, 0)){ qm_xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
 #endif
         
     int ret = socket_set_nobio(socket_);
 
     if (ret != 0) {
-        xerror2(TSF"nobio error");
+        qm_xerror2(TSF"nobio error");
         ::socket_close(socket_);
         socket_ = -1;
         socket_ = -1;
@@ -74,7 +74,7 @@ LongLinkSpeedTestItem::LongLinkSpeedTestItem(const std::string& _ip, uint16_t _p
 
     if (::getNetInfo() == kWifi && socket_fix_tcp_mss(socket_) < 0) {
 #ifdef ANDROID
-        xinfo2(TSF"wifi set tcp mss error:%0", strerror(socket_errno));
+        qm_xinfo2(TSF"wifi set tcp mss error:%0", strerror(socket_errno));
 #endif
     }
 
@@ -86,7 +86,7 @@ LongLinkSpeedTestItem::LongLinkSpeedTestItem(const std::string& _ip, uint16_t _p
     before_connect_time_ = gettickcount();
 
     if (0 !=::connect(socket_, (sockaddr*)&_addr, sizeof(_addr))) {
-        xerror2(TSF "connect fail");
+        qm_xerror2(TSF "connect fail");
     }
 }
 
@@ -95,14 +95,14 @@ LongLinkSpeedTestItem::~LongLinkSpeedTestItem() {
 }
 
 void LongLinkSpeedTestItem::HandleFDISSet(SocketSelect& _sel) {
-    xverbose_function();
+    qm_xverbose_function();
 
     if (kLongLinkSpeedTestFail == state_ || kLongLinkSpeedTestSuc == state_) {
         return;
     }
 
     if (_sel.Exception_FD_ISSET(socket_)) {
-        xerror2(TSF"the socket is error, error:%0", strerror(errno));
+        qm_xerror2(TSF"the socket is error, error:%0", strerror(errno));
         state_ = kLongLinkSpeedTestFail;
     } else if (_sel.Write_FD_ISSET(socket_)) {
         if (kLongLinkSpeedTestConnecting == state_) {
@@ -133,7 +133,7 @@ void LongLinkSpeedTestItem::HandleSetFD(SocketSelect& _sel) {
         break;
 
     default:
-        xassert2(false);
+        qm_xassert2(false);
         break;
     }
 }
@@ -170,10 +170,10 @@ int LongLinkSpeedTestItem::__HandleSpeedTestReq() {
     ssize_t nwrite =::send(socket_, req_ab_.PosPtr(), req_ab_.Length() - req_ab_.Pos(), 0);
 
     if (nwrite <= 0) {
-        xerror2(TSF"writen send <= 0, errno:%0, nwrite:%1", strerror(errno), nwrite);
+        qm_xerror2(TSF"writen send <= 0, errno:%0, nwrite:%1", strerror(errno), nwrite);
         return kLongLinkSpeedTestFail;
     } else {
-        xdebug2(TSF"send length:%0", nwrite);
+        qm_xdebug2(TSF"send length:%0", nwrite);
         req_ab_.Seek(nwrite, AutoBuffer::ESeekCur);
 
         if (req_ab_.Length() - req_ab_.Pos() <= 0) {
@@ -192,10 +192,10 @@ int LongLinkSpeedTestItem::__HandleSpeedTestResp() {
     ssize_t nrecv = recv(socket_, resp_ab_.PosPtr(), resp_ab_.Capacity() - resp_ab_.Pos(), 0);
 
     if (nrecv <= 0) {
-        xerror2(TSF"recv nrecv <= 0, errno:%0, resp_ab_.Capacity():%1,resp_ab_.Pos():%2", strerror(errno), resp_ab_.Capacity(), resp_ab_.Pos());
+        qm_xerror2(TSF"recv nrecv <= 0, errno:%0, resp_ab_.Capacity():%1,resp_ab_.Pos():%2", strerror(errno), resp_ab_.Capacity(), resp_ab_.Pos());
         return kLongLinkSpeedTestFail;
     } else {
-        xdebug2(TSF"recv length:%0", nrecv);
+        qm_xdebug2(TSF"recv length:%0", nrecv);
         resp_ab_.Length(nrecv + resp_ab_.Pos(), resp_ab_.Length() + nrecv);
 
         size_t pacLength = 0;
@@ -207,24 +207,24 @@ int LongLinkSpeedTestItem::__HandleSpeedTestResp() {
         int nRet  = gDefaultLongLinkEncoder.longlink_unpack(resp_ab_, anCmdID, anSeq, pacLength, body, extension, NULL);
 
         if (LONGLINK_UNPACK_FALSE == nRet) {
-            xerror2(TSF"longlink_unpack false");
+            qm_xerror2(TSF"longlink_unpack false");
             return kLongLinkSpeedTestFail;
         } else if (LONGLINK_UNPACK_CONTINUE == nRet) {
-            xdebug2(TSF"not recv an package,continue recv, resp_ab_.Lenght():%0", resp_ab_.Length());
+            qm_xdebug2(TSF"not recv an package,continue recv, resp_ab_.Lenght():%0", resp_ab_.Length());
             return kLongLinkSpeedTestResp;
         } else if (kCmdIdOutOfBand == anCmdID) {
             uint32_t nType = ((uint32_t*)body.Ptr(16))[0];
             uint32_t nTime = ((uint32_t*)body.Ptr(16))[1];
             nType = ntohl(nType);
             nTime = ntohl(nTime);
-            xwarn2(TSF"out of band,nType:%0, nTime:%1", nType, nTime);
+            qm_xwarn2(TSF"out of band,nType:%0, nTime:%1", nType, nTime);
 
             resp_ab_.Reset();
             return kLongLinkSpeedTestOOB;
         } else if (gDefaultLongLinkEncoder.longlink_noop_isresp(Task::kNoopTaskID, anCmdID, anSeq, body, extension)) {
             return kLongLinkSpeedTestSuc;
         } else {
-            xassert2(false);
+            qm_xassert2(false);
             return kLongLinkSpeedTestFail;
         }
     }
@@ -235,7 +235,7 @@ int LongLinkSpeedTestItem::__HandleSpeedTestResp() {
 LongLinkSpeedTest::LongLinkSpeedTest(const boost::shared_ptr<NetSource>& _netsource): netsource_(_netsource)
     , selector_(breaker_) {
     if (!breaker_.IsCreateSuc()) {
-        xassert2(false, "pipe error");
+        qm_xassert2(false, "pipe error");
         return;
     }
 }
@@ -244,12 +244,12 @@ LongLinkSpeedTest::~LongLinkSpeedTest() {
 }
 
 bool LongLinkSpeedTest::GetFastestSocket(int& _fdSocket, std::string& _strIp, unsigned int& _port, IPSourceType& _type, unsigned long& _connectMillSec) {
-    xdebug_function();
+    qm_xdebug_function();
 
     std::vector<IPPortItem> ipItemVec;
 
     if (!netsource_->GetLongLinkSpeedTestIPs(ipItemVec)) {
-        xerror2(TSF"ipItemVec is empty");
+        qm_xerror2(TSF"ipItemVec is empty");
         return false;
     }
 
@@ -273,12 +273,12 @@ bool LongLinkSpeedTest::GetFastestSocket(int& _fdSocket, std::string& _strIp, un
         int selectRet = selector_.Select(kTimeout);
 
         if (selectRet == 0) {
-            xerror2(TSF"time out");
+            qm_xerror2(TSF"time out");
             break;
         }
 
         if (selectRet < 0) {
-            xerror2(TSF"select errror, ret:%0, strerror(errno):%1", selectRet, strerror(errno));
+            qm_xerror2(TSF"select errror, ret:%0, strerror(errno):%1", selectRet, strerror(errno));
 
             if (EINTR == errno && tryCount < 3) {
                 ++  tryCount;
@@ -289,12 +289,12 @@ bool LongLinkSpeedTest::GetFastestSocket(int& _fdSocket, std::string& _strIp, un
         }
 
         if (selector_.IsException()) {
-            xerror2(TSF"pipe exception");
+            qm_xerror2(TSF"pipe exception");
             break;
         }
 
         if (selector_.IsBreak()) {
-            xwarn2(TSF"FD_ISSET(pipe_[0], &readfd)");
+            qm_xwarn2(TSF"FD_ISSET(pipe_[0], &readfd)");
             break;
         }
 
@@ -314,7 +314,7 @@ bool LongLinkSpeedTest::GetFastestSocket(int& _fdSocket, std::string& _strIp, un
         }
 
         if (count == speedTestItemVec.size()) {
-            xwarn2(TSF"all speed tese fail");
+            qm_xwarn2(TSF"all speed tese fail");
             loopShouldBeStop = true;
         }
     }
@@ -353,7 +353,7 @@ bool LongLinkSpeedTest::GetFastestSocket(int& _fdSocket, std::string& _strIp, un
             bRet = true;
             _fdSocket = (*iter)->GetSocket();
             _connectMillSec = (*iter)->GetConnectTime();
-            xdebug2(TSF"speed test success, socket:%0, use time:%1", _fdSocket, _connectMillSec);
+            qm_xdebug2(TSF"speed test success, socket:%0, use time:%1", _fdSocket, _connectMillSec);
         } else {
             (*iter)->CloseSocket();
         }

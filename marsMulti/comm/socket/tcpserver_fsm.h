@@ -23,11 +23,11 @@
 
 #include "comm/qm_autobuffer.h"
 #include "comm/socket/unix_socket.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/thread/mutex.h"
 #include "comm/thread/lock.h"
 
-class XLogger;
+class QM_XLogger;
 
 namespace marsMulti {
 namespace comm {
@@ -64,13 +64,13 @@ class TcpServerFSM {
     	return is_write_fd_set_;
     }
     void WriteFDSet(bool _is_set) {
-    	xverbose_function(TSF"_is_set:%_, is_write_fd_set_:%_", _is_set, is_write_fd_set_);
+    	qm_xverbose_function(TSF"_is_set:%_, is_write_fd_set_:%_", _is_set, is_write_fd_set_);
     	ScopedLock lock (write_fd_set_mutex_);
     	is_write_fd_set_  = _is_set;
     }
 
-    virtual TSocketStatus PreSelect(SocketSelect& _sel, XLogger& _log);
-    virtual TSocketStatus AfterSelect(SocketSelect& _sel, XLogger& _log);
+    virtual TSocketStatus PreSelect(SocketSelect& _sel, QM_XLogger& _log);
+    virtual TSocketStatus AfterSelect(SocketSelect& _sel, QM_XLogger& _log);
     virtual int Timeout() const;
 
   private:
@@ -78,8 +78,8 @@ class TcpServerFSM {
     TcpServerFSM& operator=(const TcpServerFSM&);
 
   protected:
-    virtual TSocketStatus PreReadWriteSelect(SocketSelect& _sel, XLogger& _log);
-    virtual TSocketStatus AfterReadWriteSelect(const SocketSelect& _sel, XLogger& _log);
+    virtual TSocketStatus PreReadWriteSelect(SocketSelect& _sel, QM_XLogger& _log);
+    virtual TSocketStatus AfterReadWriteSelect(const SocketSelect& _sel, QM_XLogger& _log);
 
     virtual int ReadWriteTimeout() const;
     virtual int ReadWriteAbsTimeout() const;

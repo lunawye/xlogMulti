@@ -23,7 +23,7 @@
 
 #include "marsMulti/openssl/include/openssl/md5.h"
 #include "marsMulti/comm/ini.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_strutil.h"
 #include "marsMulti/openssl/include/openssl/md5.h"
 

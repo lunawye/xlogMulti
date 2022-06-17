@@ -17,7 +17,7 @@
 #include "marsMulti/comm/socket/socketbreaker.h"
 #include "marsMulti/boost/function.hpp"
 #include "marsMulti/comm/dns/dns.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 class HTTPDetectReq {
   public:
     //static const unsigned long long kDefaultHTTPDetectTimeout = 10*1000; //10s;

@@ -7,8 +7,8 @@
 
 #include "comm/thread/tss.h"
 
-#undef  XLOGGER_HOOK
-#define XLOGGER_HOOK SPY_DEF_XLOGGER_HOOK
+#undef  QM_XLOGGER_HOOK
+#define QM_XLOGGER_HOOK SPY_DEF_XLOGGER_HOOK
 
 #define SPY_ATTACH_CLASS(name, ...) SpyCore::Singleton::Instance()->AddSpy(reinterpret_cast<void*>(this), name, new SPY_DEF_CLASS_NAME(reinterpret_cast<void*>(this), ##__VA_ARGS__))
 #define SPY_DETACH_CLASS() SpyCore::Singleton::Instance()->RemoveSpy(reinterpret_cast<void*>(this))

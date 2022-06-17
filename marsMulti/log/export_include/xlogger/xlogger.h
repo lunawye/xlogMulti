@@ -110,9 +110,9 @@ private:
 	std::string m_message;
 };
 
-class XLogger {
+class QM_XLogger {
 public:
-	XLogger(TLogLevel _level, const char* _tag, const char* _file, const char* _func, int _line, bool (*_hook)(XLoggerInfo& _info, std::string& _log))
+	QM_XLogger(TLogLevel _level, const char* _tag, const char* _file, const char* _func, int _line, bool (*_hook)(XLoggerInfo& _info, std::string& _log))
 	:m_info(), m_message(), m_isassert(false), m_exp(NULL),m_hook(_hook), m_isinfonull(false) {
 		m_info.level = _level;
 		m_info.tag = _tag;
@@ -128,7 +128,7 @@ public:
 		m_message.reserve(512);
 	}
 	
-	~XLogger() {
+	~QM_XLogger() {
 		if (!m_isassert && m_message.empty()) return;
 
 		gettimeofday(&m_info.timeval, NULL);
@@ -141,7 +141,7 @@ public:
 	}
 
 public:
-	XLogger& Assert(const char* _exp) {
+	QM_XLogger& Assert(const char* _exp) {
 		m_isassert = true;
 		m_exp = _exp;
 		return *this;
@@ -153,16 +153,16 @@ public:
 #ifdef __GNUC__
 	__attribute__((__format__ (printf, 2, 0)))
 #endif
-	XLogger&  WriteNoFormat(const char* _log) { m_message+= _log; return *this;}
+	QM_XLogger&  WriteNoFormat(const char* _log) { m_message+= _log; return *this;}
 #ifdef __GNUC__
 	 __attribute__((__format__ (printf, 3, 0)))
 #endif
-	XLogger&  WriteNoFormat(const TypeSafeFormat&, const char* _log) { m_message+= _log; return *this;}
+	QM_XLogger&  WriteNoFormat(const TypeSafeFormat&, const char* _log) { m_message+= _log; return *this;}
 
-	XLogger& operator<<(const string_cast& _value);
-	XLogger& operator>>(const string_cast& _value);
+	QM_XLogger& operator<<(const string_cast& _value);
+	QM_XLogger& operator>>(const string_cast& _value);
 
-	void operator>> (XLogger& _xlogger) {
+	void operator>> (QM_XLogger& _xlogger) {
 		if (_xlogger.m_info.level < m_info.level)
 		{
 			_xlogger.m_info.level = m_info.level;
@@ -177,49 +177,49 @@ public:
 		m_message.clear();
 	}
 
-	void operator<< (XLogger& _xlogger) {
+	void operator<< (QM_XLogger& _xlogger) {
 		_xlogger.operator>>(*this);
 	}
 
-	XLogger& operator()() { return *this; }
-	XLogger& operator()(const XLoggerInfoNull&) { m_isinfonull = true; return *this;}
-	XLogger& operator()(const XLoggerTag&, const char* _tag) { m_info.tag = _tag; return *this;}
+	QM_XLogger& operator()() { return *this; }
+	QM_XLogger& operator()(const XLoggerInfoNull&) { m_isinfonull = true; return *this;}
+	QM_XLogger& operator()(const XLoggerTag&, const char* _tag) { m_info.tag = _tag; return *this;}
 #ifdef __GNUC__
 	__attribute__((__format__ (printf, 2, 3)))
 #endif
-	XLogger& operator()(const char* _format, ...);
+	QM_XLogger& operator()(const char* _format, ...);
 
 #ifdef __GNUC__
 	 __attribute__((__format__ (printf, 2, 0)))
 #endif
-	XLogger& VPrintf(const char* _format, va_list _list);
+	QM_XLogger& VPrintf(const char* _format, va_list _list);
 
 #define XLOGGER_FORMAT_ARGS(n) PP_ENUM_TRAILING_PARAMS(n, const string_cast& a)
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(0));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(1));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(2));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(3));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(4));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(5));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(6));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(7));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(8));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(9));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(10));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(11));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(12));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(13));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(14));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(15));
-	XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(16));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(0));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(1));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(2));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(3));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(4));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(5));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(6));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(7));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(8));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(9));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(10));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(11));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(12));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(13));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(14));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(15));
+	QM_XLogger&  operator()(const TypeSafeFormat&, const char*_format XLOGGER_FORMAT_ARGS(16));
 #undef XLOGGER_FORMAT_ARGS
 
 private:
 	void DoTypeSafeFormat(const char* _format, const string_cast** _args);
 	
 private:
-	XLogger(const XLogger&);
-	XLogger& operator=(const XLogger&);
+	QM_XLogger(const QM_XLogger&);
+	QM_XLogger& operator=(const QM_XLogger&);
 	
 private:
 	XLoggerInfo m_info;
@@ -407,34 +407,34 @@ inline void XMessage::DoTypeSafeFormat(const char* _format, const string_cast** 
 	}
 }
 
-///////////////////////////XLogger////////////////////
-inline XLogger& XLogger::operator<< (const string_cast& _value) {
+///////////////////////////QM_XLogger////////////////////
+inline QM_XLogger& QM_XLogger::operator<< (const string_cast& _value) {
 	if (NULL != _value.str()) {
 		m_message += _value.str();
 	} else {
 		m_info.level = kLevelFatal;
-		m_message += "{!!! XLogger& XLogger::operator<<(const string_cast& _value): _value.str() == NULL !!!}";
+		m_message += "{!!! QM_XLogger& QM_XLogger::operator<<(const string_cast& _value): _value.str() == NULL !!!}";
 		assert(false);
 	}
 	return *this;
 }
 
-inline XLogger& XLogger::operator>>(const string_cast& _value) {
+inline QM_XLogger& QM_XLogger::operator>>(const string_cast& _value) {
 	if (NULL != _value.str()) {
 		m_message.insert(0,  _value.str());
 	} else {
 		m_info.level = kLevelFatal;
-		m_message.insert(0,  "{!!! XLogger& XLogger::operator>>(const string_cast& _value): _value.str() == NULL !!!}");
+		m_message.insert(0,  "{!!! QM_XLogger& QM_XLogger::operator>>(const string_cast& _value): _value.str() == NULL !!!}");
 		assert(false);
 	}
 	return *this;
 }
 
-inline XLogger& XLogger::VPrintf(const char* _format, va_list _list) {
+inline QM_XLogger& QM_XLogger::VPrintf(const char* _format, va_list _list) {
 	if (_format == NULL)
 	{
 		m_info.level = kLevelFatal;
-		m_message += "{!!! XLogger& XLogger::operator()(const char* _format, va_list _list): _format == NULL !!!}";
+		m_message += "{!!! QM_XLogger& QM_XLogger::operator()(const char* _format, va_list _list): _format == NULL !!!}";
 		assert(false);
 		return *this;
 	}
@@ -445,11 +445,11 @@ inline XLogger& XLogger::VPrintf(const char* _format, va_list _list) {
 	return *this;
 }
 
-inline XLogger& XLogger::operator()(const char* _format, ...) {
+inline QM_XLogger& QM_XLogger::operator()(const char* _format, ...) {
 	if (_format == NULL)
 	{
 		m_info.level = kLevelFatal;
-		m_message += "{!!! XLogger& XLogger::operator()(const char* _format, ...): _format == NULL !!!}";
+		m_message += "{!!! QM_XLogger& QM_XLogger::operator()(const char* _format, ...): _format == NULL !!!}";
 		assert(false);
 		return *this;
 	}
@@ -465,7 +465,7 @@ inline XLogger& XLogger::operator()(const char* _format, ...) {
 #define XLOGGER_VARIANT_ARGS(n) PP_ENUM_PARAMS(n, &a)
 #define XLOGGER_VARIANT_ARGS_NULL(n) PP_ENUM(n, NULL)
 #define XLOGGER_TYPESAFE_FORMAT_IMPLEMENT(n, m) \
-		inline XLogger& XLogger::operator()(const TypeSafeFormat&, const char* _format XLOGGER_FORMAT_ARGS(n)) { \
+		inline QM_XLogger& QM_XLogger::operator()(const TypeSafeFormat&, const char* _format XLOGGER_FORMAT_ARGS(n)) { \
 		if (_format != NULL) { \
 			const string_cast* args[16] = { XLOGGER_VARIANT_ARGS(n) PP_COMMA_IF(PP_AND(n, m)) XLOGGER_VARIANT_ARGS_NULL(m) }; \
 			DoTypeSafeFormat(_format, args); \
@@ -497,7 +497,7 @@ XLOGGER_TYPESAFE_FORMAT_IMPLEMENT(16, 0)
 #undef XLOGGER_VARIANT_ARGS_NULL
 #undef XLOGGER_TYPESAFE_FORMAT_IMPLEMENT
 
-inline void XLogger::DoTypeSafeFormat(const char* _format, const string_cast** _args) {
+inline void QM_XLogger::DoTypeSafeFormat(const char* _format, const string_cast** _args) {
 
 	const char* current = _format;
 	int count = 0;
@@ -524,14 +524,14 @@ inline void XLogger::DoTypeSafeFormat(const char* _format, const string_cast** _
 					m_message += _args[argIndex]->str();
 				} else {
 					m_info.level = kLevelFatal;
-					m_message += "{!!! void XLogger::DoTypeSafeFormat: _args[";
+					m_message += "{!!! void QM_XLogger::DoTypeSafeFormat: _args[";
 					m_message += string_cast(argIndex).str();
 					m_message += "]->str() == NULL !!!}";
 					assert(false);
 				}
 			} else {
 				m_info.level = kLevelFatal;
-				m_message += "{!!! void XLogger::DoTypeSafeFormat: _args[";
+				m_message += "{!!! void QM_XLogger::DoTypeSafeFormat: _args[";
 				m_message += string_cast(argIndex).str();
 				m_message += "] == NULL !!!}";
 				assert(false);
@@ -545,7 +545,7 @@ inline void XLogger::DoTypeSafeFormat(const char* _format, const string_cast** _
 		} else {
 			++current;
 			m_info.level = kLevelFatal;
-			m_message += "{!!! void XLogger::DoTypeSafeFormat: %";
+			m_message += "{!!! void QM_XLogger::DoTypeSafeFormat: %";
 			m_message += nextch;
 			m_message += " not fit mode !!!}";
 			assert(false);
@@ -576,7 +576,7 @@ inline void XLogger::DoTypeSafeFormat(const char* _format, const string_cast** _
 	#endif
 #endif
 
-//xlogger define
+//qm_xlogger define
 
 #ifndef XLOGGER_TAG
 #define XLOGGER_TAG ""
@@ -598,34 +598,34 @@ __attribute__((__format__ (printf, 2, 3)))
 #endif
 __inline void  __xlogger_c_write(const XLoggerInfo* _info, const char* _log, ...) { xlogger_Write(_info, _log); }
 
-#define xlogger2(level, tag, file, func, line, ...)		 if ((!xlogger_IsEnabledFor(level)));\
+#define qm_xlogger2(level, tag, file, func, line, ...)		 if ((!xlogger_IsEnabledFor(level)));\
 															  else { XLoggerInfo info= {level, tag, file, func, line,\
 																	 {0, 0}, -1, -1, -1};\ gettimeofday(&info.m_tv, NULL);\
 																	 XLOGGER_ROUTER_OUTPUT(__xlogger_c_write(&info, __VA_ARGS__),xlogger_Print(&info, __VA_ARGS__), __VA_ARGS__);}
 
-#define xlogger2_if(exp, level, tag, file, func, line, ...)    if (!(exp) || !xlogger_IsEnabledFor(level));\
+#define qm_xlogger2_if(exp, level, tag, file, func, line, ...)    if (!(exp) || !xlogger_IsEnabledFor(level));\
 																	else { XLoggerInfo info= {level, tag, file, func, line,\
 																		   {0, 0}, -1, -1, -1}; gettimeofday(&info.timeval, NULL);\
 																		   XLOGGER_ROUTER_OUTPUT(__xlogger_c_write(&info, __VA_ARGS__),xlogger_Print(&info, __VA_ARGS__), __VA_ARGS__);}
 
-#define __xlogger_c_impl(level,  ...)			xlogger2(level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
-#define __xlogger_c_impl_if(level, exp, ...)	xlogger2_if(exp, level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
+#define __xlogger_c_impl(level,  ...)			qm_xlogger2(level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
+#define __xlogger_c_impl_if(level, exp, ...)	qm_xlogger2_if(exp, level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
 
-#define xverbose2(...)			   __xlogger_c_impl(kLevelVerbose, __VA_ARGS__)
-#define xdebug2(...)			   __xlogger_c_impl(kLevelDebug, __VA_ARGS__)
-#define xinfo2(...)				   __xlogger_c_impl(kLevelInfo, __VA_ARGS__)
-#define xwarn2(...)				   __xlogger_c_impl(kLevelWarn, __VA_ARGS__)
-#define xerror2(...)			   __xlogger_c_impl(kLevelError, __VA_ARGS__)
-#define xfatal2(...)			   __xlogger_c_impl(kLevelFatal, __VA_ARGS__)
+#define qm_xverbose2(...)			   __xlogger_c_impl(kLevelVerbose, __VA_ARGS__)
+#define qm_xdebug2(...)			   __xlogger_c_impl(kLevelDebug, __VA_ARGS__)
+#define qm_xinfo2(...)				   __xlogger_c_impl(kLevelInfo, __VA_ARGS__)
+#define qm_xwarn2(...)				   __xlogger_c_impl(kLevelWarn, __VA_ARGS__)
+#define qm_xerror2(...)			   __xlogger_c_impl(kLevelError, __VA_ARGS__)
+#define qm_xfatal2(...)			   __xlogger_c_impl(kLevelFatal, __VA_ARGS__)
 
-#define xverbose2_if(exp, ...)	   __xlogger_c_impl_if(kLevelVerbose, exp, __VA_ARGS__)
-#define xdebug2_if(exp, ...)	   __xlogger_c_impl_if(kLevelDebug, exp, __VA_ARGS__)
-#define xinfo2_if(exp, ...)		   __xlogger_c_impl_if(kLevelInfo, exp, __VA_ARGS__)
-#define xwarn2_if(exp, ...)		   __xlogger_c_impl_if(kLevelWarn, exp,  __VA_ARGS__)
-#define xerror2_if(exp, ...)	   __xlogger_c_impl_if(kLevelError, exp, __VA_ARGS__)
-#define xfatal2_if(exp, ...)	   __xlogger_c_impl_if(kLevelFatal, exp, __VA_ARGS__)
+#define qm_xverbose2_if(exp, ...)	   __xlogger_c_impl_if(kLevelVerbose, exp, __VA_ARGS__)
+#define qm_xdebug2_if(exp, ...)	   __xlogger_c_impl_if(kLevelDebug, exp, __VA_ARGS__)
+#define qm_xinfo2_if(exp, ...)		   __xlogger_c_impl_if(kLevelInfo, exp, __VA_ARGS__)
+#define qm_xwarn2_if(exp, ...)		   __xlogger_c_impl_if(kLevelWarn, exp,  __VA_ARGS__)
+#define qm_xerror2_if(exp, ...)	   __xlogger_c_impl_if(kLevelError, exp, __VA_ARGS__)
+#define qm_xfatal2_if(exp, ...)	   __xlogger_c_impl_if(kLevelFatal, exp, __VA_ARGS__)
 
-#define xassert2(exp, ...)	  if (((exp) || !xlogger_IsEnabledFor(kLevelFatal)));else {\
+#define qm_xassert2(exp, ...)	  if (((exp) || !xlogger_IsEnabledFor(kLevelFatal)));else {\
 									XLoggerInfo info= {kLevelFatal, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__,\
 									{0, 0}, -1, -1, -1};\
 									gettimeofday(&info.m_tv, NULL);\
@@ -633,67 +633,67 @@ __inline void  __xlogger_c_write(const XLoggerInfo* _info, const char* _log, ...
 //"##__VA_ARGS__" remove "," if NULL
 #else
 
-#ifndef XLOGGER_HOOK
-#define XLOGGER_HOOK NULL
+#ifndef QM_XLOGGER_HOOK
+#define QM_XLOGGER_HOOK NULL
 #endif
 
-#define xlogger(level, tag, file, func, line, ...)	   if ((!xlogger_IsEnabledFor(level)));\
-													   else XLogger(level, tag, file, func, line, XLOGGER_HOOK)\
+#define qm_xlogger(level, tag, file, func, line, ...)	   if ((!xlogger_IsEnabledFor(level)));\
+													   else QM_XLogger(level, tag, file, func, line, QM_XLOGGER_HOOK)\
 															 XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(TSF __VA_ARGS__),(TSF __VA_ARGS__), __VA_ARGS__)
 
-#define xlogger2(level, tag, file, func, line, ...)		if ((!xlogger_IsEnabledFor(level)));\
-														else XLogger(level, tag, file, func, line, XLOGGER_HOOK)\
+#define qm_xlogger2(level, tag, file, func, line, ...)		if ((!xlogger_IsEnabledFor(level)));\
+														else QM_XLogger(level, tag, file, func, line, QM_XLOGGER_HOOK)\
 															 XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
 
-#define xlogger2_if(exp, level, tag, file, func, line, ...)		if ((!(exp) || !xlogger_IsEnabledFor(level)));\
-																else XLogger(level, tag, file, func, line, XLOGGER_HOOK)\
+#define qm_xlogger2_if(exp, level, tag, file, func, line, ...)		if ((!(exp) || !xlogger_IsEnabledFor(level)));\
+																else QM_XLogger(level, tag, file, func, line, QM_XLOGGER_HOOK)\
 																	 XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
 
-#define __xlogger_cpp_impl2(level, ...)				 xlogger2(level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
-#define __xlogger_cpp_impl_if(level, exp, ...)	   xlogger2_if(exp, level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
+#define __xlogger_cpp_impl2(level, ...)				 qm_xlogger2(level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
+#define __xlogger_cpp_impl_if(level, exp, ...)	   qm_xlogger2_if(exp, level, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, __VA_ARGS__)
 
-#define xverbose2(...)			   __xlogger_cpp_impl2(kLevelVerbose, __VA_ARGS__)
-#define xdebug2(...)			   __xlogger_cpp_impl2(kLevelDebug, __VA_ARGS__)
-#define xinfo2(...)				   __xlogger_cpp_impl2(kLevelInfo, __VA_ARGS__)
-#define xwarn2(...)				   __xlogger_cpp_impl2(kLevelWarn, __VA_ARGS__)
-#define xerror2(...)			   __xlogger_cpp_impl2(kLevelError, __VA_ARGS__)
-#define xfatal2(...)			   __xlogger_cpp_impl2(kLevelFatal, __VA_ARGS__)
-#define xlog2(level, ...)		   __xlogger_cpp_impl2(level, __VA_ARGS__)
+#define qm_xverbose2(...)			   __xlogger_cpp_impl2(kLevelVerbose, __VA_ARGS__)
+#define qm_xdebug2(...)			   __xlogger_cpp_impl2(kLevelDebug, __VA_ARGS__)
+#define qm_xinfo2(...)				   __xlogger_cpp_impl2(kLevelInfo, __VA_ARGS__)
+#define qm_xwarn2(...)				   __xlogger_cpp_impl2(kLevelWarn, __VA_ARGS__)
+#define qm_xerror2(...)			   __xlogger_cpp_impl2(kLevelError, __VA_ARGS__)
+#define qm_xfatal2(...)			   __xlogger_cpp_impl2(kLevelFatal, __VA_ARGS__)
+#define qm_xlog2(level, ...)		   __xlogger_cpp_impl2(level, __VA_ARGS__)
 
-#define xverbose2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelVerbose, exp,  __VA_ARGS__)
-#define xdebug2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelDebug, exp,	__VA_ARGS__)
-#define xinfo2_if(exp, ...)		   __xlogger_cpp_impl_if(kLevelInfo, exp,  __VA_ARGS__)
-#define xwarn2_if(exp, ...)		   __xlogger_cpp_impl_if(kLevelWarn, exp,  __VA_ARGS__)
-#define xerror2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelError, exp,	__VA_ARGS__)
-#define xfatal2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelFatal, exp, __VA_ARGS__)
-#define xlog2_if(level, ...)	   __xlogger_cpp_impl_if(level, __VA_ARGS__)
+#define qm_xverbose2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelVerbose, exp,  __VA_ARGS__)
+#define qm_xdebug2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelDebug, exp,	__VA_ARGS__)
+#define qm_xinfo2_if(exp, ...)		   __xlogger_cpp_impl_if(kLevelInfo, exp,  __VA_ARGS__)
+#define qm_xwarn2_if(exp, ...)		   __xlogger_cpp_impl_if(kLevelWarn, exp,  __VA_ARGS__)
+#define qm_xerror2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelError, exp,	__VA_ARGS__)
+#define qm_xfatal2_if(exp, ...)	   __xlogger_cpp_impl_if(kLevelFatal, exp, __VA_ARGS__)
+#define qm_xlog2_if(level, ...)	   __xlogger_cpp_impl_if(level, __VA_ARGS__)
 
-#define xgroup2_define(group)	   XLogger group(kLevelAll, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, XLOGGER_HOOK)
-#define xgroup2(...)			   XLogger(kLevelAll, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, XLOGGER_HOOK)(__VA_ARGS__)
-#define xgroup2_if(exp, ...)	   if ((!(exp))); else XLogger(kLevelAll, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, XLOGGER_HOOK)(__VA_ARGS__)
+#define xgroup2_define(group)	   QM_XLogger group(kLevelAll, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, QM_XLOGGER_HOOK)
+#define qm_xgroup2(...)			   QM_XLogger(kLevelAll, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, QM_XLOGGER_HOOK)(__VA_ARGS__)
+#define qm_xgroup2_if(exp, ...)	   if ((!(exp))); else QM_XLogger(kLevelAll, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, QM_XLOGGER_HOOK)(__VA_ARGS__)
 
-#define xassert2(exp, ...)	  if (((exp) || !xlogger_IsEnabledFor(kLevelFatal)));\
-							 else XLogger(kLevelFatal, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, XLOGGER_HOOK).Assert(#exp)\
+#define qm_xassert2(exp, ...)	  if (((exp) || !xlogger_IsEnabledFor(kLevelFatal)));\
+							 else QM_XLogger(kLevelFatal, XLOGGER_TAG, __XFILE__, __XFUNCTION__, __LINE__, QM_XLOGGER_HOOK).Assert(#exp)\
 								  XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
 
-#define xmessage2_define(name, ...)		XMessage name; name XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
-#define xmessage2(...)					XMessage() XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
+#define qm_xmessage2_define(name, ...)		XMessage name; name XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
+#define qm_xmessage2(...)					XMessage() XLOGGER_ROUTER_OUTPUT(.WriteNoFormat(__VA_ARGS__),(__VA_ARGS__), __VA_ARGS__)
 
 
-#define XLOGGER_SCOPE_MESSAGE(...)		PP_IF(PP_NUM_PARAMS(__VA_ARGS__), xmessage2(__VA_ARGS__).String().c_str(), NULL)
+#define XLOGGER_SCOPE_MESSAGE(...)		PP_IF(PP_NUM_PARAMS(__VA_ARGS__), qm_xmessage2(__VA_ARGS__).String().c_str(), NULL)
 #define __xscope_impl(level, name, ...)   XScopeTracer __ANONYMOUS_VARIABLE__(_tracer_)(level, XLOGGER_TAG, name, __XFILE__, __XFUNCTION__, __LINE__, XLOGGER_SCOPE_MESSAGE(__VA_ARGS__))
 
-#define xverbose_scope(name, ...)		__xscope_impl(kLevelVerbose, name, __VA_ARGS__)
-#define xdebug_scope(name, ...)			__xscope_impl(kLevelDebug, name, __VA_ARGS__)
-#define xinfo_scope(name, ...)			__xscope_impl(kLevelInfo, name, __VA_ARGS__)
+#define qm_xverbose_scope(name, ...)		__xscope_impl(kLevelVerbose, name, __VA_ARGS__)
+#define qm_xdebug_scope(name, ...)			__xscope_impl(kLevelDebug, name, __VA_ARGS__)
+#define qm_xinfo_scope(name, ...)			__xscope_impl(kLevelInfo, name, __VA_ARGS__)
 
 #define __xfunction_scope_impl(level, name, ...)	XScopeTracer ____xloger_anonymous_function_scope_20151022____(level, XLOGGER_TAG, name, __XFILE__, __XFUNCTION__, __LINE__, XLOGGER_SCOPE_MESSAGE(__VA_ARGS__))
 
-#define xverbose_function(...)			__xfunction_scope_impl(kLevelVerbose, __FUNCTION__, __VA_ARGS__)
-#define xdebug_function(...)			__xfunction_scope_impl(kLevelDebug, __FUNCTION__, __VA_ARGS__)
-#define xinfo_function(...)				__xfunction_scope_impl(kLevelInfo, __FUNCTION__, __VA_ARGS__)
-#define xexitmsg_function(...)			   ____xloger_anonymous_function_scope_20151022____.Exit(xmessage2(__VA_ARGS__).String())
-#define xexitmsg_function_if(exp, ...)	   if((!exp)); else ____xloger_anonymous_function_scope_20151022____.Exit(xmessage2(__VA_ARGS__).String())
+#define qm_xverbose_function(...)			__xfunction_scope_impl(kLevelVerbose, __FUNCTION__, __VA_ARGS__)
+#define qm_xdebug_function(...)			__xfunction_scope_impl(kLevelDebug, __FUNCTION__, __VA_ARGS__)
+#define qm_xinfo_function(...)				__xfunction_scope_impl(kLevelInfo, __FUNCTION__, __VA_ARGS__)
+#define xexitmsg_function(...)			   ____xloger_anonymous_function_scope_20151022____.Exit(qm_xmessage2(__VA_ARGS__).String())
+#define xexitmsg_function_if(exp, ...)	   if((!exp)); else ____xloger_anonymous_function_scope_20151022____.Exit(qm_xmessage2(__VA_ARGS__).String())
 
 
 #define TSF __tsf__,

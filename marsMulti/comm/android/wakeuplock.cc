@@ -22,7 +22,7 @@
 
 #include "wakeuplock.h"
 #include "assert/__assert.h"
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 
 #include "platform_comm.h"
 
@@ -32,12 +32,12 @@ namespace comm {
 WakeUpLock::WakeUpLock() {
     object_ = wakeupLock_new();
     ASSERT(object_);
-    xinfo2("new wakeuplock:%p", object_);
+    qm_xinfo2("new wakeuplock:%p", object_);
 }
 
 WakeUpLock::~WakeUpLock() {
     ASSERT(object_);
-    xinfo2("delete wakeuplock:%p", object_);
+    qm_xinfo2("delete wakeuplock:%p", object_);
 
     if (IsLocking())
         wakeupLock_Unlock(object_);

@@ -13,7 +13,7 @@
 
 #include "socketselect2.h"
 
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 
 
 
@@ -155,7 +155,7 @@ int SocketSelect::Select() {
 }
 
 int SocketSelect::Select(int _msec) {
-	xverbose_function();
+	qm_xverbose_function();
 	xgroup2_define(group);
     ASSERT(-1 <= _msec);
 
@@ -217,7 +217,7 @@ int SocketSelect::Select(int _msec) {
 
             if (autoclear_) Breaker().Clear();
 
-            xdebug2(TSF"return select, ret=%_", ret);
+            qm_xdebug2(TSF"return select, ret=%_", ret);
             goto END; //free eventarray and socketarrary
         }
 
@@ -238,12 +238,12 @@ int SocketSelect::Select(int _msec) {
             FD_SET(it->first, &writefd_);
             __WOULDBLOCK(it->first, true);
             ++new_WOULDBLOCK_count;
-            xinfo2(TSF", %_", it->first) >> group;
+            qm_xinfo2(TSF", %_", it->first) >> group;
         }
     }
 
     if (0 < new_WOULDBLOCK_count) {
-        xinfo2(TSF"WOULDBLOCK FD_WRITE wait count:%_", new_WOULDBLOCK_count) << group;
+        qm_xinfo2(TSF"WOULDBLOCK FD_WRITE wait count:%_", new_WOULDBLOCK_count) << group;
         m_broken = Breaker().m_broken;
 
         if (autoclear_) Breaker().Clear();
@@ -269,29 +269,29 @@ int SocketSelect::Select(int _msec) {
             SOCKET sock = socketarray[event_index - WSA_WAIT_EVENT_0];
 
             if (networkevents.lNetworkEvents & (FD_WRITE | FD_CONNECT) && 0 != __SO_RCVTIMEO(sock)) {
-                xinfo2(TSF"WOULDBLOCK FD_WRITE notify sock:%_", sock);
+                qm_xinfo2(TSF"WOULDBLOCK FD_WRITE notify sock:%_", sock);
             }
 
             if (m_filter_map[sock] & (FD_WRITE | FD_CONNECT) && networkevents.lNetworkEvents & (FD_WRITE | FD_CONNECT)) {
                 FD_SET(sock, &writefd_);
                 __WOULDBLOCK(sock, false);
-				xverbose2(TSF"FD_WRITE | FD_CONNECT");
+				qm_xverbose2(TSF"FD_WRITE | FD_CONNECT");
             }
 
             if (m_filter_map[sock] & (FD_READ | FD_ACCEPT) && networkevents.lNetworkEvents & (FD_READ | FD_ACCEPT)) {
                 FD_SET(sock, &readfd_);
-                xverbose2(TSF"FD_READ | FD_ACCEPT");
+                qm_xverbose2(TSF"FD_READ | FD_ACCEPT");
             }
 
             if (m_filter_map[sock] & (FD_READ | FD_ACCEPT) && networkevents.lNetworkEvents & FD_CLOSE && networkevents.iErrorCode[FD_CLOSE_BIT] == 0) {
                 FD_SET(sock, &readfd_);
-                xverbose2(TSF"FD_READ | FD_ACCEPT");
+                qm_xverbose2(TSF"FD_READ | FD_ACCEPT");
             }
 
             if (m_filter_map[sock] & (FD_CLOSE)) {
                 for (int i = 0; i < FD_MAX_EVENTS; ++i) {
                     if (networkevents.iErrorCode[i] != 0) {
-                        xerror2(TSF"selector exception, sock %_ err %_",sock, networkevents.iErrorCode[i]);
+                        qm_xerror2(TSF"selector exception, sock %_ err %_",sock, networkevents.iErrorCode[i]);
                         FD_SET(sock, &exceptionfd_);
                         break;
                     }
@@ -299,7 +299,7 @@ int SocketSelect::Select(int _msec) {
             }
         }
 	} else {
-		xinfo2(TSF"return WSAWaitForMultipleEvents, ret=%_", ret);
+		qm_xinfo2(TSF"return WSAWaitForMultipleEvents, ret=%_", ret);
 	}
 
 

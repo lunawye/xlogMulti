@@ -26,7 +26,7 @@
 #include <locale>
 
 #include "marsMulti/comm/qm_strutil.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 namespace marsMulti {
 namespace sdt {
@@ -67,7 +67,7 @@ namespace sdt {
 	private:
 		bool Parse() {
 			if (url_.empty()) {
-				xwarn2(TSF"url_ is empty.");
+				qm_xwarn2(TSF"url_ is empty.");
 				return false;
 			}
 
@@ -80,7 +80,7 @@ namespace sdt {
 
 			// only support http
 			if (0 == schema_start || schema_start >= url_.length()) {
-				xwarn2(TSF"schema_start=%_, url_=%_", schema_start, url_);
+				qm_xwarn2(TSF"schema_start=%_, url_=%_", schema_start, url_);
 				return false;
 			}
 			size_t schema_end = ci_find_substr(url_, std::string("/"), schema_start + 1); // tmpurl.find("/", schema_start+1);

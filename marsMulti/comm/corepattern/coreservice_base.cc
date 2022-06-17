@@ -23,7 +23,7 @@
 #include "comm/corepattern/ServiceImpl.inl"
 #include "comm/bootregister.h"
 #include "comm/corepattern/coreservice_base.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 namespace design_patterns {
 
@@ -127,7 +127,7 @@ void CoreServiceBase::__Creater(std::vector<ServiceRegister>& _vec) {
         if (0 == _vec.size()) break;
 
         if (count <= _vec.size()) {
-            xassert2(false);
+            qm_xassert2(false);
             break;
         }
     } while (true);

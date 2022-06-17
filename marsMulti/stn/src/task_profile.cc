@@ -18,7 +18,7 @@
 //  Copyright © 2016年 Tencent. All rights reserved.
 //
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/platform_comm.h"
 #include "marsMulti/stn/task_profile.h"
 
@@ -41,7 +41,7 @@ void __SetLastFailedStatus(std::list<TaskProfile>::iterator _it){
 }
 
 uint64_t  __FirstPkgTimeout(int64_t  _init_first_pkg_timeout, size_t _sendlen, int _send_count, int _dynamictimeout_status) {
-    xassert2(3600 * 1000 >= _init_first_pkg_timeout, TSF"server_cost:%_ ", _init_first_pkg_timeout);
+    qm_xassert2(3600 * 1000 >= _init_first_pkg_timeout, TSF"server_cost:%_ ", _init_first_pkg_timeout);
     
     uint64_t ret = 0;
     uint64_t task_delay = (kMobile != getNetInfo()) ? kWifiTaskDelay : kGPRSTaskDelay;

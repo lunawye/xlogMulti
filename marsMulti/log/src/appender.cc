@@ -62,7 +62,7 @@
 #include "marsMulti/comm/tickcount.h"
 #include "marsMulti/comm/qm_autobuffer.h"
 #include "marsMulti/comm/ptrbuffer.h"
-#include "marsMulti/comm/xlogger/qm_xloggerbase.h"
+#include "marsMulti/comm/qm_xlogger/qm_xloggerbase.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/qm_strutil.h"
 #include "marsMulti/comm/mmap_util.h"

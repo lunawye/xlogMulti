@@ -45,7 +45,7 @@
 
 #include "marsMulti/comm/thread/thread.h"
 #include "marsMulti/comm/qm_time_utils.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_strutil.h"
 
 namespace marsMulti {

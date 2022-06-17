@@ -28,7 +28,7 @@
 #include "../MmNetComm.h"
 
 #include "../../../log/qm_appender.h"
-#include "../../../comm/xlogger/qm_xloggerbase.h"
+#include "../../../comm/qm_xlogger/qm_xloggerbase.h"
 #include "MockServerControlUtils.h"
 #include "HookUtil.h"
 
@@ -62,7 +62,7 @@ struct STCmdShortLinkTask
 
 	~STCmdShortLinkTask()
 	{
-		xassert2(NULL==pWorker, "@%p", pWorker);
+		qm_xassert2(NULL==pWorker, "@%p", pWorker);
 	}
 
 	const int nHashCode;

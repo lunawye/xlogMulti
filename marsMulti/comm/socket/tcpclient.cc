@@ -23,7 +23,7 @@
 #include "boost/bind.hpp"
 
 #include "qm_autobuffer.h"
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #include "thread/thread.h"
 #include "platform_comm.h"
 #include "socket_address.h"
@@ -60,7 +60,7 @@ bool TcpClient::Connect() {
     ScopedLock lock(connect_mutex_);
 
     if (kTcpInit != status_) {
-        xassert2(kTcpInitErr == status_, "%d", status_);
+        qm_xassert2(kTcpInitErr == status_, "%d", status_);
         return false;
     }
 
@@ -69,7 +69,7 @@ bool TcpClient::Connect() {
 
     if (0 != ret) {
         status_ = kSocketThreadStartErr;
-        xassert2(0 != ret, "%d", ret);
+        qm_xassert2(0 != ret, "%d", ret);
         return false;
     }
 
@@ -101,7 +101,7 @@ bool TcpClient::HaveDataRead() const {
 ssize_t TcpClient::Read(void* _buf, unsigned int _len) {
     if (kTcpConnected != status_) return -1;
 
-    xassert2(INVALID_SOCKET != socket_);
+    qm_xassert2(INVALID_SOCKET != socket_);
     ScopedLock lock(read_disconnect_mutex_);
     ssize_t ret = recv(socket_, (char*)_buf, _len, 0);
 
@@ -164,32 +164,32 @@ void TcpClient::__Run() {
 
     if (socket_ == INVALID_SOCKET) {
         status_ = kTcpConnectingErr;
-        xerror2("m_socket errno=%d",  socket_errno);
+        qm_xerror2("m_socket errno=%d",  socket_errno);
         event_.OnError(status_,  socket_errno);
         return;
     }
 
     if (getNetInfo() == kWifi && socket_fix_tcp_mss(socket_) < 0) {
 #ifdef ANDROID
-        xinfo2(TSF"wifi set tcp mss error:%0", strerror(socket_errno));
+        qm_xinfo2(TSF"wifi set tcp mss error:%0", strerror(socket_errno));
 #endif
     }
 
 #ifdef _WIN32
-    if (0 != socket_ipv6only(socket_, 0)){ xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
+    if (0 != socket_ipv6only(socket_, 0)){ qm_xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
 #endif
     
-    xerror2_if(0 != socket_set_nobio(socket_), TSF"socket_set_nobio:%_, %_", socket_errno, socket_strerror(socket_errno));
+    qm_xerror2_if(0 != socket_set_nobio(socket_), TSF"socket_set_nobio:%_, %_", socket_errno, socket_strerror(socket_errno));
 
     int ret = ::connect(socket_, (sockaddr*)&_addr, sizeof(_addr));
 
     std::string local_ip = socket_address::getsockname(socket_).ip();
     unsigned int local_port = socket_address::getsockname(socket_).port();
 
-    xinfo2(TSF"sock:%_, local_ip:%_, local_port:%_, svr_ip:%_, svr_port:%_", socket_, local_ip, local_port, ip_, port_);
+    qm_xinfo2(TSF"sock:%_, local_ip:%_, local_port:%_, svr_ip:%_, svr_port:%_", socket_, local_ip, local_port, ip_, port_);
 
     if (0 > ret && !IS_NOBLOCK_CONNECT_ERRNO(socket_errno)) {
-        xerror2("connect errno=%d", socket_errno);
+        qm_xerror2("connect errno=%d", socket_errno);
         status_ = kTcpConnectingErr;
         event_.OnError(status_, socket_errno);
         return;
@@ -209,7 +209,7 @@ void TcpClient::__Run() {
     }
 
     if (selectRet < 0) {
-        xerror2("select errno=%d", socket_errno);
+        qm_xerror2("select errno=%d", socket_errno);
         status_ = kTcpConnectingErr;
         event_.OnError(status_, socket_errno);
         return;
@@ -255,12 +255,12 @@ void TcpClient::__Run() {
         selectRet = select_readwrite.Select();
 
         if (0 == selectRet) {
-            xassert2(false);
+            qm_xassert2(false);
             continue;
         }
 
         if (0 > selectRet) {
-            xerror2("select errno=%d", socket_errno);
+            qm_xerror2("select errno=%d", socket_errno);
             status_ = kTcpIOErr;
             event_.OnError(status_, socket_errno);
             return;
@@ -276,9 +276,9 @@ void TcpClient::__Run() {
             int error_opt = 0;
             socklen_t error_len = sizeof(error_opt);
             if (0 == getsockopt(socket_, SOL_SOCKET, SO_ERROR, (char*)&error_opt, &error_len)){
-                xerror2("error_opt=%d", error_opt);
+                qm_xerror2("error_opt=%d", error_opt);
             }else{
-                xerror2("getsockopt error=%d", socket_errno);
+                qm_xerror2("getsockopt error=%d", socket_errno);
             }
             status_ = kTcpIOErr;
             event_.OnError(status_, error_opt);
@@ -302,7 +302,7 @@ void TcpClient::__Run() {
                 event_.OnDisConnect(true);
                 return;
             } else if (IS_NOBLOCK_RECV_ERRNO(socket_errno)) {
-                xwarn2(TSF"IS_NOBLOCK_RECV_ERRNO err:%_, %_", socket_errno, socket_strerror(socket_errno));
+                qm_xwarn2(TSF"IS_NOBLOCK_RECV_ERRNO err:%_, %_", socket_errno, socket_strerror(socket_errno));
             } else {
                 status_ = kTcpIOErr;
                 lock.unlock();
@@ -330,9 +330,9 @@ void TcpClient::__Run() {
                     buf.Seek(send_len, AutoBuffer::ESeekCur);
                     double send_len_bytes = (double)send_len;
                     double cost_sec = ((double)round_tick.gettickspan())/1000;
-                    xverbose2(TSF"debug:send_len:%_ bytes, cost_sec:%_ seconds", send_len_bytes, cost_sec);
+                    qm_xverbose2(TSF"debug:send_len:%_ bytes, cost_sec:%_ seconds", send_len_bytes, cost_sec);
                     if (cost_sec > 0.0 &&send_len_bytes/cost_sec < 20*1024) {
-                        xwarn2(TSF"send speed slow:%_ bytes/sec, send_len:%_ bytes, send buf len:%_, cost_sec:%_ seconds", send_len_bytes/cost_sec, send_len_bytes, len-buf.Pos(), cost_sec);
+                        qm_xwarn2(TSF"send speed slow:%_ bytes/sec, send_len:%_ bytes, send buf len:%_, cost_sec:%_ seconds", send_len_bytes/cost_sec, send_len_bytes, len-buf.Pos(), cost_sec);
                     }
                 }
             } else {

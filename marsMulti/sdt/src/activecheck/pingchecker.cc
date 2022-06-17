@@ -20,7 +20,7 @@
 
 #include "pingchecker.h"
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/singleton.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/sdt/constants.h"
@@ -30,19 +30,19 @@
 using namespace marsMulti::sdt;
 
 PingChecker::PingChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 PingChecker::~PingChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 int PingChecker::StartDoCheck(CheckRequestProfile& _check_request) {
 #if defined(ANDROID) || defined(__APPLE__)
-    xinfo_function();
+    qm_xinfo_function();
     return BaseChecker::StartDoCheck(_check_request);
 #else
-    xinfo2(TSF"neither android nor ios");
+    qm_xinfo2(TSF"neither android nor ios");
     return -1;
 #endif
 }
@@ -50,14 +50,14 @@ int PingChecker::StartDoCheck(CheckRequestProfile& _check_request) {
 void PingChecker::__DoCheck(CheckRequestProfile& _check_request) {
 
 #if defined(ANDROID) || defined(__APPLE__)
-    xinfo_function();
+    qm_xinfo_function();
 
     // longlink ip ping
     for (CheckIPPorts_Iterator iter = _check_request.longlink_items.begin(); iter != _check_request.longlink_items.end(); ++iter) {
 		for (std::vector<CheckIPPort>::iterator ipport = iter->second.begin(); ipport != iter->second.end(); ++ipport) {
             
             if (is_canceled_) {
-                xinfo2(TSF"PingChecker is canceled.");
+                qm_xinfo2(TSF"PingChecker is canceled.");
                 return;
             }
             
@@ -84,9 +84,9 @@ void PingChecker::__DoCheck(CheckRequestProfile& _check_request) {
 				const float EPSINON = 0.00001;
 
 				if ((ping_status.loss_rate - 1.0) >= -EPSINON && (ping_status.loss_rate - 1.0) <= EPSINON) {
-					xinfo2(TSF"ping check, host: %_ failed.", host);
+					qm_xinfo2(TSF"ping check, host: %_ failed.", host);
 				} else {
-					xinfo2(TSF"ping check, host: %_ success.", host);
+					qm_xinfo2(TSF"ping check, host: %_ success.", host);
 				}
 
 				snprintf(loss_rate, 16, "%f", ping_status.loss_rate);
@@ -102,7 +102,7 @@ void PingChecker::__DoCheck(CheckRequestProfile& _check_request) {
 			if (_check_request.total_timeout != UNUSE_TIMEOUT) {
 				_check_request.total_timeout -= cost_time;
 				if (_check_request.total_timeout <= 0) {
-					xinfo2(TSF"ping check, host: %_, timeout.", host);
+					qm_xinfo2(TSF"ping check, host: %_, timeout.", host);
 					break;
 				}
 			}
@@ -114,7 +114,7 @@ void PingChecker::__DoCheck(CheckRequestProfile& _check_request) {
 		for (std::vector<CheckIPPort>::iterator ipport = iter->second.begin(); ipport != iter->second.end(); ++ipport) {
             
             if (is_canceled_) {
-                xinfo2(TSF"PingChecker is canceled.");
+                qm_xinfo2(TSF"PingChecker is canceled.");
                 return;
             }
             
@@ -140,9 +140,9 @@ void PingChecker::__DoCheck(CheckRequestProfile& _check_request) {
 				const float EPSINON = 0.00001;
 
 				if ((ping_status.loss_rate - 1.0) >= -EPSINON && (ping_status.loss_rate - 1.0) <= EPSINON) {
-					xinfo2(TSF"ping check, host: %_ failed.", host);
+					qm_xinfo2(TSF"ping check, host: %_ failed.", host);
 				} else {
-					xinfo2(TSF"ping check, host: %_ success.", host);
+					qm_xinfo2(TSF"ping check, host: %_ success.", host);
 				}
 
 				snprintf(loss_rate, 16, "%f", ping_status.loss_rate);
@@ -158,7 +158,7 @@ void PingChecker::__DoCheck(CheckRequestProfile& _check_request) {
 			if (_check_request.total_timeout != UNUSE_TIMEOUT) {
 				_check_request.total_timeout -= cost_time;
 				if (_check_request.total_timeout <= 0) {
-					xinfo2(TSF"ping check, host: %_, timeout.", host);
+					qm_xinfo2(TSF"ping check, host: %_, timeout.", host);
 					break;
 				}
 			}

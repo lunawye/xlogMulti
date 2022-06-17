@@ -1,4 +1,0 @@
-rootProject.name = 'marsMulti-android-sample'
-
-include ':app'
-include ':wrapper'

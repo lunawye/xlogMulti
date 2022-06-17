@@ -184,7 +184,7 @@ namespace MessageQueue {
         std::map<MessageQueue_t, MessageQueueContent>::iterator pos = sg_messagequeue_map.find(id);
         if (sg_messagequeue_map.end() == pos) {
             //ASSERT2(false, "%" PRIu64, id);
-            xinfo2(TSF"message queue not found.");
+            qm_xinfo2(TSF"message queue not found.");
             return "";
         }
 
@@ -343,7 +343,7 @@ namespace MessageQueue {
         }
         sg_last_callback_tick = now;
         size_t size = _lst_message.size();
-        xwarn2(TSF"%_", DumpMessage(_lst_message, 50));
+        qm_xwarn2(TSF"%_", DumpMessage(_lst_message, 50));
         ASSERT2(false, "Over MAX_MQ_SIZE, size:%d", (int)size);
         if (nullptr != g_mq_max_size_callback) {
             g_mq_max_size_callback(size, DumpMessage(_lst_message, 5));
@@ -354,8 +354,8 @@ namespace MessageQueue {
         ScopedLock lock(sg_messagequeue_map_mutex);
         const MessageQueue_t& id = _handlerid.queue;
 
-//        xinfo2(TSF"mq map size:%_", sg_messagequeue_map.size());
-//        xinfo2(TSF"mq id:%_", id);
+//        qm_xinfo2(TSF"mq map size:%_", sg_messagequeue_map.size());
+//        qm_xinfo2(TSF"mq id:%_", id);
         std::map<MessageQueue_t, MessageQueueContent>::iterator pos = sg_messagequeue_map.find(id);
         if (sg_messagequeue_map.end() == pos) {
             //ASSERT2(false, "%" PRIu64, id);
@@ -718,7 +718,7 @@ namespace MessageQueue {
         
         auto spfunc = boost::any_cast<boost::shared_ptr<AsyncInvokeFunction> >(_message.body1);
         if(!spfunc || spfunc->empty()){
-            xerror2(TSF"!! call empty function: %_", _message.msg_name);
+            qm_xerror2(TSF"!! call empty function: %_", _message.msg_name);
         }
         
         (*spfunc)();
@@ -775,7 +775,7 @@ namespace MessageQueue {
     static void __ANRAssert(bool _iOS_style, const marsMulti::comm::check_content& _content, MessageHandler_t _mq_id) {
         thread_tid tid = MessageQueue2TID(_mq_id.queue);
         if(tid == 0) {
-            xwarn2(TSF"messagequeue already destroy, handler:(%_,%_)", _mq_id.queue, _mq_id.seq);
+            qm_xwarn2(TSF"messagequeue already destroy, handler:(%_,%_)", _mq_id.queue, _mq_id.seq);
             return;
         }
 
@@ -795,14 +795,14 @@ namespace MessageQueue {
         }
 
         MessageHandler_t mq_id = *((MessageHandler_t*)_content.extra_info);
-        xinfo2(TSF"anr check content:%_, handler:(%_,%_)", _content.call_id, mq_id.queue, mq_id.seq);
+        qm_xinfo2(TSF"anr check content:%_, handler:(%_,%_)", _content.call_id, mq_id.queue, mq_id.seq);
 
         boost::shared_ptr<Thread> thread(new Thread(boost::bind(__ANRAssert, _iOS_style, _content, mq_id)));
         thread->start_after(kWaitANRTimeout);
 
         MessageQueue::AsyncInvoke([=]() {
             if (thread->isruning()) {
-                xinfo2(TSF"misjudge anr, timeout:%_, tid:%_, runing time:%_, real time:%_, used_cpu_time:%_, handler:(%_,%_)", _content.timeout,
+                qm_xinfo2(TSF"misjudge anr, timeout:%_, tid:%_, runing time:%_, real time:%_, used_cpu_time:%_, handler:(%_,%_)", _content.timeout,
                        _content.tid, clock_app_monotonic() - _content.start_time, gettickcount() - _content.start_tickcount, _content.used_cpu_time, mq_id.queue, mq_id.seq);
                 thread->cancel_after();
             }
@@ -828,7 +828,7 @@ namespace MessageQueue {
             sg_messagequeue_map[id].lst_runloop_info.push_back(RunLoopInfo());
         }
 
-        xinfo_function(TSF"messagequeue id:%_", id);
+        qm_xinfo_function(TSF"messagequeue id:%_", id);
 
         while (true) {
             ScopedLock lock(sg_messagequeue_map_mutex);
@@ -983,7 +983,7 @@ namespace MessageQueue {
 
         if (0 != thread_.start()) { return KInvalidQueueID;}
         messagequeue_id_ = __CreateMessageQueueInfo(breaker_, thread_.tid());
-        xinfo2(TSF"create messageqeue id:%_", messagequeue_id_);
+        qm_xinfo2(TSF"create messageqeue id:%_", messagequeue_id_);
 
         return messagequeue_id_;
     }

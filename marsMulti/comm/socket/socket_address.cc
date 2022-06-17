@@ -26,7 +26,7 @@
 #include "comm/socket/ipv6_address_utils.h"
 #include "comm/socket/qm_nat64_prefix_util.h"
 #include "comm/qm_strutil.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 #if defined(__linux__) && !defined(AI_DEFAULT)
 	#define  AI_DEFAULT (AI_V4MAPPED | AI_ADDRCONFIG)
@@ -117,7 +117,7 @@ void  socket_address::__init(const sockaddr* _addr) {
 }
 
 bool socket_address::fix_current_nat64_addr() {
-	xinfo_function(); //打印耗时
+	qm_xinfo_function(); //打印耗时
 	bool ret = false;
 	bool is_update = false;
     if (AF_INET6 == addr_.ss_family && 0!=strncasecmp("::FFFF:", ip_, 7)) {
@@ -130,7 +130,7 @@ bool socket_address::fix_current_nat64_addr() {
             ret = ConvertV4toNat64V6(*(struct in_addr*)(&(_asv6()->sin6_addr.s6_addr32[3])), nat64_v6_addr);
 #endif
 			
-			xdebug2(TSF"ret =%_, ip_=%_, nat64_v6_addr = %_", ret, ip_, strutil::Hex2Str((char*)&(nat64_v6_addr.s6_addr16), 16));
+			qm_xdebug2(TSF"ret =%_, ip_=%_, nat64_v6_addr = %_", ret, ip_, strutil::Hex2Str((char*)&(nat64_v6_addr.s6_addr16), 16));
 			if (ret) {
 				memcpy ((char*)&(_asv6()->sin6_addr.s6_addr16), (char*)&(nat64_v6_addr.s6_addr16), 16);
 				socket_inet_ntop(AF_INET6, &(_asv6()->sin6_addr), ip_, sizeof(ip_));
@@ -147,23 +147,23 @@ bool socket_address::fix_current_nat64_addr() {
 				}
 				//-----------------------------//
 				snprintf(url_, sizeof(url_), "[%s]:%u", ip_, port());
-				xdebug2(TSF"after fix url_=%_", url_);
+				qm_xdebug2(TSF"after fix url_=%_", url_);
 			} else {
-				xerror2(TSF"ConvertV4toNat64V6() ret=%_, ipstack=%_", ret, TLocalIPStackStr[local_ipstack_detect()]);
+				qm_xerror2(TSF"ConvertV4toNat64V6() ret=%_, ipstack=%_", ret, TLocalIPStackStr[local_ipstack_detect()]);
 			}
 //		} else {
-//			xdebug2(TSF"no update nat64_prefix");
+//			qm_xdebug2(TSF"no update nat64_prefix");
 //		}
 
 	}
-	xdebug2(TSF"is_update =%_, ret=%_", is_update, ret);
+	qm_xdebug2(TSF"is_update =%_, ret=%_", is_update, ret);
 	return ret;
 }
 const sockaddr& socket_address::address_fix() {
 	if (AF_INET6 == addr_.ss_family) {
-		xdebug2(TSF"before fix current ipv6 = %_", ipv6());
+		qm_xdebug2(TSF"before fix current ipv6 = %_", ipv6());
 		fix_current_nat64_addr();
-		xdebug2(TSF"after fix current ipv6 = %_", ipv6());
+		qm_xdebug2(TSF"after fix current ipv6 = %_", ipv6());
 	}
     return (sockaddr&)addr_;
 }
@@ -198,7 +198,7 @@ const char* socket_address::ip() const {
             return ip_;
     }
 
-    xerror2(TSF"invalid ip family:%_, ip:%_", addr_.ss_family, ip_);
+    qm_xerror2(TSF"invalid ip family:%_, ip:%_", addr_.ss_family, ip_);
     return "";
 }
 
@@ -356,7 +356,7 @@ socket_address socket_address::getpeername(SOCKET _sock) {
         } else if (AF_INET6 == addr.ss_family) {
             return socket_address((const sockaddr_in6&)addr);
         } else {
-            xerror2(TSF"invalid famiray %_", addr.ss_family);
+            qm_xerror2(TSF"invalid famiray %_", addr.ss_family);
         }
     }
 

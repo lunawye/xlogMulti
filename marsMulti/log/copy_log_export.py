@@ -5,8 +5,8 @@ import shutil
 
 HEADER_FILE_SUFFIX = ".h"
 
-XLOG_SRC_PATH = "../comm/xlogger"
-XLOG_EXPORT_PATH = "export_include/xlogger/"
+XLOG_SRC_PATH = "../comm/qm_xlogger"
+XLOG_EXPORT_PATH = "export_include/qm_xlogger/"
 
 def cpHeaderFiles():
 	for dirpath, dirnames, filenames in os.walk(XLOG_SRC_PATH):

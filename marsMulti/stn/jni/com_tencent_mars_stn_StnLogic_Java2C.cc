@@ -22,7 +22,7 @@
 #include "marsMulti/baseevent/active_logic.h"
 #include "marsMulti/baseevent/baseprjevent.h"
 #include "marsMulti/baseevent/baseevent.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/singleton.h"
 #include "marsMulti/comm/qm_strutil.h"
 #include "marsMulti/comm/bootrun.h"
@@ -167,7 +167,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_setBackupIPs
 DEFINE_FIND_STATIC_METHOD(KJava2C_startTask, KNetJava2C, "startTask", "(Lcom/tencent/marsMulti/stn/StnLogic$Task;)V")
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_startTask
   (JNIEnv *_env, jclass, jobject _task) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	//get the field value of the netcmd
 	jint taskid = JNU_GetField(_env, _task, "taskID", "I").i;
@@ -260,7 +260,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_startTask
 DEFINE_FIND_STATIC_METHOD(KJava2C_stopTask, KNetJava2C, "stopTask", "(I)V")
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_stopTask
   (JNIEnv *_env, jclass, jint _taskid) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	StopTask(_taskid);
 }
@@ -268,7 +268,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_stopTask
 DEFINE_FIND_STATIC_METHOD(KJava2C_hasTask, KNetJava2C, "hasTask", "(I)Z")
 JNIEXPORT jboolean JNICALL Java_com_tencent_mars_stn_StnLogic_hasTask
   (JNIEnv *_env, jclass, jint _taskid) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	return HasTask(_taskid);
 }
@@ -282,7 +282,7 @@ DEFINE_FIND_STATIC_METHOD(KJava2C_redoTask, KNetJava2C, "redoTask", "()V")
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_redoTask
   (JNIEnv *_env, jclass)
 {
-	xverbose_function();
+	qm_xverbose_function();
 
     RedoTasks();
 }
@@ -300,7 +300,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_touchTasks
 DEFINE_FIND_STATIC_METHOD(KJava2C_clearTask, KNetJava2C, "clearTask", "()V")
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_clearTask
   (JNIEnv *_env, jclass) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	ClearTasks();
 }
@@ -312,7 +312,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_clearTask
  */
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_makesureLongLinkConnected
   (JNIEnv *_env, jclass) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	MakesureLonglinkConnected();
 }
@@ -324,7 +324,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_makesureLongLinkConnec
  */
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_setSignallingStrategy
   (JNIEnv *_env, jclass, jlong _period, jlong _keep_time) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	SetSignallingStrategy((long)_period, (long)_keep_time);
 }
@@ -336,7 +336,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_setSignallingStrategy
  */
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_keepSignalling
   (JNIEnv *_env, jclass) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	KeepSignalling();
 }
@@ -348,7 +348,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_keepSignalling
  */
 JNIEXPORT void JNICALL Java_com_tencent_mars_stn_StnLogic_stopSignalling
   (JNIEnv *_env, jclass) {
-	xverbose_function();
+	qm_xverbose_function();
 
 	StopSignalling();
 }

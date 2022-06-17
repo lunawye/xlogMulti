@@ -21,7 +21,7 @@
 #include "comm/socket/socket_address.h"
 #include "comm/qm_autobuffer.h"
 #include "comm/qm_time_utils.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/platform_comm.h"
 #include "comm/unique_resource.h"
 
@@ -41,7 +41,7 @@ SOCKET  block_socket_connect(const socket_address& _address, SocketBreaker& _bre
     }
     
 #ifdef _WIN32
-    if (0 != socket_ipv6only(sock.get(), 0)){ xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
+    if (0 != socket_ipv6only(sock.get(), 0)){ qm_xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
 #endif
     
     int ret = socket_set_nobio(sock.get());
@@ -52,7 +52,7 @@ SOCKET  block_socket_connect(const socket_address& _address, SocketBreaker& _bre
     
     if (getNetInfo() == kWifi && socket_fix_tcp_mss(sock.get()) < 0) {
 #ifdef ANDROID
-        xinfo2(TSF"wifi set tcp mss error:%0", strerror(socket_errno));
+        qm_xinfo2(TSF"wifi set tcp mss error:%0", strerror(socket_errno));
 #endif
     }
     

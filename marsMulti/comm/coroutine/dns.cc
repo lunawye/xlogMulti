@@ -12,7 +12,7 @@
 
 #include "./coro_async.h"
 
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #include "thread/lock.h"
 #include "socket/unix_socket.h"
 #include "socket/socket_address.h"
@@ -22,7 +22,7 @@
 using namespace coroutine;
 
 static void __GetIP(const std::string& host_name, DNS::DNSFunc dnsfunc, std::vector<std::string>& _result) {
-    xverbose_function();
+    qm_xverbose_function();
 
     if (NULL == dnsfunc) {
         
@@ -37,11 +37,11 @@ static void __GetIP(const std::string& host_name, DNS::DNSFunc dnsfunc, std::vec
         int error = getaddrinfo(host_name.c_str(), NULL, &hints, &result);
 
         if (error != 0) {
-            xwarn2(TSF"error, error:%0, hostname:%1", error, host_name.c_str());
+            qm_xwarn2(TSF"error, error:%0, hostname:%1", error, host_name.c_str());
         } else {
             for (single = result; single; single = single->ai_next) {
                 if (PF_INET != single->ai_family) {
-                    xassert2(false);
+                    qm_xassert2(false);
                     continue;
                 }
 
@@ -50,7 +50,7 @@ static void __GetIP(const std::string& host_name, DNS::DNSFunc dnsfunc, std::vec
 
                 // In Indonesia, if there is no ipv6's ip, operators return 0.0.0.0.
                 if (INADDR_ANY == addr_in->sin_addr.s_addr || INADDR_NONE == addr_in->sin_addr.s_addr) {
-                    xwarn2(TSF"hehe, addr_in->sin_addr.s_addr:%0", addr_in->sin_addr.s_addr);
+                    qm_xwarn2(TSF"hehe, addr_in->sin_addr.s_addr:%0", addr_in->sin_addr.s_addr);
                     continue;
                 }
 
@@ -58,7 +58,7 @@ static void __GetIP(const std::string& host_name, DNS::DNSFunc dnsfunc, std::vec
     			const char* ip = socket_address(convertAddr).ip();
 
                 if (!socket_address(ip, 0).valid()) {
-                    xerror2(TSF"ip is invalid, ip:%0", ip);
+                    qm_xerror2(TSF"ip is invalid, ip:%0", ip);
                     continue;
                 }
 
@@ -70,9 +70,9 @@ static void __GetIP(const std::string& host_name, DNS::DNSFunc dnsfunc, std::vec
                 std::vector<socket_address> dnssvraddrs;
                 marsMulti::comm::getdnssvraddrs(dnssvraddrs);
                 
-                xinfo2("dns server:") >> log_group;
+                qm_xinfo2("dns server:") >> log_group;
                 for (std::vector<socket_address>::iterator iter = dnssvraddrs.begin(); iter != dnssvraddrs.end(); ++iter) {
-                    xinfo2(TSF"%_:%_ ", iter->ip(), iter->port()) >> log_group;
+                    qm_xinfo2(TSF"%_:%_ ", iter->ip(), iter->port()) >> log_group;
                 }
             }
             
@@ -104,7 +104,7 @@ DNS::~DNS() {
 
 bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>& ips, long millsec, DNSBreaker* _breaker) {
 
-    xassert2(!_host_name.empty());
+    qm_xassert2(!_host_name.empty());
     if (_host_name.empty()) { return false; }
     if (_breaker && _breaker->isbreak) return false;
 

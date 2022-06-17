@@ -27,7 +27,7 @@
 #ifdef __APPLE__
 #include "marsMulti/xlog/qm_xlogger.h"
 #else
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #endif
 #include "marsMulti/comm/qm_autobuffer.h"
 #include "marsMulti/stn/stn.h"

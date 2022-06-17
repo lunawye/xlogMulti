@@ -1,6 +1,6 @@
 #pragma once
 
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #include "alarm.h"
 #include "singleton.h"
 #include "platform_comm.h"

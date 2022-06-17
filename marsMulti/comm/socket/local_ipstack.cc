@@ -19,7 +19,7 @@
 
 #include "qm_local_ipstack.h"
 #include <vector>
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #if (defined(__APPLE__) || defined(ANDROID))
 #include <strings.h>
 #include "network/getifaddrs.h"
@@ -55,7 +55,7 @@ _test_connect(int pf, struct sockaddr *addr, size_t addrlen, struct sockaddr* lo
         ret = connect(s, addr, addrlen);
     } while (ret < 0 && errno == EINTR && loop_count++<kMaxLoopCount);
     if (loop_count>=kMaxLoopCount) {
-    	xerror2(TSF"connect error. loop_count = %_", loop_count);
+    	qm_xerror2(TSF"connect error. loop_count = %_", loop_count);
     }
     int success = (ret == 0);
     if (success) {
@@ -67,7 +67,7 @@ _test_connect(int pf, struct sockaddr *addr, size_t addrlen, struct sockaddr* lo
         ret = close(s);
     } while (ret < 0 && errno == EINTR && loop_count++<kMaxLoopCount);
     if (loop_count>=kMaxLoopCount) {
-    	xerror2(TSF"close error. loop_count = %_", loop_count);
+    	qm_xerror2(TSF"close error. loop_count = %_", loop_count);
     }
     return success;
 }
@@ -229,7 +229,7 @@ TLocalIPStack __local_ipstack_detect(std::string& _log) {
 		detail("local_stack:%d dns_ip_stack:%d", local_stack, dns_ip_stack);
 		return (TLocalIPStack)(ELocalIPStack_None==dns_ip_stack? local_stack:dns_ip_stack);
     } else {
-    	xassert2(ELocalIPStack_Dual == local_stack);
+    	qm_xassert2(ELocalIPStack_Dual == local_stack);
     	return (TLocalIPStack)local_stack;
     }
 #else
@@ -351,10 +351,10 @@ static bool GetWinV4GateWay() {
 				if (gateway->Address.lpSockaddr->sa_family == AF_INET)
 				{
 					sockaddr_in *sa_in = (sockaddr_in *)gateway->Address.lpSockaddr;
-					xinfo2(TSF"gateway IPV4: %_", socket_inet_ntop(AF_INET, &(sa_in->sin_addr), buff, bufflen));
+					qm_xinfo2(TSF"gateway IPV4: %_", socket_inet_ntop(AF_INET, &(sa_in->sin_addr), buff, bufflen));
 					struct sockaddr_in addr;
 					if (socket_inet_pton(AF_INET, buff, &addr.sin_addr) == 1) {
-						xinfo2(TSF"this is true v4 !"); 
+						qm_xinfo2(TSF"this is true v4 !"); 
                         result = true;
 					}
 				}
@@ -363,7 +363,7 @@ static bool GetWinV4GateWay() {
 		}
 	}
 	else {
-		xinfo2("ipv4 stack detect GetAdaptersAddresses failed.");
+		qm_xinfo2("ipv4 stack detect GetAdaptersAddresses failed.");
 	}
 	free(pAddresses);
 	return result;
@@ -392,12 +392,12 @@ static bool GetWinV6GateWay() {
 				if (gateway->Address.lpSockaddr->sa_family == AF_INET6)
 				{
 					sockaddr_in6 *sa_in6 = (sockaddr_in6 *)gateway->Address.lpSockaddr;
-					xinfo2(TSF"gateway IPV6: %_", socket_inet_ntop(AF_INET6, &(sa_in6->sin6_addr), buff, bufflen));
+					qm_xinfo2(TSF"gateway IPV6: %_", socket_inet_ntop(AF_INET6, &(sa_in6->sin6_addr), buff, bufflen));
 					struct sockaddr_in6 addr6;
 					if (socket_inet_pton(AF_INET6, buff, &addr6.sin6_addr) == 1) {
 						std::string v6_s(buff);
 						if (v6_s == "::") {
-							xwarn2("the v6 is fake!");
+							qm_xwarn2("the v6 is fake!");
 						} else {
                             result = true;
                         }
@@ -408,7 +408,7 @@ static bool GetWinV6GateWay() {
 		}
 	}
 	else {
-		xinfo2("ipv6 stack detect GetAdaptersAddresses failed.");
+		qm_xinfo2("ipv6 stack detect GetAdaptersAddresses failed.");
 	}
 	free(pAddresses);
 	return result;
@@ -424,13 +424,13 @@ TLocalIPStack __local_ipstack_detect(std::string& _log) {
     if (have_ipv4) { local_stack |= ELocalIPStack_IPv4; }
     if (have_ipv6) { local_stack |= ELocalIPStack_IPv6; }
     
-    xinfo2(TSF"__local_ipstack_detect result v6 %_, v4 %_ ", have_ipv6, have_ipv4);
+    qm_xinfo2(TSF"__local_ipstack_detect result v6 %_, v4 %_ ", have_ipv6, have_ipv4);
 
     return (TLocalIPStack)local_stack;
 }
 
 TLocalIPStack local_ipstack_detect() {
-    xinfo2(TSF"windows start to detect local stack");
+    qm_xinfo2(TSF"windows start to detect local stack");
     std::string log;
     return __local_ipstack_detect(log);
 }

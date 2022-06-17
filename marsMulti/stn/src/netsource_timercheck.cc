@@ -25,7 +25,7 @@
 #include "boost/bind.hpp"
 
 #include "marsMulti/comm/comm_frequency_limit.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/stn/config.h"
 #include "marsMulti/stn/stn.h"
 
@@ -49,8 +49,8 @@ NetSourceTimerCheck::NetSourceTimerCheck(NetSource* _net_source, ActiveLogic& _a
     , seletor_(breaker_)
     , longlink_(_longlink)
 	, asyncreg_(MessageQueue::InstallAsyncHandler(_messagequeue_id)){
-    xassert2(breaker_.IsCreateSuc(), "create breaker fail");
-        xinfo2(TSF"handler:(%_,%_)", asyncreg_.Get().queue, asyncreg_.Get().seq);
+    qm_xassert2(breaker_.IsCreateSuc(), "create breaker fail");
+        qm_xinfo2(TSF"handler:(%_,%_)", asyncreg_.Get().queue, asyncreg_.Get().seq);
     frequency_limit_ = new CommFrequencyLimit(kMaxSpeedTestCount, kIntervalTime);
 
     active_connection_ = _active_logic.SignalActive.connect(boost::bind(&NetSourceTimerCheck::__OnActiveChanged, this, _1));
@@ -68,7 +68,7 @@ NetSourceTimerCheck::~NetSourceTimerCheck() {
         }
         
         if (!breaker_.Break()) {
-            xerror2(TSF"write into pipe error");
+            qm_xerror2(TSF"write into pipe error");
             break;
         }
     
@@ -80,14 +80,14 @@ NetSourceTimerCheck::~NetSourceTimerCheck() {
 
 void NetSourceTimerCheck::CancelConnect() {
 	RETURN_NETCORE_SYNC2ASYNC_FUNC(boost::bind(&NetSourceTimerCheck::CancelConnect, this));
-    xinfo_function();
+    qm_xinfo_function();
 
     if (!thread_.isruning()) {
         return;
     }
 
     if (!breaker_.Break()) {
-        xerror2(TSF"write into pipe error");
+        qm_xerror2(TSF"write into pipe error");
     }
 
 }
@@ -95,7 +95,7 @@ void NetSourceTimerCheck::CancelConnect() {
 void NetSourceTimerCheck::__StartCheck() {
 
 	RETURN_NETCORE_SYNC2ASYNC_FUNC(boost::bind(&NetSourceTimerCheck::__StartCheck, this));
-    xdebug_function();
+    qm_xdebug_function();
 
     if (asyncpost_ != MessageQueue::KNullPost) return;
 
@@ -116,17 +116,17 @@ void NetSourceTimerCheck::__Check() {
 
     // limit the frequency of speed test
     if (!frequency_limit_->Check()) {
-        xwarn2(TSF"frequency limit");
+        qm_xwarn2(TSF"frequency limit");
         return;
     }
 
     if (!breaker_.IsCreateSuc() && !breaker_.ReCreate()) {
-        xassert2(false, "break error!");
+        qm_xassert2(false, "break error!");
         return;
     }
 
     std::string linkedhost = longlink_.Profile().host;
-    xdebug2(TSF"current host:%0", linkedhost);
+    qm_xdebug2(TSF"current host:%0", linkedhost);
 
     thread_.start(boost::bind(&NetSourceTimerCheck::__Run, this, linkedhost));
 
@@ -136,7 +136,7 @@ void NetSourceTimerCheck::__StopCheck() {
 
 	RETURN_NETCORE_SYNC2ASYNC_FUNC(boost::bind(&NetSourceTimerCheck::__StopCheck, this));
 
-    xdebug_function();
+    qm_xdebug_function();
 
     if (asyncpost_ == MessageQueue::KNullPost) return;
 
@@ -145,7 +145,7 @@ void NetSourceTimerCheck::__StopCheck() {
     }
 
     if (!breaker_.Break()) {
-        xerror2(TSF"write into pipe error");
+        qm_xerror2(TSF"write into pipe error");
         return;
     }
 
@@ -161,7 +161,7 @@ void NetSourceTimerCheck::__Run(const std::string& _host) {
 
 	if (__TryConnnect(_host)) {
 
-		xassert2(fun_time_check_suc_);
+		qm_xassert2(fun_time_check_suc_);
 
 		if (fun_time_check_suc_) {
 			// reset the long link
@@ -191,7 +191,7 @@ bool NetSourceTimerCheck::__TryConnnect(const std::string& _host) {
     NetSource::GetLonglinkPorts(port_vec);
 
     if (port_vec.empty()) {
-        xerror2(TSF"get ports empty!");
+        qm_xerror2(TSF"get ports empty!");
         return false;
     }
 
@@ -209,22 +209,22 @@ bool NetSourceTimerCheck::__TryConnnect(const std::string& _host) {
         int select_ret = seletor_.Select(kTimeout);
 
         if (select_ret == 0) {
-            xerror2(TSF"time out");
+            qm_xerror2(TSF"time out");
             break;
         }
 
         if (select_ret < 0) {
-            xerror2(TSF"select errror, ret:%0, strerror(errno):%1", select_ret, strerror(errno));
+            qm_xerror2(TSF"select errror, ret:%0, strerror(errno):%1", select_ret, strerror(errno));
             break;
         }
 
         if (seletor_.IsException()) {
-            xerror2(TSF"pipe exception");
+            qm_xerror2(TSF"pipe exception");
             break;
         }
 
         if (seletor_.IsBreak()) {
-            xwarn2(TSF"FD_ISSET(pipe_[0], &readfd)");
+            qm_xwarn2(TSF"FD_ISSET(pipe_[0], &readfd)");
             break;
         }
 
@@ -250,7 +250,7 @@ bool NetSourceTimerCheck::__TryConnnect(const std::string& _host) {
 void NetSourceTimerCheck::__OnActiveChanged(bool _is_active) {
     ASYNC_BLOCK_START
     
-    xdebug2(TSF"_is_active:%0", _is_active);
+    qm_xdebug2(TSF"_is_active:%0", _is_active);
 
     if (_is_active) {
         __StartCheck();

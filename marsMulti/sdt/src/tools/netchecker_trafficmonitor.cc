@@ -19,7 +19,7 @@
  */
 #include "netchecker_trafficmonitor.h"
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/platform_comm.h"
 
 using namespace marsMulti::comm;
@@ -32,7 +32,7 @@ NetCheckTrafficMonitor::NetCheckTrafficMonitor(unsigned long mobileDataThreshold
     , wifi_data_threshold_(wifiDataThreshold)
     , mobile_data_threshold_(mobileDataThreshold)
     , is_ignore_recv_data_(isIgnoreRecvData) {
-    xinfo_function();
+    qm_xinfo_function();
 }
 
 
@@ -46,7 +46,7 @@ bool NetCheckTrafficMonitor::sendLimitCheck(unsigned long sendDataSize) {
 
     if ((wifi_send_data_size_ + sendDataSize) > wifi_data_threshold_
             || (mobile_send_data_size_ + sendDataSize) > mobile_data_threshold_) {
-        xwarn2(TSF"sendLimitCheck!!!wifi_data_threshold_=%0,mobile_data_threshold_=%1,wifi_send_=%2,wifi_recv_=%3,mobile_send_=%4"
+        qm_xwarn2(TSF"sendLimitCheck!!!wifi_data_threshold_=%0,mobile_data_threshold_=%1,wifi_send_=%2,wifi_recv_=%3,mobile_send_=%4"
                ",mobile_recv_=%5,sendDataSize=%6", wifi_data_threshold_, mobile_data_threshold_, wifi_send_data_size_, wifi_recv_data_size_, mobile_send_data_size_, mobile_recv_data_size_, sendDataSize);
         return true;
     } else {
@@ -62,7 +62,7 @@ bool NetCheckTrafficMonitor::recvLimitCheck(unsigned long recvDataSize) {
     if (!is_ignore_recv_data_) {
         if ((wifi_send_data_size_ + wifi_recv_data_size_) > wifi_data_threshold_
                 || (mobile_send_data_size_ + mobile_recv_data_size_) > mobile_data_threshold_) {
-            xwarn2(TSF"recvLimitCheck!!!wifi_data_threshold_=%0,mobile_data_threshold_=%1,wifi_send_=%2,wifi_recv_=%3,mobile_send_=%4"
+            qm_xwarn2(TSF"recvLimitCheck!!!wifi_data_threshold_=%0,mobile_data_threshold_=%1,wifi_send_=%2,wifi_recv_=%3,mobile_send_=%4"
                    ",mobile_recv_=%5", wifi_data_threshold_, mobile_data_threshold_, wifi_send_data_size_, wifi_recv_data_size_, mobile_send_data_size_, mobile_recv_data_size_);
             return true;
         }
@@ -97,7 +97,7 @@ int NetCheckTrafficMonitor::__data(unsigned long sendDataSize, unsigned long rec
 }
 
 void NetCheckTrafficMonitor::__dumpDataSize() {
-    xinfo_function();
-    xinfo2(TSF"m_wifiRecvDataSize=%_,wifi_send_data_size_=%_,mobile_recv_data_size_=%_,mobile_send_data_size_=%_,wifi_data_threshold_=%_,mobile_data_threshold_=%_,is_ignore_recv_data_=%_"
+    qm_xinfo_function();
+    qm_xinfo2(TSF"m_wifiRecvDataSize=%_,wifi_send_data_size_=%_,mobile_recv_data_size_=%_,mobile_send_data_size_=%_,wifi_data_threshold_=%_,mobile_data_threshold_=%_,is_ignore_recv_data_=%_"
            , wifi_recv_data_size_, wifi_send_data_size_, mobile_recv_data_size_, mobile_send_data_size_, wifi_data_threshold_, mobile_data_threshold_, is_ignore_recv_data_);
 }

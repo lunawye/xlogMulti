@@ -4,7 +4,7 @@
 #include "comm\platform_comm.h"
 
 #include "runtime_comm.h"
-#include "comm\xlogger\qm_xlogger.h"
+#include "comm\qm_xlogger\qm_xlogger.h"
 #include "runtime_utils.h"
 
 using namespace PublicComponent;

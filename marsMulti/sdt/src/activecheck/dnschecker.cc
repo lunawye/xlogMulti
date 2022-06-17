@@ -21,7 +21,7 @@
 #include "dnschecker.h"
 
 #include "marsMulti/comm/singleton.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/sdt/constants.h"
 
@@ -30,27 +30,27 @@
 using namespace marsMulti::sdt;
 
 DnsChecker::DnsChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 DnsChecker::~DnsChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 int DnsChecker::StartDoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
     return BaseChecker::StartDoCheck(_check_request);
 }
 
 
 void DnsChecker::__DoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
 
     //longlink host dns
     for (CheckIPPorts_Iterator iter = _check_request.longlink_items.begin(); iter != _check_request.longlink_items.end(); ++iter) {
         
         if (is_canceled_) {
-            xinfo2(TSF"HttpChecker is canceled.");
+            qm_xinfo2(TSF"HttpChecker is canceled.");
             return;
         }
         
@@ -69,17 +69,17 @@ void DnsChecker::__DoCheck(CheckRequestProfile& _check_request) {
         profile.rtt = cost_time;
 
         if (0 == ret) {
-			xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_SUC);
+			qm_xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_SUC);
 			if (ipinfo.size >= 2){
 				profile.ip1 = inet_ntoa(ipinfo.ip[0]);
 				profile.ip2 = inet_ntoa(ipinfo.ip[1]);
 			}else if (1 == ipinfo.size){
 				profile.ip1 = inet_ntoa(ipinfo.ip[0]);
 			}else{
-				xerror2(TSF"ret = 0, but ipinfo.size = %d", ipinfo.size);
+				qm_xerror2(TSF"ret = 0, but ipinfo.size = %d", ipinfo.size);
 			}
 		} else {
-			xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_FAIL);
+			qm_xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_FAIL);
 		}
 
         _check_request.checkresult_profiles.push_back(profile);
@@ -88,7 +88,7 @@ void DnsChecker::__DoCheck(CheckRequestProfile& _check_request) {
 		if (_check_request.total_timeout != UNUSE_TIMEOUT) {
 			_check_request.total_timeout -= cost_time;
 			if (_check_request.total_timeout <= 0) {
-				xinfo2(TSF"dns check, host: %0, timeout.", profile.domain_name);
+				qm_xinfo2(TSF"dns check, host: %0, timeout.", profile.domain_name);
 				break;
 			}
 		}
@@ -98,7 +98,7 @@ void DnsChecker::__DoCheck(CheckRequestProfile& _check_request) {
     for (CheckIPPorts_Iterator iter = _check_request.shortlink_items.begin(); iter != _check_request.shortlink_items.end(); ++iter) {
         
         if (is_canceled_) {
-            xinfo2(TSF"HttpChecker is canceled.");
+            qm_xinfo2(TSF"HttpChecker is canceled.");
             return;
         }
         
@@ -117,17 +117,17 @@ void DnsChecker::__DoCheck(CheckRequestProfile& _check_request) {
         profile.rtt = cost_time;
 
         if (0 == ret) {
-			xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_SUC);
+			qm_xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_SUC);
 			if (ipinfo.size >= 2){
 				profile.ip1 = inet_ntoa(ipinfo.ip[0]);
 				profile.ip2 = inet_ntoa(ipinfo.ip[1]);
 			}else if (1 == ipinfo.size){
 				profile.ip1 = inet_ntoa(ipinfo.ip[0]);
 			}else{
-				xerror2(TSF"ret = 0, but ipinfo.size = %d", ipinfo.size);
+				qm_xerror2(TSF"ret = 0, but ipinfo.size = %d", ipinfo.size);
 			}
 		} else {
-			xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_FAIL);
+			qm_xinfo2(TSF"%0, check dns, host: %1, ret: %2", NET_CHECK_TAG, profile.domain_name, CHECK_FAIL);
 		}
 
         _check_request.checkresult_profiles.push_back(profile);
@@ -136,7 +136,7 @@ void DnsChecker::__DoCheck(CheckRequestProfile& _check_request) {
 		if (_check_request.total_timeout != UNUSE_TIMEOUT) {
 			_check_request.total_timeout -= cost_time;
 			if (_check_request.total_timeout <= 0) {
-				xinfo2(TSF"dns check, host: %0, timeout.", profile.domain_name);
+				qm_xinfo2(TSF"dns check, host: %0, timeout.", profile.domain_name);
 				break;
 			}
 		}

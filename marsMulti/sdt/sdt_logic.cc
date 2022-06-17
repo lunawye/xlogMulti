@@ -21,7 +21,7 @@
 
 #include "marsMulti/baseevent/baseevent.h"
 #include "marsMulti/baseevent/baseprjevent.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/bootrun.h"
 #include "marsMulti/sdt/constants.h"
 
@@ -37,18 +37,18 @@ static const std::string kLibName = "sdt";
 #define SDT_WEAK_CALL(func) \
     boost::shared_ptr<SdtCore> sdt_ptr = SdtCore::Singleton::Instance_Weak().lock();\
     if (!sdt_ptr) {\
-        xwarn2(TSF"sdt uncreate");\
+        qm_xwarn2(TSF"sdt uncreate");\
         return;\
     }\
 	sdt_ptr->func
 
 static void onCreate() {
-    xinfo2(TSF"sdt oncreate");
+    qm_xinfo2(TSF"sdt oncreate");
     SdtCore::Singleton::Instance();
 }
 
 static void onDestroy() {
-    xinfo2(TSF"sdt onDestroy");
+    qm_xinfo2(TSF"sdt onDestroy");
     SdtCore::Singleton::AsyncRelease();
 }
 

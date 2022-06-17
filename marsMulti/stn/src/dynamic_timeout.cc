@@ -24,7 +24,7 @@
 
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/platform_comm.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/stn/config.h"
 
 using namespace marsMulti::stn;
@@ -73,7 +73,7 @@ void DynamicTimeout::CgiTaskStatistic(std::string _cgi_uri, unsigned int _total_
         }
         /*else {
             task_status = DYNTIME_TASK_NORMAL_TAG;
-             xdebug2(TSF"totalSize:%_, costTime:%_", totalSize, costTime);
+             qm_xdebug2(TSF"totalSize:%_, costTime:%_", totalSize, costTime);
         }*/
     }
     
@@ -153,11 +153,11 @@ void DynamicTimeout::__StatusSwitch(std::string _cgi_uri, int _task_status) {
         case kEValuating:
         {
             if (dyntime_continuous_good_count_ >= kDynTimeMaxContinuousExcellentCount && (gettickcount() - dyntime_latest_bigpkg_goodtime_) <= kDynTimeCountExpireTime) {
-                xassert2(kDynTimeMaxContinuousExcellentCount >= 10, TSF"max_continuous_good_count:%_", kDynTimeMaxContinuousExcellentCount);
+                qm_xassert2(kDynTimeMaxContinuousExcellentCount >= 10, TSF"max_continuous_good_count:%_", kDynTimeMaxContinuousExcellentCount);
                 dyntime_status_ = kExcellent;
             }
             else if (dyntime_failed_normal_count_.count() <= kDynTimeMinNormalPkgCount){
-                xassert2(kDynTimeMinNormalPkgCount < dyntime_failed_normal_count_.size(), TSF"DYNTIME_MIN_NORMAL_PKG_COUNT:%_, dyntime_failed_normal_count_:%_", kDynTimeMinNormalPkgCount, dyntime_failed_normal_count_.size());
+                qm_xassert2(kDynTimeMinNormalPkgCount < dyntime_failed_normal_count_.size(), TSF"DYNTIME_MIN_NORMAL_PKG_COUNT:%_, dyntime_failed_normal_count_:%_", kDynTimeMinNormalPkgCount, dyntime_failed_normal_count_.size());
                 dyntime_status_ = kBad;
                 dyntime_fncount_latstmodify_time_ = 0;
             }
@@ -173,7 +173,7 @@ void DynamicTimeout::__StatusSwitch(std::string _cgi_uri, int _task_status) {
         case kBad:
         {
             if (dyntime_failed_normal_count_.count() > kDynTimeMinNormalPkgCount) {
-                xassert2(kDynTimeMinNormalPkgCount < dyntime_failed_normal_count_.size(), TSF"DYNTIME_MIN_NORMAL_PKG_COUNT:%_, dyntime_failed_normal_count_:%_", kDynTimeMinNormalPkgCount, dyntime_failed_normal_count_.size());
+                qm_xassert2(kDynTimeMinNormalPkgCount < dyntime_failed_normal_count_.size(), TSF"DYNTIME_MIN_NORMAL_PKG_COUNT:%_, dyntime_failed_normal_count_:%_", kDynTimeMinNormalPkgCount, dyntime_failed_normal_count_.size());
                 dyntime_status_ = kEValuating;
                 dyntime_fncount_latstmodify_time_ = 0;
             }
@@ -183,5 +183,5 @@ void DynamicTimeout::__StatusSwitch(std::string _cgi_uri, int _task_status) {
             break;
     }
     
-    xdebug2(TSF"task_status:%_, good_count:%_, good_time:%_, dyntime_status:%_, dyntime_failed_normal_count_NORMAL:%_, cgi:%_", _task_status, dyntime_continuous_good_count_, dyntime_latest_bigpkg_goodtime_, dyntime_status_, dyntime_failed_normal_count_.count(), _cgi_uri);
+    qm_xdebug2(TSF"task_status:%_, good_count:%_, good_time:%_, dyntime_status:%_, dyntime_failed_normal_count_NORMAL:%_, cgi:%_", _task_status, dyntime_continuous_good_count_, dyntime_latest_bigpkg_goodtime_, dyntime_status_, dyntime_failed_normal_count_.count(), _cgi_uri);
 }

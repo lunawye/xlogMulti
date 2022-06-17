@@ -20,7 +20,7 @@
 
 #include "stn_logic_C2Java.h"
 #include "marsMulti/comm/qm_autobuffer.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/jni/util/var_cache.h"
 #include "marsMulti/comm/jni/util/scope_jenv.h"
 #include "marsMulti/comm/jni/util/comm_function.h"
@@ -53,7 +53,7 @@ extern boost::signals2::signal<void (ErrCmdType _err_type, int _err_code, const 
         if (cb) {\
             return (cb->fun);\
         }\
-        xwarn2("stn native callback is null");\
+        qm_xwarn2("stn native callback is null");\
         return (default_value);\
     }
 
@@ -64,7 +64,7 @@ extern boost::signals2::signal<void (ErrCmdType _err_type, int _err_code, const 
             (cb->fun);\
             return;\
         }\
-        xwarn2("stn native callback is null");\
+        qm_xwarn2("stn native callback is null");\
         return;\
     }
 #define DEFINE_FIND_EMPTY_STATIC_METHOD(methodid) \
@@ -78,8 +78,8 @@ DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_onTaskEnd)
 #endif
 int C2Java_OnTaskEnd(uint32_t _taskid, void* const _user_context, const std::string& _user_id, int _error_type, int _error_code, const ConnectProfile& _profile){
 
-    xverbose_function();
-    xdebug2(TSF"recieve task profile: %_, %_, %_", _profile.start_connect_time, _profile.start_send_packet_time, _profile.read_packet_finished_time);
+    qm_xverbose_function();
+    qm_xdebug2(TSF"recieve task profile: %_, %_, %_", _profile.start_connect_time, _profile.start_send_packet_time, _profile.read_packet_finished_time);
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(OnTaskEnd(_taskid, _user_context, _user_id, _error_type, _error_code), -1);
 #endif
@@ -132,7 +132,7 @@ DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_onPush)
 #endif
 void C2Java_OnPush(const std::string& _channel_id, uint32_t _cmdid, uint32_t _taskid, const AutoBuffer& _body, const AutoBuffer& _extend){
 
-    xverbose_function();
+    qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(OnPush(_channel_id, _cmdid, _taskid, _body, _extend));
@@ -148,7 +148,7 @@ void C2Java_OnPush(const std::string& _channel_id, uint32_t _cmdid, uint32_t _ta
 	if (_body.Length() > 0) {
 		data_jba = JNU_Buffer2JbyteArray(env, _body);
 	} else {
-		xdebug2(TSF"the data.Lenght() < = 0");
+		qm_xdebug2(TSF"the data.Lenght() < = 0");
 	}
 
 	JNU_CallStaticMethodByMethodInfo(env, KC2Java_onPush, ScopedJstring(env, _channel_id.c_str()).GetJstr(), (jint)_cmdid, (jint)_taskid, data_jba);
@@ -165,7 +165,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_onNewDns, KC2Java, "onNewDns", "(Ljava/lang/St
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_onNewDns)
 #endif
 std::vector<std::string>  C2Java_OnNewDns(const std::string& _host){
-	xverbose_function();
+	qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(OnNewDns(_host), std::vector<std::string>());
 #endif
@@ -190,7 +190,7 @@ std::vector<std::string>  C2Java_OnNewDns(const std::string& _host){
 		}
 	}
 	else {
-		xerror2(TSF"host is empty");
+		qm_xerror2(TSF"host is empty");
 	}
 
 	return iplist;
@@ -202,7 +202,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_req2Buf, KC2Java, "req2Buf", "(ILjava/lang/Obj
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_req2Buf)
 #endif
 bool C2Java_Req2Buf(uint32_t _taskid,  void* const _user_context, const std::string& _user_id, AutoBuffer& _outbuffer,  AutoBuffer& _extend, int& _error_code, const int _channel_select, const std::string& _host){
-    xverbose_function();
+    qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(Req2Buf(_taskid, _user_context, _user_id,
@@ -236,7 +236,7 @@ bool C2Java_Req2Buf(uint32_t _taskid,  void* const _user_context, const std::str
 			env->ReleaseByteArrayElements(ret_byte_array, ba, 0);
 			env->DeleteLocalRef(ret_byte_array);
 		} else {
-			xdebug2(TSF"the retByteArray is null");
+			qm_xdebug2(TSF"the retByteArray is null");
 		}
 	}
 	env->DeleteLocalRef(byte_array_output_stream_obj);
@@ -255,7 +255,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_buf2Resp, KC2Java, "buf2Resp", "(ILjava/lang/O
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_buf2Resp)
 #endif
 int C2Java_Buf2Resp(uint32_t _taskid, void* const _user_context, const std::string& _user_id, const AutoBuffer& _inbuffer, const AutoBuffer& _extend, int& _error_code, const int _channel_select){
-    xverbose_function();
+    qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(Buf2Resp(_taskid, _user_context, _user_id, _inbuffer, _extend, _error_code, _channel_select), -1);
 #endif
@@ -269,7 +269,7 @@ int C2Java_Buf2Resp(uint32_t _taskid, void* const _user_context, const std::stri
 	if (_inbuffer.Length() > 0) {
 		resp_buf_jba =  JNU_Buffer2JbyteArray(env, _inbuffer);
 	} else {
-		xdebug2(TSF"the decodeBuffer.Lenght() <= 0");
+		qm_xdebug2(TSF"the decodeBuffer.Lenght() <= 0");
 	}
 
 	jintArray errcode_array = env->NewIntArray(1);
@@ -294,7 +294,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_makesureAuthed, KC2Java, "makesureAuthed", "(L
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_makesureAuthed)
 #endif
 bool C2Java_MakesureAuthed(const std::string& _host, const std::string& _user_id){
-    xverbose_function();
+    qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(MakesureAuthed(_host, _user_id), false);
 #endif
@@ -313,7 +313,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_getLongLinkIdentifyCheckBuffer, KC2Java, "getL
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_getLongLinkIdentifyCheckBuffer)
 #endif
 int C2Java_GetLonglinkIdentifyCheckBuffer(const std::string& _channel_id, AutoBuffer& _identify_buffer, AutoBuffer& _buffer_hash, int32_t& _cmdid){
-    xverbose_function();
+    qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(GetLonglinkIdentifyCheckBuffer(_channel_id, _identify_buffer, _buffer_hash, _cmdid), -1);
 #endif
@@ -337,7 +337,7 @@ int C2Java_GetLonglinkIdentifyCheckBuffer(const std::string& _channel_id, AutoBu
 	ret = JNU_CallStaticMethodByMethodInfo(env, KC2Java_getLongLinkIdentifyCheckBuffer, ScopedJstring(env, _channel_id.c_str()).GetJstr(), byte_array_outputstream_obj, byte_array_outputstream_hash, jcmdid_array).i;
 	if (ret == kCheckNext || ret == kCheckNever)
 	{
-		xwarn2(TSF"getLongLinkIdentifyCheckBuffer uin == 0, not ready");
+		qm_xwarn2(TSF"getLongLinkIdentifyCheckBuffer uin == 0, not ready");
 		env->DeleteLocalRef(byte_array_outputstream_obj);
 		env->DeleteLocalRef(byte_array_outputstream_hash);
         env->DeleteLocalRef(jcmdid_array);
@@ -372,7 +372,7 @@ int C2Java_GetLonglinkIdentifyCheckBuffer(const std::string& _channel_id, AutoBu
 		env->DeleteLocalRef(ret_byte_array);
         
 	} else {
-		xdebug2(TSF"the retByteArray is NULL");
+		qm_xdebug2(TSF"the retByteArray is NULL");
 	}
     
 	//free the local reference
@@ -388,7 +388,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_onLongLinkIdentifyResp, KC2Java, "onLongLinkId
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_onLongLinkIdentifyResp)
 #endif
 bool C2Java_OnLonglinkIdentifyResponse(const std::string& _channel_id, const AutoBuffer& _response_buffer, const AutoBuffer& _identify_buffer_hash){
-    xverbose_function();
+    qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(OnLonglinkIdentifyResponse(_channel_id, _response_buffer, _identify_buffer_hash), false);
 #endif
@@ -402,14 +402,14 @@ bool C2Java_OnLonglinkIdentifyResponse(const std::string& _channel_id, const Aut
 	if (_response_buffer.Length() > 0) {
 		data_jba = JNU_Buffer2JbyteArray(env, _response_buffer);
 	} else {
-		xdebug2(TSF"the respbuffer.Lenght() < = 0");
+		qm_xdebug2(TSF"the respbuffer.Lenght() < = 0");
 	}
 
 	jbyteArray hash_jba = NULL;
 	if (_identify_buffer_hash.Length() > 0) {
 		hash_jba = JNU_Buffer2JbyteArray(env, _identify_buffer_hash);
 	} else {
-		xdebug2(TSF"the hashCodeBuffer.Lenght() < = 0");
+		qm_xdebug2(TSF"the hashCodeBuffer.Lenght() < = 0");
 	}
 
 	jboolean ret = JNU_CallStaticMethodByMethodInfo(env, KC2Java_onLongLinkIdentifyResp, ScopedJstring(env, _channel_id.c_str()).GetJstr(),data_jba, hash_jba).z;
@@ -450,7 +450,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_reportNetConnectInfo, KC2Java, "reportConnectS
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_reportNetConnectInfo)
 #endif
 void C2Java_ReportConnectStatus(int _all_connstatus, int _longlink_connstatus){
-    xverbose_function();
+    qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(ReportConnectStatus(_all_connstatus, _longlink_connstatus));
@@ -459,7 +459,7 @@ void C2Java_ReportConnectStatus(int _all_connstatus, int _longlink_connstatus){
     ScopeJEnv scope_jenv(cache_instance->GetJvm());
     JNIEnv *env = scope_jenv.GetEnv();
     JNU_CallStaticMethodByMethodInfo(env, KC2Java_reportNetConnectInfo, (jint)_all_connstatus, (jint)_longlink_connstatus);
-    xdebug2(TSF"all_connstatus = %0, longlink_connstatus = %_", _all_connstatus, _longlink_connstatus);
+    qm_xdebug2(TSF"all_connstatus = %0, longlink_connstatus = %_", _all_connstatus, _longlink_connstatus);
 };
 
 //DEFINE_FIND_STATIC_METHOD(KC2Java_reportCrashStatistics, KC2Java, "reportCrashStatistics", "(Ljava/lang/String;Ljava/lang/String;)V")
@@ -473,7 +473,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_requestSync, KC2Java, "requestDoSync", "()V")
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_requestSync)
 #endif
 void C2Java_RequestSync(){
-    xverbose_function();
+    qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(RequestSync());
@@ -491,7 +491,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_requestNetCheckShortLinkHosts, KC2Java, "reque
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_requestNetCheckShortLinkHosts)
 #endif
 void C2Java_RequestNetCheckShortLinkHosts(std::vector<std::string>& _hostlist){
-	xverbose_function();
+	qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(RequestNetCheckShortLinkHosts(_hostlist));
@@ -522,7 +522,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_reportTaskProfile, KC2Java, "reportTaskProfile
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_reportTaskProfile)
 #endif
 void C2Java_ReportTaskProfile(const TaskProfile& _task_profile){
-	xverbose_function();
+	qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_VOID_FUN(ReportTaskProfile(_task_profile));

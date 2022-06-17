@@ -18,7 +18,7 @@
 //
 
 #include "weak_network_logic.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 
 #define MARK_TIMEOUT (60*1000)
 #define WEAK_CONNECT_RTT (2 * 1000)
@@ -80,12 +80,12 @@ namespace stn {
         if(!_is_foreground && is_curr_weak_) {
             __MarkWeak(false);
             __ReportWeakLogic(kExitSceneBackground, 1, false);
-            xinfo2(TSF"weak network end");
+            qm_xinfo2(TSF"weak network end");
         }
     }
     
     void WeakNetworkLogic::__ReportWeakLogic(int _key, int _value, bool _is_important) {
-        xinfo2(TSF"weak idkey:(%_, %_)", _key, _value);
+        qm_xinfo2(TSF"weak idkey:(%_, %_)", _key, _value);
         if (report_weak_logic_) {
             report_weak_logic_(_key, _value, _is_important);
         }
@@ -97,7 +97,7 @@ namespace stn {
             else {
                 __MarkWeak(false);
                 __ReportWeakLogic(kExitSceneTimeout, 1, false);
-                xinfo2(TSF"weak network end");
+                qm_xinfo2(TSF"weak network end");
                 return false;
             }
         }
@@ -116,7 +116,7 @@ namespace stn {
     }
     
     void WeakNetworkLogic::OnConnectEvent(bool _is_suc, int _rtt, int _index) {
-        xdebug2(TSF"connect(%_, %_, %_", _is_suc, _rtt, _index);
+        qm_xdebug2(TSF"connect(%_, %_, %_", _is_suc, _rtt, _index);
         if(_is_suc) {
             last_connect_fail_tick_.setInvalid();
             last_connect_suc_tick_.gettickcount();
@@ -127,18 +127,18 @@ namespace stn {
         }
         
         if(!ActiveLogic::Instance()->IsForeground()) {
-        	xdebug2(TSF"is background, this:%_", ActiveLogic::Instance().get());
+        	qm_xdebug2(TSF"is background, this:%_", ActiveLogic::Instance().get());
 	        return;
         }
 
-        xdebug2(TSF"connect in foreground");
+        qm_xdebug2(TSF"connect in foreground");
         if(is_curr_weak_)   ++connect_after_weak_;
         if(!_is_suc) {
             if(is_curr_weak_ && last_mark_tick_.gettickspan() >= WEAK_LEAST_SPAN) {
                 __MarkWeak(false);
                 __ReportWeakLogic(kExitSceneConnect, 1, false);
                 if(connect_after_weak_ <= 1 && first_mark_tick_.gettickspan() < SURE_WEAK_SPAN) __ReportWeakLogic(kExitQuickConnectNoNet, 1, false);
-                xinfo2(TSF"weak network end");
+                qm_xinfo2(TSF"weak network end");
             }
             return;
         }
@@ -156,7 +156,7 @@ namespace stn {
         if(is_weak) {
             if(!is_curr_weak_) {
                 __MarkWeak(true);
-                xinfo2(TSF"weak network rtt:%_, index:%_", _rtt, _index);
+                qm_xinfo2(TSF"weak network rtt:%_, index:%_", _rtt, _index);
             } else {
                 last_mark_tick_.gettickcount();
             }
@@ -172,7 +172,7 @@ namespace stn {
             if(!is_curr_weak_) {
                 __MarkWeak(true);
                 __ReportWeakLogic(_is_firstpkg ? kSceneFirstPkg : kScenePkgPkg, 1, false);
-                xinfo2(TSF"weak network span:%_", _span);
+                qm_xinfo2(TSF"weak network span:%_", _span);
             } else {
                 last_mark_tick_.gettickcount();
             }
@@ -196,7 +196,7 @@ namespace stn {
         if(is_weak) {
             if(!is_curr_weak_) {
                 __MarkWeak(true);
-                xinfo2(TSF"weak network errtype:%_", _task_profile.err_type);
+                qm_xinfo2(TSF"weak network errtype:%_", _task_profile.err_type);
             } else {
                 last_mark_tick_.gettickcount();
             }
@@ -205,7 +205,7 @@ namespace stn {
                 if(is_curr_weak_ && last_mark_tick_.gettickspan() >= WEAK_LEAST_SPAN) {
                     __MarkWeak(false);
                     __ReportWeakLogic(kExitSceneTask, 1, false);
-                    xinfo2(TSF"weak network end");
+                    qm_xinfo2(TSF"weak network end");
                 }
             }
         }

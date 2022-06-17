@@ -24,7 +24,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 namespace marsMulti {
 namespace comm {
@@ -53,14 +53,14 @@ bool SocketBreaker::ReCreate(){
     _Cleanup();
     
     if (pipe(pipes_) == -1){
-        xerror2(TSF"pipe errno %_,%_", errno, strerror(errno));
+        qm_xerror2(TSF"pipe errno %_,%_", errno, strerror(errno));
         return false;
     }
     
     int flags0 = fcntl(pipes_[0], F_GETFL, 0);
     int flags1 = fcntl(pipes_[1], F_GETFL, 0);
     if (flags0 == -1 || flags1 == -1) {
-        xerror2(TSF"get old flags error");
+        qm_xerror2(TSF"get old flags error");
         _Cleanup();
         return false;
     }
@@ -68,7 +68,7 @@ bool SocketBreaker::ReCreate(){
     int ret0 = fcntl(pipes_[0], F_SETFL, flags0|O_NONBLOCK);
     int ret1 = fcntl(pipes_[1], F_SETFL, flags1|O_NONBLOCK);
     if (ret0 == -1 || ret1 == -1) {
-        xerror2(TSF"fcntl error %_,%_", errno, strerror(errno));
+        qm_xerror2(TSF"fcntl error %_,%_", errno, strerror(errno));
         _Cleanup();
         return false;
     }
@@ -87,7 +87,7 @@ bool SocketBreaker::Break(){
     const char dummy = '1';
     ssize_t writebytes = write(pipes_[1], &dummy, sizeof(dummy));
     if (writebytes != sizeof(dummy)){
-        xerror2(TSF"write ret %_, fd %_ error %_,%_", writebytes, pipes_[1], errno, strerror(errno));
+        qm_xerror2(TSF"write ret %_, fd %_ error %_,%_", writebytes, pipes_[1], errno, strerror(errno));
         return false;
     }
     
@@ -133,12 +133,12 @@ bool SocketBreaker::Clear()
                 return true;
             }
             
-            xerror2(TSF"read ret %_, fd %_ error %_,%_", rv, pipes_[0], errno, strerror(errno));
+            qm_xerror2(TSF"read ret %_, fd %_ error %_,%_", rv, pipes_[0], errno, strerror(errno));
             return false;
         }
     }
     
-    xassert2(false);
+    qm_xassert2(false);
     return false;
 }
 

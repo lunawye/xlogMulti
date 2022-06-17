@@ -43,7 +43,7 @@
 #include "marsMulti/stn/proto/longlink_packer.h"
 
 class AutoBuffer;
-class XLogger;
+class QM_XLogger;
 
 class SmartHeartbeat;
 
@@ -163,7 +163,7 @@ class LongLink {
     void    __RunResponseError(ErrCmdType _type, int _errcode, ConnectProfile& _profile, bool _networkreport = true);
 
     bool    __SendNoopWhenNoData();
-    bool    __NoopReq(XLogger& _xlog, comm::Alarm& _alarm, bool need_active_timeout);
+    bool    __NoopReq(QM_XLogger& _xlog, comm::Alarm& _alarm, bool need_active_timeout);
     bool    __NoopResp(uint32_t _cmdid, uint32_t _taskid, AutoBuffer& _buf, AutoBuffer& _extension, comm::Alarm& _alarm, bool& _nooping, ConnectProfile& _profile);
 
     virtual void     __OnAlarm(bool _noop_timeout);

@@ -19,7 +19,7 @@
 #include "marsMulti/comm/tickcount.h"
 #include "marsMulti/comm/qm_strutil.h"
 #include "marsMulti/comm/qm_string_cast.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/socket/block_socket.h"
 #include "marsMulti/comm/socket/complexconnect.h"
 #include "marsMulti/comm/socket/socket_address.h"
@@ -60,14 +60,14 @@ HTTPDetector::HTTPDetector(const HTTPDetectReq& _req)
     
 }
 HTTPDetector::~HTTPDetector(){
-    xinfo_function();
+    qm_xinfo_function();
     CancelAndWait();
 }
 
 int HTTPDetector::StartSync(HTTPDectectResult& _result) {
-    xinfo_function();
+    qm_xinfo_function();
     if (worker_thread_.isruning()) {
-        xwarn2(TSF"@%_ HTTPDetect is running.", this);
+        qm_xwarn2(TSF"@%_ HTTPDetect is running.", this);
         return -1;
     }
     dns_breaker_.Clear();
@@ -80,7 +80,7 @@ int HTTPDetector::StartSync(HTTPDectectResult& _result) {
 
 int HTTPDetector::StartSync(const std::vector<std::string>& _prior_ips, HTTPDectectResult& _result) {
     if (worker_thread_.isruning()) {
-        xwarn2(TSF"@%_ HTTPDetect is running.", this);
+        qm_xwarn2(TSF"@%_ HTTPDetect is running.", this);
         return -1;
     }
     dns_breaker_.Clear();
@@ -109,18 +109,18 @@ void HTTPDetector::__Run() {
         callback_(result_);
         callback_ = NULL;
     } else {
-        xassert2(false, TSF"@%_ HTTPDetect async, but not set callback", this);
+        qm_xassert2(false, TSF"@%_ HTTPDetect async, but not set callback", this);
     }
     result_.Reset();
 }
 
 void HTTPDetector::__Detect() {
     using namespace http;
-    xinfo2(TSF"@%_ HTTPDetect req:%_", this, req_.ToString());
+    qm_xinfo2(TSF"@%_ HTTPDetect req:%_", this, req_.ToString());
     
     result_.detect_url_ = req_.detect_url_;
     if (!strutil::StartsWith(req_.detect_url_, "http://")) {
-        xerror2(TSF"@%_ url is not start with http://, detect_url_:%_", this, req_.detect_url_);
+        qm_xerror2(TSF"@%_ url is not start with http://, detect_url_:%_", this, req_.detect_url_);
         result_.logic_error_msg_.append("url is not start with http://;\n");
         return;
     }
@@ -162,7 +162,7 @@ void HTTPDetector::__Detect() {
     if (0==strncasecmp(req_.http_method_.c_str(), "POST", 4)) {
         req_buffer.Write(req_.post_data_.c_str(), req_.post_data_.size());
     }
-    xdebug2(TSF"req_buffer:%_", (char*)req_buffer.Ptr());
+    qm_xdebug2(TSF"req_buffer:%_", (char*)req_buffer.Ptr());
     
     std::string svr_ip;
     if (req_.prior_ip_.empty()) {
@@ -182,11 +182,11 @@ void HTTPDetector::__Detect() {
                 for (auto ip : vec_ip)
                     result_.dns_resolved_ip_.push_back(ip);
             } else if (dns_breaker_.isbreak) {
-                xwarn2(TSF"@%_ GetHostByName break by user", this);
+                qm_xwarn2(TSF"@%_ GetHostByName break by user", this);
                 result_.dns_errmsg_.append("GetHostByName break by user;");
                 return;
             } else {
-                xerror2(TSF"@%_ GetHostByName error， remain_timeout：%_", this, remain_timeout);
+                qm_xerror2(TSF"@%_ GetHostByName error， remain_timeout：%_", this, remain_timeout);
                 if (result_.dns_cost_>=remain_timeout) {
                     result_.dns_errmsg_.append(std::string("GetHostByName timeout, set timeout:")+string_cast(remain_timeout).str()+"ms");
                 } else {
@@ -196,7 +196,7 @@ void HTTPDetector::__Detect() {
             }
             remain_timeout -= result_.dns_cost_;
             if (remain_timeout<=0) {
-                xwarn2(TSF"@%_ HTTPDetect timeout, dns_cost:%_, total_timeout:%_", this, result_.dns_cost_, req_.total_timeout_);
+                qm_xwarn2(TSF"@%_ HTTPDetect timeout, dns_cost:%_, total_timeout:%_", this, result_.dns_cost_, req_.total_timeout_);
                 result_.is_timeout_ = true;
                 result_.logic_error_msg_.append("HTTPDetect total timeout after dns resolve.");
                 return;
@@ -204,7 +204,7 @@ void HTTPDetector::__Detect() {
         }
     } else {
         svr_ip = req_.prior_ip_.at(0);
-        xinfo2(TSF"@%_ use prior ip %_", this, svr_ip);
+        qm_xinfo2(TSF"@%_ use prior ip %_", this, svr_ip);
     }
     
     detect_tick.gettickcount();
@@ -213,7 +213,7 @@ void HTTPDetector::__Detect() {
     result_.connect_ip_port_ = svr_addr.url();
     
     int conn_timeout = std::min(kComplexConnectTimeout, (int)remain_timeout);
-    xdebug2(TSF"@%_, con_timeout:%_", this, conn_timeout);
+    qm_xdebug2(TSF"@%_, con_timeout:%_", this, conn_timeout);
     ComplexConnect conn(conn_timeout, kComplexConnectInterval);
     std::vector<socket_address> vecaddr;
     vecaddr.push_back(svr_addr);
@@ -232,12 +232,12 @@ void HTTPDetector::__Detect() {
             result_.tcp_connect_errno_ = socket_errno;
             result_.tcp_connect_errmsg_ = strerror(socket_errno);
         }
-        xerror2(TSF"tcp connect error, isbreak:%_, errno:%_(%_)", breaker_.IsBreak(), result_.tcp_connect_errno_, result_.tcp_connect_errmsg_);
+        qm_xerror2(TSF"tcp connect error, isbreak:%_, errno:%_(%_)", breaker_.IsBreak(), result_.tcp_connect_errno_, result_.tcp_connect_errmsg_);
         return;
     }
     
     if (remain_timeout<=0) {
-        xwarn2(TSF"@%_ HTTPDetect timeout, tcp_connect_cost_:%_, total_timeout:%_", this, result_.tcp_connect_cost_, req_.total_timeout_);
+        qm_xwarn2(TSF"@%_ HTTPDetect timeout, tcp_connect_cost_:%_, total_timeout:%_", this, result_.tcp_connect_cost_, req_.total_timeout_);
         result_.logic_error_msg_.append("HTTPDetect total timeout after tcp connect.");
         return;
     }
@@ -250,7 +250,7 @@ void HTTPDetector::__Detect() {
     int send_ret = block_socket_send(sock, (const unsigned char*)req_buffer.Ptr(), (unsigned int)req_buffer.Length(), breaker_, err_code);
     
     if (send_ret < 0) {
-        xerror2(TSF"Send Request Error, ret:%_, errno:%_, nread:%_, nwrite:%_", send_ret, strerror(err_code), socket_nread(sock), socket_nwrite(sock));
+        qm_xerror2(TSF"Send Request Error, ret:%_, errno:%_, nread:%_, nwrite:%_", send_ret, strerror(err_code), socket_nread(sock), socket_nwrite(sock));
         result_.tcp_rw_errno_ = err_code;
         result_.tcp_rw_errmsg_ = strerror(err_code);
         socket_close(sock);
@@ -259,17 +259,17 @@ void HTTPDetector::__Detect() {
     
     
     if (breaker_.IsBreak()) {
-        xwarn2(TSF"Send Request break, sent:%_ nread:%_, nwrite:%_", send_ret, socket_nread(sock), socket_nwrite(sock));
+        qm_xwarn2(TSF"Send Request break, sent:%_ nread:%_, nwrite:%_", send_ret, socket_nread(sock), socket_nwrite(sock));
         result_.logic_error_msg_.append("user interrupt detect when tcp send;\n");
         socket_close(sock);
         return;
     }
     result_.http_send_req_cost_ = detect_tick.gettickspan();
     result_.http_req_packet_size_ = send_ret;
-    xassert2(send_ret == (int)req_buffer.Length());
+    qm_xassert2(send_ret == (int)req_buffer.Length());
     remain_timeout -= result_.http_send_req_cost_;
     if (remain_timeout<=0) {
-        xwarn2(TSF"@%_ HTTPDetect timeout, http_send_req_cost_:%_, total_timeout:%_", this, result_.http_send_req_cost_, req_.total_timeout_);
+        qm_xwarn2(TSF"@%_ HTTPDetect timeout, http_send_req_cost_:%_, total_timeout:%_", this, result_.http_send_req_cost_, req_.total_timeout_);
         result_.logic_error_msg_.append("HTTPDetect total timeout after send req.");
         return;
     }
@@ -289,7 +289,7 @@ void HTTPDetector::__Detect() {
     while (true) {
         remain_timeout -= detect_tick.gettickspan();
         if (remain_timeout<=0) {
-            xwarn2(TSF"@%_ HTTPDetect timeout, span:%_, total_timeout:%_", this, (int64_t)detect_tick.gettickspan(), req_.total_timeout_);
+            qm_xwarn2(TSF"@%_ HTTPDetect timeout, span:%_, total_timeout:%_", this, (int64_t)detect_tick.gettickspan(), req_.total_timeout_);
             result_.logic_error_msg_.append("HTTPDetect total timeout when recv resp.");
             return;
         }
@@ -297,30 +297,30 @@ void HTTPDetector::__Detect() {
         
         int recv_ret = block_socket_recv(sock, recv_buf, 8 * 1024, breaker_, err_code, 5000);
         if (recv_ret < 0) {
-            xerror2(TSF"read block socket return false, error:%0, nread:%_, nwrite:%_", strerror(err_code), socket_nread(sock), socket_nwrite(sock));
+            qm_xerror2(TSF"read block socket return false, error:%0, nread:%_, nwrite:%_", strerror(err_code), socket_nread(sock), socket_nwrite(sock));
             result_.tcp_rw_errno_ = err_code;
             result_.tcp_rw_errmsg_ = strerror(err_code);
             break;
         }
         
         if (breaker_.IsBreak()) {
-            xinfo2(TSF"user cancel, nread:%_, nwrite:%_", socket_nread(sock), socket_nwrite(sock));
+            qm_xinfo2(TSF"user cancel, nread:%_, nwrite:%_", socket_nread(sock), socket_nwrite(sock));
             result_.logic_error_msg_.append("user interrupt detect when tcp recv;\n");
             break;
         }
         
         if (recv_ret == 0 && SOCKET_ERRNO(ETIMEDOUT) == err_code) {
-            xerror2(TSF"read timeout error:(%_,%_), nread:%_, nwrite:%_ ", err_code, strerror(err_code), socket_nread(sock), socket_nwrite(sock));
+            qm_xerror2(TSF"read timeout error:(%_,%_), nread:%_, nwrite:%_ ", err_code, strerror(err_code), socket_nread(sock), socket_nwrite(sock));
             continue;
         }
         if (recv_ret == 0) {
-            xerror2(TSF"remote disconnect, nread:%_, nwrite:%_", socket_nread(sock), socket_nwrite(sock));
+            qm_xerror2(TSF"remote disconnect, nread:%_, nwrite:%_", socket_nread(sock), socket_nwrite(sock));
             result_.tcp_rw_errmsg_ = "remote disconnect";
             break;
         }
         
         if (recv_ret > 0) {
-            xinfo2(TSF"recv len:%_ ", recv_ret);
+            qm_xinfo2(TSF"recv len:%_ ", recv_ret);
             //recv_pos = recv_buf.Pos();
             if (is_first_recv_packet) {
                 is_first_recv_packet = false;
@@ -335,17 +335,17 @@ void HTTPDetector::__Detect() {
         }
         
         if (parse_status == http::Parser::kFirstLineError) {
-            xerror2(TSF"http head not receive yet, but socket closed, length:%0, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(sock), socket_nwrite(sock));
+            qm_xerror2(TSF"http head not receive yet, but socket closed, length:%0, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(sock), socket_nwrite(sock));
             result_.http_errmsg_ = "http head not receive yet, but socket closed";
             break;
         }
         else if (parse_status == http::Parser::kHeaderFieldsError) {
-            xerror2(TSF"parse http head failed, but socket closed, length:%_, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(sock), socket_nwrite(sock));
+            qm_xerror2(TSF"parse http head failed, but socket closed, length:%_, nread:%_, nwrite:%_ ", recv_buf.Length(), socket_nread(sock), socket_nwrite(sock));
              result_.http_errmsg_ = "parse http head failed, but socket closed";
             break;
         }
         else if (parse_status == http::Parser::kBodyError) {
-            xerror2(TSF"content_length_ != body.Length(), Head:%0, http dump:%1 \n headers size:%2" , parser.Fields().ContentLength(), xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
+            qm_xerror2(TSF"content_length_ != body.Length(), Head:%0, http dump:%1 \n headers size:%2" , parser.Fields().ContentLength(), xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
             XMessage xmsg;
             xmsg(TSF"content_length(%_) != body size(%_)", parser.Fields().ContentLength(),recv_buf.Length());
             result_.http_errmsg_ = xmsg.String();
@@ -353,20 +353,20 @@ void HTTPDetector::__Detect() {
         }
         else if (parse_status == http::Parser::kEnd) {
             if (status_code != 200) {
-                xerror2(TSF"@%_, status_code != 200, code:%_, http dump:%_ \n headers size:%_", this, status_code, xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
+                qm_xerror2(TSF"@%_, status_code != 200, code:%_, http dump:%_ \n headers size:%_", this, status_code, xdump(recv_buf.Ptr(), recv_buf.Length()), parser.Fields().GetHeaders().size());
             } else {
-                xinfo2(TSF"@%_, headers size:%_, ", this, parser.Fields().GetHeaders().size());
+                qm_xinfo2(TSF"@%_, headers size:%_, ", this, parser.Fields().GetHeaders().size());
             }
             result_.http_resp_header_ = parser.Fields().ToString();
             break;
         }
         else {
-            xdebug2(TSF"http parser status:%_ ", parse_status);
+            qm_xdebug2(TSF"http parser status:%_ ", parse_status);
         }
     }
     result_.http_recv_resp_cost_ = detect_tick.gettickspan();
     result_.http_resp_packet_size_ = recv_buf.Length();
-    xdebug2(TSF"read with nonblock socket http response, length:%_, ", recv_buf.Length());
+    qm_xdebug2(TSF"read with nonblock socket http response, length:%_, ", recv_buf.Length());
 
     
 }

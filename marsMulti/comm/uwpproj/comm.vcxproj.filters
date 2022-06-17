@@ -59,7 +59,7 @@
     <ClCompile Include="..\tickcount.cc" />
     <ClCompile Include="..\time_utils.c" />
     <ClCompile Include="..\tinyxml2.cc" />
-    <ClCompile Include="..\xlogger\xloggerbase.c" />
+    <ClCompile Include="..\qm_xlogger\xloggerbase.c" />
     <ClCompile Include="..\UWP\xlogger_threadinfo.cpp" />
     <ClCompile Include="..\UWP\unistd.c" />
     <ClCompile Include="..\UWP\uwp_compatible.cpp" />
@@ -82,7 +82,7 @@
     <ClCompile Include="..\UWP\zlib\zutil.c" />
     <ClCompile Include="..\UWP\SocketSelect\socketselect2.cc" />
     <ClCompile Include="..\socket\unix_socket.cc" />
-    <ClCompile Include="..\xlogger\loginfo_extract.c" />
+    <ClCompile Include="..\qm_xlogger\loginfo_extract.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\boost\libs\date_time\src\gregorian\greg_names.hpp" />
@@ -151,7 +151,7 @@
     <ClInclude Include="..\UWP\zlib\zconf.h" />
     <ClInclude Include="..\UWP\zlib\zlib.h" />
     <ClInclude Include="..\UWP\zlib\zutil.h" />
-    <ClInclude Include="..\xlogger\loginfo_extract.h" />
+    <ClInclude Include="..\qm_xlogger\loginfo_extract.h" />
     <ClInclude Include="..\UWP\boost\path.hpp" />
   </ItemGroup>
   <ItemGroup>

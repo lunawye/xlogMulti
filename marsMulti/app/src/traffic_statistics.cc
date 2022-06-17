@@ -14,7 +14,7 @@
 #include "marsMulti/app/app.h"
 #include "marsMulti/comm/thread/lock.h"
 #include "marsMulti/comm/qm_time_utils.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/platform_comm.h"
 
 using namespace marsMulti::app;
@@ -41,12 +41,12 @@ TrafficStatistics::TrafficStatistics(unsigned long _report_tmo, unsigned int _re
 {}
 
 TrafficStatistics::~TrafficStatistics() {
-    xinfo_function();
+    qm_xinfo_function();
     // Flush();
 }
 void TrafficStatistics::SetCallback(const boost::function<void (int32_t, int32_t, int32_t, int32_t)>& _func_report_flow) {
     ScopedLock lock(mutex_);
-    xassert2(!func_report_flow_);
+    qm_xassert2(!func_report_flow_);
     func_report_flow_ = _func_report_flow;
 }
 void TrafficStatistics::Flush() {
@@ -77,9 +77,9 @@ void TrafficStatistics::__ReportData() {
     if (func_report_flow_) {
         if (wifi_recv_data_size_>0 || wifi_send_data_size_ || mobile_recv_data_size_ || mobile_send_data_size_)
             func_report_flow_(wifi_recv_data_size_, wifi_send_data_size_, mobile_recv_data_size_, mobile_send_data_size_);
-        xdebug2(TSF"wifi:%_, r:%_, mobile:s:%_, r:%_", wifi_send_data_size_, wifi_recv_data_size_, mobile_send_data_size_, mobile_recv_data_size_);
+        qm_xdebug2(TSF"wifi:%_, r:%_, mobile:s:%_, r:%_", wifi_send_data_size_, wifi_recv_data_size_, mobile_send_data_size_, mobile_recv_data_size_);
     } else {
-        xassert2(false, TSF"wifi:s:%_, r:%_, mobile:s:%_, r:%_", wifi_send_data_size_, wifi_recv_data_size_, mobile_send_data_size_, mobile_recv_data_size_);
+        qm_xassert2(false, TSF"wifi:s:%_, r:%_, mobile:s:%_, r:%_", wifi_send_data_size_, wifi_recv_data_size_, mobile_send_data_size_, mobile_recv_data_size_);
     }
     wifi_recv_data_size_ = 0;
     wifi_send_data_size_ = 0;

@@ -20,7 +20,7 @@
 
 #include "coroutine.h"
 #include "comm/socket/socket_address.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/thread/lock.h"
 #include "comm/qm_time_utils.h"
 #include "comm/qm_autobuffer.h"
@@ -80,7 +80,7 @@ private:
         
         for (auto& i: tasks_) {
             TaskInfo& task = *i;
-            xverbose2(TSF"task in, id:%_", &task);
+            qm_xverbose2(TSF"task in, id:%_", &task);
             poll_.Consign(task.poll_);
             
             if (!task.abs_timeout_.isValid()) continue;

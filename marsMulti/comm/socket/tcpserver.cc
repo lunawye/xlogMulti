@@ -25,7 +25,7 @@
 #include "boost/bind.hpp"
 
 #include "comm/thread/lock.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/socket/socket_address.h"
 
 using namespace marsMulti::comm;
@@ -85,7 +85,7 @@ void TcpServer::StopAndWait() {
     ScopedLock lock(mutex_);
 
     if (!breaker_.Break()) {
-        xassert2(false);
+        qm_xassert2(false);
         breaker_.Close();
         breaker_.ReCreate();
     }
@@ -113,33 +113,33 @@ void TcpServer::__ListenThread() {
     do {
         ScopedLock lock(mutex_);
 
-        xassert2(INVALID_SOCKET == listen_sock_, TSF"m_listen_sock:%_", listen_sock_);
+        qm_xassert2(INVALID_SOCKET == listen_sock_, TSF"m_listen_sock:%_", listen_sock_);
 
         SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
 
         if (INVALID_SOCKET == listen_sock) {
-            xerror2(TSF"socket create err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
+            qm_xerror2(TSF"socket create err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
             cond_.notifyAll(lock);
             break;
         }
 
         if (0 > socket_reuseaddr(listen_sock, 1)) { // make sure before than bind
         
-            xerror2(TSF"socket reuseaddr err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
+            qm_xerror2(TSF"socket reuseaddr err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
             socket_close(listen_sock);
             cond_.notifyAll(lock);
             break;
         }
 
         if (0 > bind(listen_sock, (struct sockaddr*) &bind_addr_, sizeof(bind_addr_))) {
-            xerror2(TSF"socket bind err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
+            qm_xerror2(TSF"socket bind err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
             socket_close(listen_sock);
             cond_.notifyAll(lock);
             break;
         }
 
         if (0 > listen(listen_sock, backlog_)) {
-            xerror2(TSF"socket listen err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
+            qm_xerror2(TSF"socket listen err:(%_, %_)", socket_errno, socket_strerror(socket_errno)) >> break_group;
             socket_close(listen_sock);
             cond_.notifyAll(lock);
             break;
@@ -149,7 +149,7 @@ void TcpServer::__ListenThread() {
         cond_.notifyAll(lock);
         lock.unlock();
 
-        xinfo2(TSF"listen start sock:(%_, %_:%_)", listen_sock_, ip, ntohs(bind_addr_.sin_port));
+        qm_xinfo2(TSF"listen start sock:(%_, %_:%_)", listen_sock_, ip, ntohs(bind_addr_.sin_port));
         observer_.OnCreate(this);
 
         while (true) {
@@ -162,27 +162,27 @@ void TcpServer::__ListenThread() {
             int selret = sel.Select();
 
             if (0 > selret) {
-                xerror2(TSF"select ret:%_, err:(%_, %_)", selret, sel.Errno(), socket_strerror(sel.Errno())) >> break_group;
+                qm_xerror2(TSF"select ret:%_, err:(%_, %_)", selret, sel.Errno(), socket_strerror(sel.Errno())) >> break_group;
                 break;
             }
 
             if (sel.IsException()) {
-                xerror2(TSF"breaker exception") >> break_group;
+                qm_xerror2(TSF"breaker exception") >> break_group;
                 break;
             }
 
             if (sel.IsBreak()) {
-                xinfo2(TSF"breaker by user") >> break_group;
+                qm_xinfo2(TSF"breaker by user") >> break_group;
                 break;
             }
 
             if (sel.Exception_FD_ISSET(listen_sock_)) {
-                xerror2(TSF"socket exception err:(%_, %_)", socket_error(listen_sock_), socket_strerror(socket_error(listen_sock_))) >> break_group;
+                qm_xerror2(TSF"socket exception err:(%_, %_)", socket_error(listen_sock_), socket_strerror(socket_error(listen_sock_))) >> break_group;
                 break;
             }
 
             if (!sel.Read_FD_ISSET(listen_sock_)) {
-                xerror2(TSF"socket unreadable but break by unknown") >> break_group;
+                qm_xerror2(TSF"socket unreadable but break by unknown") >> break_group;
                 break;
             }
 #endif
@@ -194,19 +194,19 @@ void TcpServer::__ListenThread() {
             SOCKET client = accept(listen_sock_, (struct sockaddr*) &client_addr, &client_addr_len);
 
             if (INVALID_SOCKET == client) {
-                xerror2(TSF"accept return client invalid:%_, err:(%_, %_)", client, socket_errno, socket_strerror(socket_errno)) >> break_group;
+                qm_xerror2(TSF"accept return client invalid:%_, err:(%_, %_)", client, socket_errno, socket_strerror(socket_errno)) >> break_group;
                 break;
             }
 
             char cli_ip[16] = {0};
 			socket_inet_ntop(AF_INET, &(client_addr.sin_addr), cli_ip, sizeof(cli_ip));
-            xinfo2(TSF"listen accept sock:(%_, %_:%_) cli:(%_, %_:%_)", listen_sock_, ip, ntohs(bind_addr_.sin_port), client, cli_ip, ntohs(client_addr.sin_port));
+            qm_xinfo2(TSF"listen accept sock:(%_, %_:%_) cli:(%_, %_:%_)", listen_sock_, ip, ntohs(bind_addr_.sin_port), client, cli_ip, ntohs(client_addr.sin_port));
 
             observer_.OnAccept(this, client, client_addr);
         }
     } while (false);
 
-    xinfo2(TSF"listen end sock:(%_, %_:%_), ", listen_sock_, ip, ntohs(bind_addr_.sin_port)) << break_group;
+    qm_xinfo2(TSF"listen end sock:(%_, %_:%_), ", listen_sock_, ip, ntohs(bind_addr_.sin_port)) << break_group;
 
     if (INVALID_SOCKET != listen_sock_) {
         socket_close(listen_sock_);

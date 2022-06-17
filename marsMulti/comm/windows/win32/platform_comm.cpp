@@ -8,8 +8,8 @@
 #include <string>
 #include <functional>
 
-#include "xlogger/qm_xlogger.h"
-#include "xlogger/loginfo_extract.h"
+#include "qm_xlogger/qm_xlogger.h"
+#include "qm_xlogger/loginfo_extract.h"
 #include "NetUtil.h"
 #include "comm/thread/mutex.h"
 #include "comm/thread/lock.h"
@@ -36,24 +36,24 @@ namespace marsMulti{
         }
 
         bool getProxyInfo(int& port, std::string& strProxy, const std::string& _host) {
-            xverbose_function();
+            qm_xverbose_function();
 
             return getProxyInfoImpl(port, strProxy, _host);
         }
 
         bool getCurRadioAccessNetworkInfo(struct RadioAccessNetworkInfo& info) {
-            xverbose_function();
+            qm_xverbose_function();
             return false;
         }
 
         int getNetInfo() {
-            xverbose_function();
+            qm_xverbose_function();
 
             return isNetworkConnected() ? kWifi : kNoNet;
         }
 
         unsigned int getSignal(bool isWifi) {
-            xverbose_function();
+            qm_xverbose_function();
             return (unsigned int)0;
         }
 

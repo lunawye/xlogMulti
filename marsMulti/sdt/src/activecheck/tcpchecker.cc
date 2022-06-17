@@ -22,7 +22,7 @@
 #include "marsMulti/stn/stn_logic.h"
 
 #include "marsMulti/comm/singleton.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/stn/proto/longlink_packer.h"
 #include "marsMulti/sdt/constants.h"
@@ -34,27 +34,27 @@ using namespace marsMulti::sdt;
 using namespace marsMulti::stn;
 
 TcpChecker::TcpChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 TcpChecker::~TcpChecker() {
-    xverbose_function();
+    qm_xverbose_function();
 }
 
 int TcpChecker::StartDoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
     return BaseChecker::StartDoCheck(_check_request);
 }
 
 
 void TcpChecker::__DoCheck(CheckRequestProfile& _check_request) {
-    xinfo_function();
+    qm_xinfo_function();
 
     for (CheckIPPorts_Iterator iter = _check_request.longlink_items.begin(); iter != _check_request.longlink_items.end(); ++iter) {
     	std::string host = iter->first;
     	for (std::vector<CheckIPPort>::iterator ipport = iter->second.begin(); ipport != iter->second.end(); ++ipport) {
             if (is_canceled_) {
-                xinfo2(TSF"TcpChecker is canceled.");
+                qm_xinfo2(TSF"TcpChecker is canceled.");
                 return;
             }
     		CheckResultProfile profile;
@@ -64,7 +64,7 @@ void TcpChecker::__DoCheck(CheckRequestProfile& _check_request) {
 			profile.network_type = comm::getNetInfo();
 
     		unsigned int timeout = UNUSE_TIMEOUT == _check_request.total_timeout ? DEFAULT_TCP_CONN_TIMEOUT : _check_request.total_timeout;
-			xinfo2(TSF"tcp check ip: %0, port: %1, timeout: %2", profile.ip, profile.port, timeout);
+			qm_xinfo2(TSF"tcp check ip: %0, port: %1, timeout: %2", profile.ip, profile.port, timeout);
 
     		uint64_t start_time = ::gettickcount();
     		TcpQuery tcp_query(profile.ip.c_str(), profile.port, 0);
@@ -76,9 +76,9 @@ void TcpChecker::__DoCheck(CheckRequestProfile& _check_request) {
 
 			if (ret < 0) {
 				profile.error_code = kSndRcvErr;
-				xerror2(TSF"tcp send nooping data error.");
+				qm_xerror2(TSF"tcp send nooping data error.");
 			} else {
-				xinfo2(TSF"tcp check send nooping data success.");
+				qm_xinfo2(TSF"tcp check send nooping data success.");
 			}
 
 			uint64_t cost_time = 0;
@@ -91,7 +91,7 @@ void TcpChecker::__DoCheck(CheckRequestProfile& _check_request) {
 
 				if (ret < 0) {
 					profile.error_code = kSndRcvErr;
-					xerror2(TSF"tcp recv nooping data error.");
+					qm_xerror2(TSF"tcp recv nooping data error.");
 					_check_request.checkresult_profiles.push_back(profile);
 					continue;
 				} else {
@@ -109,7 +109,7 @@ void TcpChecker::__DoCheck(CheckRequestProfile& _check_request) {
 			if (_check_request.total_timeout != UNUSE_TIMEOUT) {
 				_check_request.total_timeout -= cost_time;
 				if (_check_request.total_timeout <= 0) {
-					xinfo2(TSF"tcp check, host: %0, timeout.", host);
+					qm_xinfo2(TSF"tcp check, host: %0, timeout.", host);
 					break;
 				}
 			}

@@ -23,7 +23,7 @@
 #include "marsMulti/baseevent/active_logic.h"
 #include "marsMulti/comm/platform_comm.h"
 #include "marsMulti/comm/singleton.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/stn/stn.h"
 
 #include "flow_limit.h"
@@ -42,7 +42,7 @@ AntiAvalanche::~AntiAvalanche() {
 }
 
 bool AntiAvalanche::Check(const Task& _task, const void* _buffer, int _len) {
-    xverbose_function();
+    qm_xverbose_function();
 
     unsigned int span = 0;
     if (!frequency_limit_->Check(_task, _buffer, _len, span)){

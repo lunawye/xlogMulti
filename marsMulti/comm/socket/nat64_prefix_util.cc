@@ -21,7 +21,7 @@
 #include "qm_nat64_prefix_util.h"
 #include "qm_local_ipstack.h"
 #include "unix_socket.h"
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #include "qm_strutil.h"
 #include "platform_comm.h"
 #include "marsMulti/comm/network/getaddrinfo_with_timeout.h"
@@ -69,7 +69,7 @@ static bool IsNat64AddrValid(const struct in6_addr* _replaced_nat64_addr) {
 #endif
 	size_t suffix_zero_count = GetSuffixZeroCount((uint8_t*)_replaced_nat64_addr, sizeof(struct in6_addr));
 	if (0!=suffix_zero_count) {
-		xwarn2(TSF"suffix_zero_count=%_, _replaced_nat64_addr=%_", suffix_zero_count,
+		qm_xwarn2(TSF"suffix_zero_count=%_, _replaced_nat64_addr=%_", suffix_zero_count,
 				strutil::Hex2Str((char*)_replaced_nat64_addr, sizeof(struct in6_addr)));
 	}
 	bool is_valid = false;
@@ -153,7 +153,7 @@ static bool IsNat64AddrValid(const struct in6_addr* _replaced_nat64_addr) {
 			}
 			break;
 		default:
-			xassert2(false, TSF"suffix_zero_count=%_", suffix_zero_count);
+			qm_xassert2(false, TSF"suffix_zero_count=%_", suffix_zero_count);
 	}
 	return is_valid;
 }
@@ -194,14 +194,14 @@ static void ReplaceNat64WithV4IP(struct in6_addr* _replaced_nat64_addr, const st
 			break;
 		default:
 			memcpy(((uint8_t*)_replaced_nat64_addr)+12, (uint8_t*)_v4_addr, 4);
-			xassert2(false, TSF"suffix_zero_count=%_", suffix_zero_count);
+			qm_xassert2(false, TSF"suffix_zero_count=%_", suffix_zero_count);
 	}
 }
 
 bool ConvertV4toNat64V6(const struct in_addr& _v4_addr, struct in6_addr& _v6_addr) {
-    xdebug_function();
+    qm_xdebug_function();
     if (ELocalIPStack_IPv6 != local_ipstack_detect()) {
-    	xwarn2(TSF"Current Network is not ELocalIPStack_IPv6, no need GetNetworkNat64Prefix.");
+    	qm_xwarn2(TSF"Current Network is not ELocalIPStack_IPv6, no need GetNetworkNat64Prefix.");
 		return false;
     }
 	struct addrinfo hints, *res=NULL, *res0=NULL;
@@ -248,11 +248,11 @@ bool ConvertV4toNat64V6(const struct in_addr& _v4_addr, struct in6_addr& _v6_add
 						memcpy ( (char*)&_v6_addr, (char*)&((((sockaddr_in6*)res->ai_addr)->sin6_addr).s6_addr16), 16);
 #endif
 						const char* ip_str = socket_inet_ntop(AF_INET6, &_v6_addr, ip_buf, sizeof(ip_buf));
-						xdebug2(TSF"AF_INET6 v4_ip=%_, nat64 ip_str = %_", v4_ip, ip_str);
+						qm_xdebug2(TSF"AF_INET6 v4_ip=%_, nat64 ip_str = %_", v4_ip, ip_str);
 		    			ret = true;
 		    			break;
 	    			} else {
-	    				xerror2(TSF"Nat64 addr invalid, =%_",
+	    				qm_xerror2(TSF"Nat64 addr invalid, =%_",
 	    						strutil::Hex2Str((char*)&(((sockaddr_in6*)res->ai_addr)->sin6_addr), 16));
 	    				ret = false;
 	    			}
@@ -262,16 +262,16 @@ bool ConvertV4toNat64V6(const struct in_addr& _v4_addr, struct in6_addr& _v6_add
 
     		} else if (AF_INET == res->ai_family){
     			const char* ip_str = socket_inet_ntop(AF_INET, &(((sockaddr_in*)res->ai_addr)->sin_addr), ip_buf, sizeof(ip_buf));
-    			xinfo2(TSF"AF_INET ip_str = %_", ip_str);
+    			qm_xinfo2(TSF"AF_INET ip_str = %_", ip_str);
     			ret = false;
     		} else {
-    			xerror2(TSF"invalid ai_family = %_", res->ai_family);
+    			qm_xerror2(TSF"invalid ai_family = %_", res->ai_family);
     			ret = false;
     		}
 
     	}
     } else {
-        xerror2(TSF" getaddrinfo error = %_, res0:@%_", error, res0);
+        qm_xerror2(TSF" getaddrinfo error = %_, res0:@%_", error, res0);
     	ret = false;
     }
     if (NULL != res0)
@@ -284,7 +284,7 @@ bool ConvertV4toNat64V6(const std::string& _v4_ip, std::string& _nat64_v6_ip) {
 	struct in_addr v4_addr = {0};
 	int pton_ret = socket_inet_pton(AF_INET, _v4_ip.c_str(), &v4_addr);
 	if (0==pton_ret) {
-    	xwarn2(TSF"param error. %_ is not v4 ip", _v4_ip.c_str());
+    	qm_xwarn2(TSF"param error. %_ is not v4 ip", _v4_ip.c_str());
     	return false;
     }
 
@@ -300,9 +300,9 @@ bool ConvertV4toNat64V6(const std::string& _v4_ip, std::string& _nat64_v6_ip) {
 
 ///----------------------------------------------------------------------------
 bool  GetNetworkNat64Prefix(struct in6_addr& _nat64_prefix_in6) {
-    xdebug_function();
+    qm_xdebug_function();
     if (ELocalIPStack_IPv6 != local_ipstack_detect()) {
-    	xwarn2(TSF"Current Network is not ELocalIPStack_IPv6, no need GetNetworkNat64Prefix.");
+    	qm_xwarn2(TSF"Current Network is not ELocalIPStack_IPv6, no need GetNetworkNat64Prefix.");
 		return false;
     }
 	struct addrinfo hints, *res=NULL, *res0=NULL;
@@ -338,16 +338,16 @@ bool  GetNetworkNat64Prefix(struct in6_addr& _nat64_prefix_in6) {
 
     		} else if (AF_INET == res->ai_family){
     			const char* ip_str = socket_inet_ntop(AF_INET, &(((sockaddr_in*)res->ai_addr)->sin_addr), ip_buf, sizeof(ip_buf));
-    			xinfo2(TSF"AF_INET ip_str = %_", ip_str);
+    			qm_xinfo2(TSF"AF_INET ip_str = %_", ip_str);
     			ret = false;
     		} else {
-    			xerror2(TSF"invalid ai_family = %_", res->ai_family);
+    			qm_xerror2(TSF"invalid ai_family = %_", res->ai_family);
     			ret = false;
     		}
 
     	}
     } else {
-    	xerror2(TSF" getaddrinfo error = %_, res0:@%_", error, res0);
+    	qm_xerror2(TSF" getaddrinfo error = %_, res0:@%_", error, res0);
     	ret = false;
     }
 

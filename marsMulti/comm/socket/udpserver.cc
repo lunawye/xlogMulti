@@ -22,7 +22,7 @@
 
 #include "boost/bind.hpp"
 
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 #include "socket/socket_address.h"
 #include "socket/udpclient.h"
 
@@ -91,7 +91,7 @@ void UdpServer::SendAsync(const std::string& _ip, int _port, void* _buf, size_t 
 }
 
 void UdpServer::SendAsync(struct sockaddr_in* _addr, void* _buf, size_t _len) {
-    xassert2((fd_socket_ != INVALID_SOCKET && event_ != NULL), "socket invalid");
+    qm_xassert2((fd_socket_ != INVALID_SOCKET && event_ != NULL), "socket invalid");
 
     if (fd_socket_ == INVALID_SOCKET || event_ == NULL)
         return;
@@ -119,18 +119,18 @@ void UdpServer::__InitSocket(int _port) {
 
     if (fd_socket_ == INVALID_SOCKET) {
         errCode = socket_errno;
-        xerror2(TSF"udp socket create error, error: %0", socket_strerror(errCode));
+        qm_xerror2(TSF"udp socket create error, error: %0", socket_strerror(errCode));
         return;
     }
 
     if (bind(fd_socket_, (struct sockaddr*)&servAddr, sizeof(servAddr)) != 0) {
         errCode = socket_errno;
-        xerror2(TSF"udp bind error, error: %0", socket_strerror(errCode));
+        qm_xerror2(TSF"udp bind error, error: %0", socket_strerror(errCode));
     }
 }
 
 void UdpServer::__RunLoop() {
-    xassert2(fd_socket_ != INVALID_SOCKET, "socket invalid");
+    qm_xassert2(fd_socket_ != INVALID_SOCKET, "socket invalid");
 
     if (fd_socket_ == INVALID_SOCKET)
         return;
@@ -162,7 +162,7 @@ void UdpServer::__RunLoop() {
         ret = __DoSelect(bWriteSet ? false : true, bWriteSet, buf, len, &addr, err);    // only read or write can be true
 
         if (ret == -1) {
-            xerror2(TSF"select error");
+            qm_xerror2(TSF"select error");
 
             if (event_)
                 event_->OnError(this, err);
@@ -171,7 +171,7 @@ void UdpServer::__RunLoop() {
         }
 
         if (ret == -2 && event_ == NULL) {
-            xinfo2(TSF"normal break");
+            qm_xinfo2(TSF"normal break");
             break;
         }
 
@@ -193,7 +193,7 @@ bool UdpServer::__SetBroadcastOpt() {
 
     if (setsockopt(fd_socket_, SOL_SOCKET, SO_BROADCAST, (const char*)&on, sizeof(on)) != 0) {
         int errCode = socket_errno;
-        xerror2(TSF"udp set broadcast error: %0", socket_strerror(errCode));
+        qm_xerror2(TSF"udp set broadcast error: %0", socket_strerror(errCode));
         return false;
     }
 
@@ -204,7 +204,7 @@ bool UdpServer::__SetBroadcastOpt() {
  * return -2 break, -1 error, 0 timeout, else handle size
  */
 int UdpServer::__DoSelect(bool _bReadSet, bool _bWriteSet, void* _buf, size_t _len, struct sockaddr_in* _addr, int& _errno) {
-    xassert2((!(_bReadSet && _bWriteSet) && (_bReadSet || _bWriteSet)), "only read or write can be true, not both");
+    qm_xassert2((!(_bReadSet && _bWriteSet) && (_bReadSet || _bWriteSet)), "only read or write can be true, not both");
 
     selector_.PreSelect();
 
@@ -219,32 +219,32 @@ int UdpServer::__DoSelect(bool _bReadSet, bool _bWriteSet, void* _buf, size_t _l
     int ret = selector_.Select();
 
     if (ret < 0) {
-        xerror2(TSF"udp select error: %0", socket_strerror(selector_.Errno()));
+        qm_xerror2(TSF"udp select error: %0", socket_strerror(selector_.Errno()));
         _errno = selector_.Errno();
         return -1;
     }
 
     //    if (ret == 0)
     //    {
-    //        xinfo2(TSF"udp select timeout:%0 ms", _timeoutMs);
+    //        qm_xinfo2(TSF"udp select timeout:%0 ms", _timeoutMs);
     //        return 0;
     //    }
 
     // user break
     if (selector_.IsException()) {
         _errno = selector_.Errno();
-        xerror2(TSF"sel exception");
+        qm_xerror2(TSF"sel exception");
         return -1;
     }
 
     if (selector_.IsBreak()) {
-        xinfo2(TSF"sel breaker");
+        qm_xinfo2(TSF"sel breaker");
         return -2;
     }
 
     if (selector_.Exception_FD_ISSET(fd_socket_)) {
         _errno = socket_errno;
-        xerror2(TSF"socket exception error");
+        qm_xerror2(TSF"socket exception error");
         return -1;
     }
 
@@ -253,7 +253,7 @@ int UdpServer::__DoSelect(bool _bReadSet, bool _bWriteSet, void* _buf, size_t _l
 
         if (ret == -1) {
             _errno = socket_errno;
-            xerror2(TSF"sendto error: %0", socket_strerror(_errno));
+            qm_xerror2(TSF"sendto error: %0", socket_strerror(_errno));
             return -1;
         }
 
@@ -266,7 +266,7 @@ int UdpServer::__DoSelect(bool _bReadSet, bool _bWriteSet, void* _buf, size_t _l
 
         if (ret == -1) {
             _errno = socket_errno;
-            xerror2(TSF"recvfrom error: %0", socket_strerror(_errno));
+            qm_xerror2(TSF"recvfrom error: %0", socket_strerror(_errno));
             return -1;
         }
 

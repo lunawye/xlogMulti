@@ -32,7 +32,7 @@ LongLinkMetaData::LongLinkMetaData(const LonglinkConfig& _config, NetSource& _ne
     :longlink_(LongLinkChannelFactory::Create(_message_id, _netsource, _config)), longlink_monitor_(nullptr), netsource_checker_(nullptr)
     , signal_keeper_(nullptr), config_(_config)
     , asyncreg_(comm::MessageQueue::InstallAsyncHandler(_message_id)) {
-        xinfo_function(TSF"create longlink with name:%_, group:%_", _config.name, _config.group);
+        qm_xinfo_function(TSF"create longlink with name:%_, group:%_", _config.name, _config.group);
 
         netsource_checker_ = std::make_shared<NetSourceTimerCheck>(&_netsource, _activeLogic, *(longlink_.get()), _message_id);
         netsource_checker_->fun_time_check_suc_ = boost::bind(&LongLinkMetaData::__OnTimerCheckSuc, this, config_.name);
@@ -44,7 +44,7 @@ LongLinkMetaData::LongLinkMetaData(const LonglinkConfig& _config, NetSource& _ne
 }
 
 LongLinkMetaData::~LongLinkMetaData() {
-    xinfo_function();
+    qm_xinfo_function();
     
 }
 
@@ -52,7 +52,7 @@ void LongLinkMetaData::__OnTimerCheckSuc(const std::string& _name) {
     SYNC2ASYNC_FUNC(boost::bind(&LongLinkMetaData::__OnTimerCheckSuc, this, _name));
 
     if(longlink_->Profile().ip_type != IPSourceType::kIPSourceBackup) {
-        xinfo2(TSF"longlink %_ is not using backip, ignore", _name);
+        qm_xinfo2(TSF"longlink %_ is not using backip, ignore", _name);
         return;
     }
     longlink_->Disconnect(LongLink::kTimeCheckSucc);

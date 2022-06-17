@@ -33,7 +33,7 @@
 
 #include "marsMulti/comm/qm_autobuffer.h"
 #include "marsMulti/comm/jni/util/scoped_jstring.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/jni/util/var_cache.h"
 #include "marsMulti/comm/jni/util/scope_jenv.h"
 #include "marsMulti/comm/jni/util/comm_function.h"
@@ -62,7 +62,7 @@ void SetAppLogicNativeCallback(std::shared_ptr<AppLogicNativeCallback> _cb) {
         if (cb) {\
             return (cb->fun);\
         }\
-        xwarn2("applogic native callback is null");\
+        qm_xwarn2("applogic native callback is null");\
         return (default_value);\
     }
 
@@ -77,7 +77,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_getAppFilePath, KC2Java, "getAppFilePath", "()
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_getAppFilePath)
 #endif
 std::string GetAppFilePath() {
-	xverbose_function();
+	qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(GetAppFilePath(), std::string(""));
@@ -89,7 +89,7 @@ std::string GetAppFilePath() {
 
 	jstring path = (jstring)JNU_CallStaticMethodByMethodInfo(env, KC2Java_getAppFilePath).l;
 	if (NULL == path) {
-		xerror2(TSF"getAppFilePath error return null");
+		qm_xerror2(TSF"getAppFilePath error return null");
 		return "";
 	}
 
@@ -105,7 +105,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_getAccountInfo, KC2Java, "getAccountInfo", "()
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_getAccountInfo)
 #endif
 AccountInfo GetAccountInfo() {
-	xverbose_function();
+	qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(GetAccountInfo(), AccountInfo());
 #else
@@ -117,7 +117,7 @@ AccountInfo GetAccountInfo() {
 	AccountInfo info;
 	jobject ret_obj = JNU_CallStaticMethodByMethodInfo(env, KC2Java_getAccountInfo).l;
 	if (NULL == ret_obj) {
-		xerror2(TSF"getAccountInfo error return null");
+		qm_xerror2(TSF"getAccountInfo error return null");
 		return info;
 	}
 
@@ -137,7 +137,7 @@ AccountInfo GetAccountInfo() {
 }
 
 std::string GetUserName() {
-    xverbose_function();
+    qm_xverbose_function();
 
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(GetUserName(), std::string(""));
@@ -199,7 +199,7 @@ DEFINE_FIND_STATIC_METHOD(KC2Java_getDeviceType, KC2Java, "getDeviceType", "()Lc
 DEFINE_FIND_EMPTY_STATIC_METHOD(KC2Java_getDeviceType)
 #endif
 DeviceInfo GetDeviceInfo() {
-	xverbose_function();
+	qm_xverbose_function();
 #ifdef NATIVE_CALLBACK
     CALL_NATIVE_CALLBACK_RETURN_FUN(GetDeviceInfo(), DeviceInfo());
 #endif
@@ -215,7 +215,7 @@ DeviceInfo GetDeviceInfo() {
 
 	jobject ret_obj = JNU_CallStaticMethodByMethodInfo(env, KC2Java_getDeviceType).l;
 	if (NULL == ret_obj) {
-		xerror2(TSF"GetDeviceInfo error return null");
+		qm_xerror2(TSF"GetDeviceInfo error return null");
 		return s_info;
 	}
 

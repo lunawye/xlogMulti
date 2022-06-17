@@ -22,7 +22,7 @@
 #define callback_h
 #include "marsMulti/comm/thread/thread.h"
 #include "message_queue.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "boost/bind.hpp"
 
 namespace marsMulti {
@@ -56,7 +56,7 @@ public:
 
     void invalidate() {
         //should call in messagequeue of cb_handler_
-        xassert2(comm::MessageQueue::CurrentThreadMessageQueue() == comm::MessageQueue::Handler2Queue(cb_handler_));
+        qm_xassert2(comm::MessageQueue::CurrentThreadMessageQueue() == comm::MessageQueue::Handler2Queue(cb_handler_));
         comm::ScopedLock lock(mutex_);
         valid_ = false;
     }

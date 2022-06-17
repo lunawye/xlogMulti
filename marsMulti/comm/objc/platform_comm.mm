@@ -19,8 +19,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
-#include "comm/xlogger/qm_xlogger.h"
-#include "comm/xlogger/loginfo_extract.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/loginfo_extract.h"
 #import "comm/objc/qm_scope_autoreleasepool.h"
 
 #import <TargetConditionals.h>
@@ -117,7 +117,7 @@ float publiccomponent_GetSystemVersion() {
 
 bool getProxyInfo(int& port, std::string& strProxy, const std::string& _host)
 {
-    xverbose_function();
+    qm_xverbose_function();
     
 #if TARGET_OS_WATCH
     return false;
@@ -168,19 +168,19 @@ bool getProxyInfo(int& port, std::string& strProxy, const std::string& _host)
     if (!CFStringGetCString(http_proxy, tmp_proxy, sizeof(tmp_proxy), kCFStringEncodingASCII)
         || !CFNumberGetValue(http_port, kCFNumberSInt32Type, &tmp_port))
     {
-        xerror2(TSF"convert error");
+        qm_xerror2(TSF"convert error");
         return false;
     }
 
     strProxy = tmp_proxy;
     port = tmp_port;
-    xdebug2(TSF"%0:%1", strProxy, port);
+    qm_xdebug2(TSF"%0:%1", strProxy, port);
     return true;
 #endif
 }
 
 int getNetInfo() {
-    xverbose_function();
+    qm_xverbose_function();
     SCOPE_POOL();
     
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_WATCH
@@ -226,7 +226,7 @@ int getNetTypeForStatistics(){
 }
 
 unsigned int getSignal(bool isWifi){
-    xverbose_function();
+    qm_xverbose_function();
     SCOPE_POOL();
     return (unsigned int)0;
 }
@@ -315,9 +315,9 @@ bool getCurWifiInfo(marsMulti::comm::WifiInfo& wifiInfo, bool _force_refresh)
     
     marsMulti::comm::ScopedLock wifi_id_lock(wifi_id_mutex);
     if (!g_new_wifi_id_cb) {
-        xwarn2("g_new_wifi_id_cb is null");
+        qm_xwarn2("g_new_wifi_id_cb is null");
     }
-    xdebug2(TSF"_force_refresh %_", _force_refresh);
+    qm_xdebug2(TSF"_force_refresh %_", _force_refresh);
     // 来自mars的调用全部使用新的netid, 并且 _force_refresh = false
     // 来自业务调用的全部 _force_refresh = true
     if (g_new_wifi_id_cb && !_force_refresh) {
@@ -402,7 +402,7 @@ bool getCurWifiInfo(marsMulti::comm::WifiInfo& wifiInfo, bool _force_refresh)
     // * BSSID: "00:00:00:00:00:00" 
     lock.lock();
     sg_wifiinfo = wifiInfo;
-    xinfo2(TSF"get wifi info:%_", sg_wifiinfo.ssid);
+    qm_xinfo2(TSF"get wifi info:%_", sg_wifiinfo.ssid);
 
     return __WiFiInfoIsValid(wifiInfo);
 #endif
@@ -430,7 +430,7 @@ bool getCurSIMInfo(marsMulti::comm::SIMInfo& simInfo)
 
     simInfo.isp_code += [carrier.mobileCountryCode UTF8String];
     simInfo.isp_code += [carrier.mobileNetworkCode UTF8String];
-    xverbose2(TSF"isp_code:%0", simInfo.isp_code);
+    qm_xverbose2(TSF"isp_code:%0", simInfo.isp_code);
 
     return true;
 }
@@ -500,7 +500,7 @@ bool getCurRadioAccessNetworkInfo(marsMulti::comm::RadioAccessNetworkInfo& _rani
     _raninfo.radio_access_network =  [currentRadioAccessTechnology UTF8String];
     _raninfo.radio_access_network.erase(0, strlen("CTRadioAccessTechnology"));
     
-    xassert2(!_raninfo.radio_access_network.empty(), "%s", [currentRadioAccessTechnology UTF8String]);
+    qm_xassert2(!_raninfo.radio_access_network.empty(), "%s", [currentRadioAccessTechnology UTF8String]);
     
     return true;
 }

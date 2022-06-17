@@ -2437,7 +2437,7 @@
                  U _strncpy
                  U _strrchr
 
-/Users/lunawye/QQMusic11_18_0/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(xlogger.cc.o):
+/Users/lunawye/QQMusic11_18_0/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(qm_xlogger.cc.o):
 0000000000000a70 T __ZN12XScopeTracerC1E9TLogLevelPKcS2_S2_S2_iS2_
 00000000000008e0 T __ZN12XScopeTracerC2E9TLogLevelPKcS2_S2_S2_iS2_
 0000000000000bc0 T __ZN12XScopeTracerD1Ev

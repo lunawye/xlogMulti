@@ -14,7 +14,7 @@
 #include "comm/thread/lock.h"
 #include "comm/thread/thread.h"
 #include "comm/thread/condition.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/qm_time_utils.h"
 
 namespace marsMulti {
@@ -74,7 +74,7 @@ static Mutex sg_mutex;
 
 
 static void __WorkerFunc() {
-    xverbose_function();
+    qm_xverbose_function();
     
     
     //parameter
@@ -97,13 +97,13 @@ static void __WorkerFunc() {
         }
     }
     if (iter == sg_dnsitem_vec.end()) {
-        xerror2(TSF"timeout before sys getaddrinfo");
+        qm_xerror2(TSF"timeout before sys getaddrinfo");
         return;
     }
     lock.unlock();
     
     int error = getaddrinfo(worker_node.c_str(), worker_service.c_str(), &worker_hints, &worker_res0);
-    xinfo2(TSF"sys getaddrinfo error:%_, node:%_, service:%_", error, worker_node, worker_service);
+    qm_xinfo2(TSF"sys getaddrinfo error:%_, node:%_, service:%_", error, worker_node, worker_service);
     
     lock.lock();
     
@@ -118,32 +118,32 @@ static void __WorkerFunc() {
         if (iter != sg_dnsitem_vec.end()) {
             iter->error_code = error;
             iter->status = kGetADDRFail;
-            xassert2(NULL!=iter->res);
+            qm_xassert2(NULL!=iter->res);
             *(iter->res) = worker_res0;
         } else {
             if (worker_res0!=NULL) {
-                xinfo2(TSF"getaddrinfo fail and timeout. free worker_res0 @%_", worker_res0);
+                qm_xinfo2(TSF"getaddrinfo fail and timeout. free worker_res0 @%_", worker_res0);
                 freeaddrinfo(worker_res0);
             }
-            xinfo2(TSF"getaddrinfo fail and timeout. worker_node:%_", worker_node);
+            qm_xinfo2(TSF"getaddrinfo fail and timeout. worker_node:%_", worker_node);
         }
         sg_condition.notifyAll();
     } else {
         if (iter != sg_dnsitem_vec.end()) {
             if (iter->status==kGetADDRDoing) {
                 iter->status = kGetADDRSuc;
-                xassert2(NULL!=iter->res);
+                qm_xassert2(NULL!=iter->res);
                 *(iter->res) = worker_res0;
             } else {
                 if (worker_res0!=NULL) {
-                    xinfo2(TSF"getaddrinfo end but timeout. free worker_res0 @%_", worker_res0);
+                    qm_xinfo2(TSF"getaddrinfo end but timeout. free worker_res0 @%_", worker_res0);
                     freeaddrinfo(worker_res0);
                 }
-                xinfo2(TSF"getaddrinfo end but timeout. worker_node:%_", worker_node);
+                qm_xinfo2(TSF"getaddrinfo end but timeout. worker_node:%_", worker_node);
             }
         } else {
             if (worker_res0!=NULL) {
-                xinfo2(TSF"getaddrinfo end but timeout. free worker_res0 @%_", worker_res0);
+                qm_xinfo2(TSF"getaddrinfo end but timeout. free worker_res0 @%_", worker_res0);
                 freeaddrinfo(worker_res0);
             }
         }
@@ -156,7 +156,7 @@ static void __WorkerFunc() {
 
 
 int getaddrinfo_with_timeout(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res, bool& _is_timeout, unsigned long long _timeout_msec) {
-    xverbose_function();
+    qm_xverbose_function();
     //Check param
     
     ScopedLock lock(sg_mutex);
@@ -166,7 +166,7 @@ int getaddrinfo_with_timeout(const char *node, const char *service, const struct
     int start_ret = thread.start();
     
     if (start_ret != 0) {
-        xerror2(TSF"start the thread fail, host:%_", node);
+        qm_xerror2(TSF"start the thread fail, host:%_", node);
         return kRetCodeInternalStateError;
     }
     
@@ -195,7 +195,7 @@ int getaddrinfo_with_timeout(const char *node, const char *service, const struct
                 break;
         }
         
-        xassert2(it != sg_dnsitem_vec.end());
+        qm_xassert2(it != sg_dnsitem_vec.end());
         
         if (it != sg_dnsitem_vec.end()){
             
@@ -215,26 +215,26 @@ int getaddrinfo_with_timeout(const char *node, const char *service, const struct
                     std::vector<DnsItem>::iterator iter = sg_dnsitem_vec.begin();
                     int i = 0;
                     for (; iter != sg_dnsitem_vec.end(); ++iter) {
-                        xerror2(TSF"sg_dnsitem_vec[%_]:%_", i++, iter->ToString());
+                        qm_xerror2(TSF"sg_dnsitem_vec[%_]:%_", i++, iter->ToString());
                     }
-                    xassert2(false, TSF"dns_item:%_", dns_item.ToString());
+                    qm_xassert2(false, TSF"dns_item:%_", dns_item.ToString());
                     return kRetCodeParamNotMatch;
                 }
             }
             
             if (kGetADDRTimeout == it->status ) {
-                xinfo2(TSF "dns get ip status:kGetADDRTimeout item:%_", it->ToString());
+                qm_xinfo2(TSF "dns get ip status:kGetADDRTimeout item:%_", it->ToString());
                 sg_dnsitem_vec.erase(it);
                 _is_timeout = true;
                 return kRetCodeGetADDRTimeout;
             } else if (kGetADDRFail == it->status) {
-                xinfo2(TSF "dns get ip status:kGetADDRFail item:%_", it->ToString());
+                qm_xinfo2(TSF "dns get ip status:kGetADDRFail item:%_", it->ToString());
                 int ret_code = it->error_code;
                 sg_dnsitem_vec.erase(it);
                 return ret_code;
             }
             
-            xassert2(false, TSF"%_", it->status);
+            qm_xassert2(false, TSF"%_", it->status);
             
             
             sg_dnsitem_vec.erase(it);

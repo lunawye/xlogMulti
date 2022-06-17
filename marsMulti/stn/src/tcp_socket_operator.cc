@@ -4,7 +4,7 @@
 
 #include "tcp_socket_operator.h"
 #include "config.h"
-#include <comm/xlogger/qm_xlogger.h>
+#include <comm/qm_xlogger/qm_xlogger.h>
 #include <memory>
 #include <comm/socket/block_socket.h>
 #include "marsMulti/comm/socket/unix_socket.h"   // for socket_close
@@ -21,7 +21,7 @@ bool ContainIPv6(const std::vector<socket_address>& _vecaddr) {
     for (auto address : _vecaddr) {
         in6_addr addr6 = IN6ADDR_ANY_INIT;
 		if (socket_inet_pton(AF_INET6,address.ip(), &addr6)) { //first ip is ipv6
-			xinfo2(TSF"ip %_ is v6", address.ip());
+			qm_xinfo2(TSF"ip %_ is v6", address.ip());
 			return true;
 		}
     }
@@ -56,7 +56,7 @@ SOCKET TcpSocketOperator::Connect(const std::vector<socket_address> &_vecaddr,
         conn = std::make_shared<ComplexConnect>(kShortlinkConnTimeout, kShortlinkConnInterval);
     }
 	SOCKET sock = conn->ConnectImpatient(_vecaddr, sBreaker_, observer_.get(), _proxy_type, _proxy_addr, _proxy_username, _proxy_pwd);
-	xinfo2(TSF"connect result socket: %_", sock);
+	qm_xinfo2(TSF"connect result socket: %_", sock);
 	profile_.index = conn->Index();
 	profile_.rtt = conn->IndexRtt();
 	profile_.errorCode = conn->ErrorCode();

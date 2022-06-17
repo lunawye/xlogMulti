@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <math.h>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "comm/socket/socketselect.h"
 #include "comm/socket/tcpclient_fsm.h"
 #include "comm/socket/socket_address.h"
@@ -71,7 +71,7 @@ ComplexConnect::ComplexConnect(unsigned int _timeout /*ms*/, unsigned int _inter
     : timeout_(_timeout), interval_(_interval), error_interval_(_error_interval), max_connect_(3),  trycount_(0), index_(-1), errcode_(0)
     , index_conn_rtt_(0), index_conn_totalcost_(0), totalcost_(0), is_interrupted_(false)
     , need_detail_log_(true), v4_timeout_(_v4_timeout), v6_timeout_(_v6_timeout), indepent_timeout_(true) {
-        xdebug2(TSF"use indepent timeout for ip: %_, %_", v6_timeout_, v4_timeout_);
+        qm_xdebug2(TSF"use indepent timeout for ip: %_, %_", v6_timeout_, v4_timeout_);
     }
 
 ComplexConnect::~ComplexConnect()
@@ -185,7 +185,7 @@ public:
                              const std::string& _proxy_pwd, unsigned int _connect_timeout, unsigned int _index, MComplexConnect* _observer)
     : ConnectCheckFSM(_proxy_addr, _connect_timeout,_index,_observer), destaddr_(_destaddr), username_(_proxy_username), password_(_proxy_pwd){
         check_status_ = ECheckInit;
-        xinfo2(TSF"http tunel proxy info:%_:%_ username:%_", _proxy_addr.ip(), _proxy_addr.port(), username_);
+        qm_xinfo2(TSF"http tunel proxy info:%_:%_ username:%_", _proxy_addr.ip(), _proxy_addr.port(), username_);
     }
     
 protected:
@@ -212,7 +212,7 @@ protected:
             http::Parser::TRecvStatus parse_status = parser.Recv(_recv_buff.Ptr(), _recv_buff.Length(), &consumed_bytes);
 
             if (parse_status != http::Parser::kEnd) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
@@ -222,7 +222,7 @@ protected:
                 checkfintime_ = gettickcount();
                 _recv_buff.Reset();
             } else {
-				xwarn2(TSF"proxy error, proxy status code:%_, proxy info:%_:%_ resp:%_", parser.Status().StatusCode(), addr_.ip(), addr_.port(), xdump(_recv_buff.Ptr(), _recv_buff.Length()));
+				qm_xwarn2(TSF"proxy error, proxy status code:%_, proxy info:%_:%_ resp:%_", parser.Status().StatusCode(), addr_.ip(), addr_.port(), xdump(_recv_buff.Ptr(), _recv_buff.Length()));
                 check_status_ = ECheckFail;
             }
             
@@ -230,7 +230,7 @@ protected:
             check_status_ = (observer_ && observer_->OnVerifyRecv(index_, destaddr_, sock_, _recv_buff)) ? ECheckOK : ECheckFail;
             checkfintime_ = gettickcount();
         } else {
-            xassert2(false, "status:%d", check_status_);
+            qm_xassert2(false, "status:%d", check_status_);
         }
         
     }
@@ -274,7 +274,7 @@ protected:
                 check_status_ = ECheckFail;
             }
         } else {
-            xassert2(false, "status:%d", check_status_);
+            qm_xassert2(false, "status:%d", check_status_);
         }
     }
     
@@ -292,7 +292,7 @@ public:
                           const std::string& _proxy_pwd, unsigned int _connect_timeout, unsigned int _index, MComplexConnect* _observer)
     : ConnectCheckFSM(_proxy_addr, _connect_timeout,_index,_observer), destaddr_(_destaddr), username_(_proxy_username), password_(_proxy_pwd){
         check_status_ = ECheckInit;
-        xinfo2(TSF"socks5 proxy info:%_:%_ username:%_", _proxy_addr.ip(), _proxy_addr.port(), username_);
+        qm_xinfo2(TSF"socks5 proxy info:%_:%_ username:%_", _proxy_addr.ip(), _proxy_addr.port(), username_);
     }
     
 protected:
@@ -315,7 +315,7 @@ protected:
         if (check_status_ == EProxySocks5GreetReq) {
             
             if (_recv_buff.Length() < 2) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
@@ -333,13 +333,13 @@ protected:
                 check_status_ = EProxySocks5GreetSucc;
                 request_send_ = true;
             } else {
-                xwarn2("auth method not support:%d", method);
+                qm_xwarn2("auth method not support:%d", method);
                 check_status_ = ECheckFail;
             }
             recv_buf_.Length(0, 0);
         } else if(check_status_ == EProxySocks5AuthReq) {
             if (_recv_buff.Length() < 2) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
@@ -347,7 +347,7 @@ protected:
             uint8_t status = ((uint8_t*)_recv_buff.Ptr())[1];
             if(kSocks5AuthVersion != ver || kSocks5RespStatus != status) {
                 check_status_ = ECheckFail;
-                xwarn2("socks5 proxy auth fail: %d %d", ver, status);
+                qm_xwarn2("socks5 proxy auth fail: %d %d", ver, status);
                 return;
             }
             
@@ -356,24 +356,24 @@ protected:
             recv_buf_.Length(0, 0);
         } else if (check_status_ == EProxySocks5ConnSvrReq) {
             if (_recv_buff.Length() < 4) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
             uint8_t atyp = ((uint8_t*)_recv_buff.Ptr())[3];
             
             if (kSocksATYPIPv4 == atyp && _recv_buff.Length() < 6+4) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
             if (kSocksATYPHost == atyp && _recv_buff.Length() < (size_t)(6+1+((uint8_t*)_recv_buff.Ptr())[4])) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
             if (kSocksATYPIPv6 == atyp && _recv_buff.Length() < 6+16) {
-                xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
+                qm_xinfo2(TSF"proxy response continue:%_", _recv_buff.Length());
                 return;
             }
             
@@ -382,7 +382,7 @@ protected:
             
             if(kSocks5Version != ver || kSocks5RespStatus != status) {
                 check_status_ = ECheckFail;
-                xwarn2("socks5 proxy connect server fail: %d %d", ver, status);
+                qm_xwarn2("socks5 proxy connect server fail: %d %d", ver, status);
                 return;
             }
             
@@ -394,7 +394,7 @@ protected:
             check_status_ = (observer_ && observer_->OnVerifyRecv(index_, destaddr_, sock_, _recv_buff)) ? ECheckOK : ECheckFail;
             checkfintime_ = gettickcount();
         } else {
-            xassert2(false, "socks5 proxy checkfsm status:%d", check_status_);
+            qm_xassert2(false, "socks5 proxy checkfsm status:%d", check_status_);
         }
     }
     
@@ -406,7 +406,7 @@ protected:
             check_status_ = EProxySocks5GreetReq;
         } else if (check_status_ == EProxySocks5GreetSucc) {
             if (username_.empty() || password_.empty() || username_.size() > 255 || password_.size() > 255) {
-                xwarn2(TSF"username/password error:%_ %_", username_.size(), password_.size());
+                qm_xwarn2(TSF"username/password error:%_ %_", username_.size(), password_.size());
                 check_status_ = ECheckFail;
                 return;
             }
@@ -438,7 +438,7 @@ protected:
                 check_status_ = ECheckFail;
             }
         } else {
-            xassert2(false, "socks5 proxy checkfsm status:%d", check_status_);
+            qm_xassert2(false, "socks5 proxy checkfsm status:%d", check_status_);
         }
     }
 
@@ -482,17 +482,17 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
     is_connective_check_failed_ = false;
 
     if (_vecaddr.empty()) {
-        xwarn2(TSF"_vecaddr size:%_, m_timeout:%_, m_interval:%_, m_error_interval:%_, m_max_connect:%_, @%_", _vecaddr.size(), timeout_, interval_, error_interval_, max_connect_, this);
+        qm_xwarn2(TSF"_vecaddr size:%_, m_timeout:%_, m_interval:%_, m_error_interval:%_, m_max_connect:%_, @%_", _vecaddr.size(), timeout_, interval_, error_interval_, max_connect_, this);
         return INVALID_SOCKET;
     }
 
-    xinfo2_if(need_detail_log_, TSF"_vecaddr size:%_, m_timeout:%_, m_interval:%_, m_error_interval:%_, m_max_connect:%_, @%_", _vecaddr.size(), timeout_, interval_, error_interval_, max_connect_, this);
+    qm_xinfo2_if(need_detail_log_, TSF"_vecaddr size:%_, m_timeout:%_, m_interval:%_, m_error_interval:%_, m_max_connect:%_, @%_", _vecaddr.size(), timeout_, interval_, error_interval_, max_connect_, this);
     
     uint64_t  starttime = gettickcount();
     std::vector<ConnectCheckFSM*> vecsocketfsm;
 
     for (unsigned int i = 0; i < _vecaddr.size(); ++i) {
-        xverbose2(TSF"complex.conn %_", _vecaddr[i].url());
+        qm_xverbose2(TSF"complex.conn %_", _vecaddr[i].url());
 
         ConnectCheckFSM* ic = NULL;
         if (marsMulti::comm::kProxyHttpTunel == _proxy_type && _proxy_addr) {
@@ -503,7 +503,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
             if (indepent_timeout_) {
                 if (IsV6(_vecaddr[i])) {
                     ic = new ConnectCheckFSM(_vecaddr[i], v6_timeout_, i, _observer);
-                    xdebug2(TSF"ip %_ is v6", _vecaddr[i].ip());
+                    qm_xdebug2(TSF"ip %_ is v6", _vecaddr[i].ip());
                 } else {
                     ic = new ConnectCheckFSM(_vecaddr[i], v4_timeout_, i, _observer);
                 }
@@ -519,7 +519,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
     
     uint64_t laststart_connecttime = curtime - std::max(interval_, error_interval_);
 
-    xdebug2(TSF"curtime:%_, laststart_connecttime:%_, @%_", curtime, laststart_connecttime, this);
+    qm_xdebug2(TSF"curtime:%_, laststart_connecttime:%_, @%_", curtime, laststart_connecttime, this);
 
     int lasterror = 0;
     unsigned int index = 0;
@@ -535,7 +535,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
         
         int next_connect_timeout = int(((0 == lasterror) ? interval_ : error_interval_) - (curtime - laststart_connecttime));
 
-        xverbose2(TSF"next_connect_timeout %_", next_connect_timeout);
+        qm_xverbose2(TSF"next_connect_timeout %_", next_connect_timeout);
 
         int timeout = (int)timeout_;
         unsigned int runing_count = (unsigned int)std::count_if(vecsocketfsm.begin(), vecsocketfsm.end(), &__isconnecting);
@@ -553,7 +553,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
             if (runing_count + 1 < max_connect_) {
                 timeout = std::min(timeout, (int)interval_);
             }
-            xdebug2(TSF"running count: %_, index: %_, timeout: %_, %_", index, runing_count, next_connect_timeout, timeout);
+            qm_xdebug2(TSF"running count: %_, index: %_, timeout: %_, %_", index, runing_count, next_connect_timeout, timeout);
 
             laststart_connecttime = gettickcount();
             lasterror = 0;
@@ -567,19 +567,19 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
 
             xgroup2_define(group);
             vecsocketfsm[i]->PreSelect(sel, group);
-            need_detail_log_&&!group.Empty() ? (xgroup2(TSF"index:%_, @%_, ", i, this) << group) : group.Clear();
+            need_detail_log_&&!group.Empty() ? (qm_xgroup2(TSF"index:%_, @%_, ", i, this) << group) : group.Clear();
             timeout = std::min(timeout, vecsocketfsm[i]->Timeout());
-            xdebug2(TSF"connect ip timeout: %_", vecsocketfsm[i]->Timeout());
+            qm_xdebug2(TSF"connect ip timeout: %_", vecsocketfsm[i]->Timeout());
         }
 
-        xdebug2(TSF"timeout:%_, @%_", timeout, this);
+        qm_xdebug2(TSF"timeout:%_, @%_", timeout, this);
         int ret = 0;
 
         if (INT_MAX == timeout) {
             ret = sel.Select();
         } else {
             if (timeout <= 0) { // timeout may be 0, which causes dead loop
-                xwarn2(TSF"invalid timeout %_", timeout);
+                qm_xwarn2(TSF"invalid timeout %_", timeout);
                 timeout = 1000;
             }
             ret = sel.Select(timeout);
@@ -588,19 +588,19 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
         // select error
         if (ret < 0) {
             errcode_ = sel.Errno();
-            xerror2(TSF"sel ret:(%_, %_, %_), @%_", ret, sel.Errno(), socket_strerror(sel.Errno()), this);
+            qm_xerror2(TSF"sel ret:(%_, %_, %_), @%_", ret, sel.Errno(), socket_strerror(sel.Errno()), this);
             break;
         }
 
         // user break
         if (sel.IsException()) {
-            xerror2(TSF"sel exception @%_", this);
+            qm_xerror2(TSF"sel exception @%_", this);
             break;
         }
 
         if (sel.IsBreak()) {
             is_interrupted_ = true;
-            xinfo2(TSF"sel breaker @%_", this);
+            qm_xinfo2(TSF"sel breaker @%_", this);
             break;
         }
 
@@ -610,7 +610,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
 
             xgroup2_define(group);
             vecsocketfsm[i]->AfterSelect(sel, group);
-            (!group.Empty() && need_detail_log_) ? (xgroup2(TSF"index:%_, @%_, status:%_,%_", i, this, vecsocketfsm[i]->Status(), vecsocketfsm[i]->CheckStatus()) << group) : group.Clear();
+            (!group.Empty() && need_detail_log_) ? (qm_xgroup2(TSF"index:%_, @%_, status:%_,%_", i, this, vecsocketfsm[i]->Status(), vecsocketfsm[i]->CheckStatus()) << group) : group.Clear();
 
             if (TcpClientFSM::EEnd == vecsocketfsm[i]->Status()) {
                 if (_observer) _observer->OnFinished(i, socket_address(&vecsocketfsm[i]->Address()), vecsocketfsm[i]->Socket(), vecsocketfsm[i]->Error(),
@@ -621,7 +621,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
                 delete vecsocketfsm[i];
                 vecsocketfsm[i] = NULL;
                 lasterror = -1;
-                xerror2(TSF"socket error, code:%_", errcode_);
+                qm_xerror2(TSF"socket error, code:%_", errcode_);
                 continue;
             }
 
@@ -635,7 +635,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
                 delete vecsocketfsm[i];
                 vecsocketfsm[i] = NULL;
                 lasterror = -1;
-                xerror2(TSF"socket error, code:%_", errcode_);
+                qm_xerror2(TSF"socket error, code:%_", errcode_);
                 continue;
             }
 
@@ -644,7 +644,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
                                                          vecsocketfsm[i]->Rtt(), vecsocketfsm[i]->TotalRtt(), (int)(gettickcount() - starttime));
 
                 errcode_ = vecsocketfsm[i]->Error();
-                xinfo2_if(need_detail_log_, TSF"index:%_, sock:%_, suc ConnectImpatient:%_:%_, RTT:(%_, %_), @%_", i, vecsocketfsm[i]->Socket(),
+                qm_xinfo2_if(need_detail_log_, TSF"index:%_, sock:%_, suc ConnectImpatient:%_:%_, RTT:(%_, %_), @%_", i, vecsocketfsm[i]->Socket(),
                        vecsocketfsm[i]->IP(), vecsocketfsm[i]->Port(), vecsocketfsm[i]->Rtt(), vecsocketfsm[i]->TotalRtt(), this);
                 retsocket = vecsocketfsm[i]->Socket();
                 index_ = i;
@@ -671,7 +671,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
         
         loop_count ++;
         if (loop_count > kMaxConnectingLoopCount) {
-            xwarn2(TSF"too much loop running, may be in dead loop");
+            qm_xwarn2(TSF"too much loop running, may be in dead loop");
             break;
         }
         
@@ -688,7 +688,7 @@ SOCKET ComplexConnect::ConnectImpatient(const std::vector<socket_address>& _veca
     vecsocketfsm.clear();
 
     totalcost_ = (int)(::gettickcount() - starttime);
-    xinfo2(TSF"retsocket:%_, connrtt:%_, conntotalrtt:%_, totalcost:%_, @%_", retsocket, index_conn_rtt_, index_conn_totalcost_, totalcost_, this);
+    qm_xinfo2(TSF"retsocket:%_, connrtt:%_, conntotalrtt:%_, totalcost:%_, @%_", retsocket, index_conn_rtt_, index_conn_totalcost_, totalcost_, this);
 
     return retsocket;
 }

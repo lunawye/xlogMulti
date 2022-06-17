@@ -21,7 +21,7 @@
 
 #include <algorithm>
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/assert/__assert.h"
 
 namespace marsMulti {
@@ -51,10 +51,10 @@ bool SocketPoll::Consign(SocketPoll& _consignor, bool _recover) {
     
     if (_recover) {
         if (it == events_.end()) return false;
-        xassert2(it->events == _consignor.events_[0].events, TSF"%_ != %_", it->events, _consignor.events_[0].events);
+        qm_xassert2(it->events == _consignor.events_[0].events, TSF"%_ != %_", it->events, _consignor.events_[0].events);
         events_.erase(it, it+_consignor.events_.size());
     } else {
-        xassert2(it == events_.end());
+        qm_xassert2(it == events_.end());
         if (it != events_.end()) return false;
         events_.insert(events_.end(), _consignor.events_.begin(), _consignor.events_.end());
     }
@@ -179,20 +179,20 @@ bool SocketPoll::ConsignReport(SocketPoll& _consignor, int64_t _timeout) const {
     int32_t triggered_event_count = 0;
     auto find_it = std::find_if(events_.begin(), events_.end(), [&_consignor](const pollfd _v){ return _v.fd == _consignor.events_[0].fd;});
     
-    xassert2(find_it != events_.end());
-    xassert2(events_.end() - find_it >= (int)_consignor.events_.size());
+    qm_xassert2(find_it != events_.end());
+    qm_xassert2(events_.end() - find_it >= (int)_consignor.events_.size());
     
     if (find_it == events_.end()) return false;
     
     for (auto &i : _consignor.events_) {
-        xassert2(i.fd == find_it->fd && i.events == find_it->events,
+        qm_xassert2(i.fd == find_it->fd && i.events == find_it->events,
                  TSF"i(%_, %_), find_it(%_, %_)", i.fd, i.events, find_it->fd, find_it->events);
         if (0 != find_it->revents) {
             i.revents = find_it->revents;
             ++triggered_event_count;
             
             if (i.fd == _consignor.events_[0].fd) {
-                xassert2(&i == &(_consignor.events_[0]));
+                qm_xassert2(&i == &(_consignor.events_[0]));
                 continue;
             }
             

@@ -13,7 +13,7 @@
 
 #include "socketselect2.h"
 
-#include "xlogger/qm_xlogger.h"
+#include "qm_xlogger/qm_xlogger.h"
 
 static DWORD __SO_RCVTIMEO(SOCKET _sock) {
     DWORD optval = 0;
@@ -197,12 +197,12 @@ int SocketSelect::Select(int _msec) {
             FD_SET(it->first, &writefd_);
             __WOULDBLOCK(it->first, true);
             ++new_WOULDBLOCK_count;
-            xinfo2(TSF", %_", it->first) >> group;
+            qm_xinfo2(TSF", %_", it->first) >> group;
         }
     }
 
     if (0 < new_WOULDBLOCK_count) {
-        xinfo2(TSF"WOULDBLOCK FD_WRITE wait count:%_", new_WOULDBLOCK_count) << group;
+        qm_xinfo2(TSF"WOULDBLOCK FD_WRITE wait count:%_", new_WOULDBLOCK_count) << group;
         m_broken = Breaker().m_broken;
 
         if (autoclear_) Breaker().Clear();
@@ -244,7 +244,7 @@ int SocketSelect::Select(int _msec) {
             SOCKET sock = socketarray[event_index - WSA_WAIT_EVENT_0];
 
             if (networkevents.lNetworkEvents & (FD_WRITE | FD_CONNECT) && 0 != __SO_RCVTIMEO(sock)) {
-                xinfo2(TSF"WOULDBLOCK FD_WRITE notify sock:%_", sock);
+                qm_xinfo2(TSF"WOULDBLOCK FD_WRITE notify sock:%_", sock);
             }
 
             if (m_filter_map[sock] & (FD_WRITE | FD_CONNECT) && networkevents.lNetworkEvents & (FD_WRITE | FD_CONNECT)) {

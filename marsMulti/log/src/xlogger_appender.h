@@ -1,7 +1,7 @@
 #include "marsMulti/log/qm_appender.h"
 
 #include "boost/iostreams/device/mapped_file.hpp"
-#include "marsMulti/comm/xlogger/qm_xloggerbase.h"
+#include "marsMulti/comm/qm_xlogger/qm_xloggerbase.h"
 #include "marsMulti/comm/thread/thread.h"
 #include "marsMulti/comm/thread/condition.h"
 

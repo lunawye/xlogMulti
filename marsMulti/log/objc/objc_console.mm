@@ -12,8 +12,8 @@
 // limitations under the License.
 
 #import <Foundation/Foundation.h>
-#include "comm/xlogger/qm_xlogger.h"
-#include "comm/xlogger/loginfo_extract.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/loginfo_extract.h"
 #import "comm/objc/qm_scope_autoreleasepool.h"
 #include "marsMulti/log/qm_appender.h"
 

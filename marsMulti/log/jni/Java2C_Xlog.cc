@@ -20,7 +20,7 @@
 #include <vector>
 #include <string>
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/jni/util/scoped_jstring.h"
 #include "marsMulti/comm/jni/util/var_cache.h"
 #include "marsMulti/comm/jni/util/scope_jenv.h"
@@ -40,7 +40,7 @@ JNIEXPORT jlong JNICALL Java_com_tencent_mars_xlog_Xlog_newXlogInstance
     (JNIEnv *env, jobject, jobject _log_config) {
 
     if (NULL == _log_config) {
-        xerror2(TSF"logconfig is null");
+        qm_xerror2(TSF"logconfig is null");
         return -1;
     }
 
@@ -107,7 +107,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_xlog_Xlog_appenderOpen
 	(JNIEnv *env, jclass clazz, jobject _log_config) {
 
     if (NULL == _log_config) {
-        xerror2(TSF"logconfig is null");
+        qm_xerror2(TSF"logconfig is null");
         return;
     }
 
@@ -164,7 +164,7 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_xlog_Xlog_logWrite
   (JNIEnv *env, jclass, jobject _log_info, jstring _log) {
 
     if (NULL == _log_info || NULL == _log) {
-        xerror2(TSF"loginfo or log is null");
+        qm_xerror2(TSF"loginfo or log is null");
         return;
     }
 

@@ -28,7 +28,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/network/getgateway.h"
 #include "marsMulti/comm/socket/socketselect.h"
 #include "marsMulti/comm/socket/socket_address.h"
@@ -72,10 +72,10 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
 }
 
 int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/, const char* dest, unsigned int packetSize, int* rtt) {
-    xinfo2(TSF"in runpingquery");
-    xassert2(_querycount >= 0, "ping count should be more than 0");
-    xassert2(interval >= 0, "interval should be more than 0");
-    xassert2(timeout >= 0, "timeout should be more than 0");
+    qm_xinfo2(TSF"in runpingquery");
+    qm_xassert2(_querycount >= 0, "ping count should be more than 0");
+    qm_xassert2(interval >= 0, "interval should be more than 0");
+    qm_xassert2(timeout >= 0, "timeout should be more than 0");
 
     if (_querycount == 0)
         _querycount = DEFAULT_PING_COUNT;
@@ -91,18 +91,18 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
         int ret = getdefaultgateway(&_addr);
 
         if (-1 == ret) {
-            xerror2(TSF"get default gateway error.");
+            qm_xerror2(TSF"get default gateway error.");
             return -1;
         }
 
         dest = socket_address(_addr).ip();
 
         if (NULL == dest || 0 == strlen(dest)) {
-            xerror2(TSF"ping dest host is NULL.");
+            qm_xerror2(TSF"ping dest host is NULL.");
             return -1;
         }
 
-        xinfo2(TSF"get default gateway: %0", dest);
+        qm_xinfo2(TSF"get default gateway: %0", dest);
     }
 
     char line[MAXLINE] = {0};
@@ -112,7 +112,7 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
         int sendLen = (packetSize > 0 ? packetSize : 56) * _querycount;
 
         if (traffic_monitor_->sendLimitCheck(sendLen)) {  // 56 is default packet size
-            xwarn2(TSF"limitCheck!!!sendLen=%0", sendLen);
+            qm_xwarn2(TSF"limitCheck!!!sendLen=%0", sendLen);
             return TRAFFIC_LIMIT_RET_CODE;
         }
     }
@@ -120,14 +120,14 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
     char cmd[256] = {0};
 
     if (strlen(dest) > 200) {
-        xerror2(TSF"domain name is too long.");
+        qm_xerror2(TSF"domain name is too long.");
         return -1;
     }
 
     int index = snprintf(cmd, 256, "ping -c %d -i %d -w %d", _querycount, interval, timeout);
 
     if (index < 0 || index >= 256) {
-        xerror2(TSF"sprintf return error.index=%_", index);
+        qm_xerror2(TSF"sprintf return error.index=%_", index);
         return -1;
     }
 
@@ -140,15 +140,15 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
     }
 
     if (tempLen < 0 || tempLen >= 256 - index) {
-        xerror2(TSF"sprintf return error.tempLen=%_, index=%_", tempLen, index);
+        qm_xerror2(TSF"sprintf return error.tempLen=%_, index=%_", tempLen, index);
         return -1;
     }
 
-    xinfo2(TSF"popen cmd=%0", cmd);
+    qm_xinfo2(TSF"popen cmd=%0", cmd);
     FILE* pp = popen(cmd, "r");
 
     if (!pp) {
-        xerror2(TSF"popen error:%0", strerror(errno));
+        qm_xerror2(TSF"popen error:%0", strerror(errno));
         return -1;
     }
 
@@ -159,7 +159,7 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
     pclose(pp);
 
     if (pingresult_.empty()) {
-        xerror2(TSF"m_strPingResult is empty");
+        qm_xerror2(TSF"m_strPingResult is empty");
         return -1;
     }
 
@@ -170,18 +170,18 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
     GetPingStatus(pingStatusTemp);
 
     if (0 == pingStatusTemp.avgrtt && 0 == pingStatusTemp.maxrtt) {
-        xinfo2(TSF"remote host is not available, pingresult_:%_", pingresult_);
+        qm_xinfo2(TSF"remote host is not available, pingresult_:%_", pingresult_);
         return -1;
     }
-    xdebug2("ping rtt: %d, %d", (int)pingStatusTemp.avgrtt, (int)pingStatusTemp.maxrtt);
+    qm_xdebug2("ping rtt: %d, %d", (int)pingStatusTemp.avgrtt, (int)pingStatusTemp.maxrtt);
     *rtt = static_cast<int>(pingStatusTemp.avgrtt);
 
-    xinfo2(TSF"m_strPingResult = %0, %1", pingresult_, *rtt);
+    qm_xinfo2(TSF"m_strPingResult = %0, %1", pingresult_, *rtt);
     return 0;
 }
 
 int PingQuery::GetPingStatus(struct PingStatus& _ping_status) {
-    xinfo_function();
+    qm_xinfo_function();
     clearPingStatus(_ping_status);
 
     if (pingresult_.empty())  return -1;
@@ -202,10 +202,10 @@ int PingQuery::GetPingStatus(struct PingStatus& _ping_status) {
                 if (index2 > index1) {
                     int size = index2 - index1 - 1;
                     std::string ipTemp(iter->substr(index1 + 1, size));
-                    xinfo2(TSF"ipTemp=%_, size = %_", ipTemp.c_str(), size);
-                    xassert2(size <= 16 && size > 0);
+                    qm_xinfo2(TSF"ipTemp=%_, size = %_", ipTemp.c_str(), size);
+                    qm_xassert2(size <= 16 && size > 0);
                     strncpy(_ping_status.ip, ipTemp.c_str(), (size < 16 ? size : 15));
-                    xdebug2(TSF"_ping_status.ip=%_", _ping_status.ip);
+                    qm_xdebug2(TSF"_ping_status.ip=%_", _ping_status.ip);
                 }
             }
         }  // end if(vecPingRes.begin()==iter)
@@ -357,24 +357,24 @@ static char* Sock_ntop_host(const struct sockaddr* sa, socklen_t salen) {
     char* ptr;
 
     if ((ptr = sock_ntop_host(sa, salen)) == NULL) {
-        xerror2(TSF"sock_ntop_host error,errno=%0", errno); /* inet_ntop() sets errno */
+        qm_xerror2(TSF"sock_ntop_host error,errno=%0", errno); /* inet_ntop() sets errno */
     }
 
     return (ptr);
 }
 static void Gettimeofday(struct timeval* tv, void* foo) {
     if (gettimeofday(tv, (struct timezone*)foo) == -1) {
-        xerror2(TSF"gettimeofday error");
+        qm_xerror2(TSF"gettimeofday error");
     }
 
     return;
 }
 static int Sendto(int fd, const void* ptr, size_t nbytes, int flags, const struct sockaddr* sa, socklen_t salen) {
-    xdebug_function();
+    qm_xdebug_function();
     int len = 0;
 
     if ((len = (int)sendto(fd, ptr, nbytes, flags, sa, salen)) != (ssize_t) nbytes) {
-        xerror2(TSF"sendto: uncomplete packet, len:%_, nbytes:%_, errno:%_(%_)", len, nbytes, socket_errno, strerror(socket_errno));
+        qm_xerror2(TSF"sendto: uncomplete packet, len:%_, nbytes:%_, errno:%_(%_)", len, nbytes, socket_errno, strerror(socket_errno));
     }
 
     return len;
@@ -390,7 +390,7 @@ static struct addrinfo* Host_serv(const char* host, const char* serv, int family
     hints.ai_socktype = socktype;   /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
 
     if ((n = getaddrinfo(host, serv, &hints, &res)) != 0) {
-        xerror2(TSF"host_serv error for %0, %1: %2",
+        qm_xerror2(TSF"host_serv error for %0, %1: %2",
                 ((host == NULL) ? "(no hostname)" : host),
                 ((serv == NULL) ? "(no service name)" : serv),
                 gai_strerror(n));
@@ -405,7 +405,7 @@ static int Socket(int family, int type, int protocol) {
     int n;
 
     if ((n = socket(family, type, protocol)) < 0) {
-        xerror2(TSF"socket error");
+        qm_xerror2(TSF"socket error");
     }
 
     return (n);
@@ -453,27 +453,27 @@ void PingQuery::proc_v4(char* _ptr, ssize_t _len, struct msghdr* _msg, struct ti
     icmp = (struct icmp*) _ptr;
 
     if ((icmplen = (int)_len - IP_HEADER_LEN) < ICMP_HEADER_LEN) {
-        xerror2(TSF"receive malformed icmp packet");
+        qm_xerror2(TSF"receive malformed icmp packet");
         return;             /* malformed packet */
     }
 
     // if (icmp->icmp_type == ICMP_ECHOREPLY)
     //  {
-    xdebug2(TSF"icmp->icmp_type=%0,is equal with ICMP_ECHOREPLY:%1", icmp->icmp_type, icmp->icmp_type == ICMP_ECHOREPLY);
+    qm_xdebug2(TSF"icmp->icmp_type=%0,is equal with ICMP_ECHOREPLY:%1", icmp->icmp_type, icmp->icmp_type == ICMP_ECHOREPLY);
 
     if (icmplen < ICMP_HEADER_LEN + sizeof(struct timeval)) {
-        xerror2(TSF"not enough data to compute RTT");
+        qm_xerror2(TSF"not enough data to compute RTT");
         return;         /* not enough data to use */
     }
 
     tvsend = (struct timeval*)(&_ptr[ICMP_MINLEN]);
-    xdebug2(TSF"before ntohl tvsend sec=%_, nsec=%_; tvrecv sec=%_, usec=%_", tvsend->tv_sec
+    qm_xdebug2(TSF"before ntohl tvsend sec=%_, nsec=%_; tvrecv sec=%_, usec=%_", tvsend->tv_sec
             , tvsend->tv_usec, _tvrecv->tv_sec, _tvrecv->tv_usec);
 
     tvsend->tv_sec = ntohl(tvsend->tv_sec);
     tvsend->tv_usec = ntohl(tvsend->tv_usec);
 
-    xdebug2(TSF"tvsend sec=%_, nsec=%_; tvrecv sec=%_, usec=%_", tvsend->tv_sec
+    qm_xdebug2(TSF"tvsend sec=%_, nsec=%_; tvrecv sec=%_, usec=%_", tvsend->tv_sec
             , tvsend->tv_usec, _tvrecv->tv_sec, _tvrecv->tv_usec);
 
     tv_sub(_tvrecv, tvsend);
@@ -482,14 +482,14 @@ void PingQuery::proc_v4(char* _ptr, ssize_t _len, struct msghdr* _msg, struct ti
     if (rtt < 10000.0 && rtt > 0.0) {
         vecrtts_.push_back(rtt);
     } else {
-        xerror2(TSF"rtt = %0 is illegal.receive %1 bytes from %2", rtt, icmplen, Sock_ntop_host(&recvaddr_, sizeof(recvaddr_)));
+        qm_xerror2(TSF"rtt = %0 is illegal.receive %1 bytes from %2", rtt, icmplen, Sock_ntop_host(&recvaddr_, sizeof(recvaddr_)));
     }
 
     char tempbuff[1024] = {0};
     snprintf(tempbuff, 1024, "%d bytes from %s: seq=%d,  rtt=%f ms\n",
              icmplen, Sock_ntop_host(&recvaddr_, sizeof(recvaddr_)),
              ntohs(icmp->icmp_seq), rtt);
-    xinfo2(TSF"%_", (char*)tempbuff);
+    qm_xinfo2(TSF"%_", (char*)tempbuff);
     pingresult_.append(tempbuff);
     //   }
 }
@@ -505,16 +505,16 @@ int PingQuery::__prepareSendAddr(const char* _dest) {
     if (NULL == ai) return -1;
 
     h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen);
-    xinfo2(TSF"PING %0 (%1): %2 data bytes\n", (ai->ai_canonname ? ai->ai_canonname : h), h, DATALEN);
+    qm_xinfo2(TSF"PING %0 (%1): %2 data bytes\n", (ai->ai_canonname ? ai->ai_canonname : h), h, DATALEN);
 
     if (ai->ai_family != AF_INET) {
-        xinfo2(TSF"unknown address family %0\n", ai->ai_family);
+        qm_xinfo2(TSF"unknown address family %0\n", ai->ai_family);
         freeaddrinfo(ai);
         return -1;
     }
 
     memcpy(&sendaddr_, ai->ai_addr, sizeof(struct sockaddr));
-    xdebug2(TSF"m_sendAddr=%0", socket_address(&sendaddr_).ip());
+    qm_xdebug2(TSF"m_sendAddr=%0", socket_address(&sendaddr_).ip());
     freeaddrinfo(ai);  // 閲婃斁addrinfo鍐呴儴瀛楁malloc鐨勫唴瀛橈紙鐢眊etaddrinfo鍑芥暟鍐呴儴浜х敓锛�
     return 0;
 }
@@ -530,12 +530,12 @@ int PingQuery::__initialize(const char* _dest) {
     setsockopt(sockfd_, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
     // make nonblock socket
     if (0 != socket_ipv6only(sockfd_, 0)){
-        xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno));
+        qm_xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno));
     }
     int ret = ::socket_set_nobio(sockfd_);
 
     if (ret != 0) {
-        xerror2(TSF"__initialize():set nonblock socket error:%0", socket_strerror(socket_errno));
+        qm_xerror2(TSF"__initialize():set nonblock socket error:%0", socket_strerror(socket_errno));
         return -1;
     }
 
@@ -570,12 +570,12 @@ int PingQuery::__recv() {
 
     if (NULL != traffic_monitor_) {
         if (traffic_monitor_->recvLimitCheck(n)) {
-            xwarn2(TSF"limitCheck,recv Size=%0", n);
+            qm_xwarn2(TSF"limitCheck,recv Size=%0", n);
             return TRAFFIC_LIMIT_RET_CODE;
         }
     }
 
-    xinfo2(TSF"after recvmsg() n =%0\n", (int)n);
+    qm_xinfo2(TSF"after recvmsg() n =%0\n", (int)n);
 
     if (n < 0) {
         return -1;
@@ -585,7 +585,7 @@ int PingQuery::__recv() {
 
     Gettimeofday(&tval, NULL);
 
-    xdebug2(TSF"gettimeofday sec=%0,usec=%1", tval.tv_sec, tval.tv_usec);
+    qm_xdebug2(TSF"gettimeofday sec=%0,usec=%1", tval.tv_sec, tval.tv_usec);
 
     proc_v4(recvbuf + IP_HEADER_LEN, n, &msg, &tval);  // 杩欎釜闀垮害n锛屽寘鍚�20涓瓧鑺傜殑ip澶�
 
@@ -600,7 +600,7 @@ int PingQuery::__send() {
 
     if (NULL != traffic_monitor_) {
         if (traffic_monitor_->sendLimitCheck(len)) {
-            xwarn2(TSF"limitCheck!!len=%0", len);
+            qm_xwarn2(TSF"limitCheck!!len=%0", len);
             return TRAFFIC_LIMIT_RET_CODE;
         }
     }
@@ -624,7 +624,7 @@ void PingQuery::__preparePacket(char* _sendbuffer, int& _len) {
 
     struct timeval now;
     (void)gettimeofday(&now, NULL);
-    xdebug2(TSF"gettimeofday now sec=%0, nsec=%1", now.tv_sec, now.tv_usec);
+    qm_xdebug2(TSF"gettimeofday now sec=%0, nsec=%1", now.tv_sec, now.tv_usec);
     now.tv_usec = htonl(now.tv_usec);
     now.tv_sec = htonl(now.tv_sec);
     bcopy((void*)&now, (void*)&sendbuf[ICMP_MINLEN], sizeof(now));
@@ -674,19 +674,19 @@ int PingQuery::__runReadWrite(int& _errcode) {
         int retsel = sel.Select((int)timeoutMs);
 
         if (retsel < 0) {
-            xerror2(TSF"retSel<0");
+            qm_xerror2(TSF"retSel<0");
             _errcode = sel.Errno();
             return -1;
         }
         
         if (sel.IsBreak()){
-            xinfo2(TSF"user breaked");
+            qm_xinfo2(TSF"user breaked");
             _errcode = EINTR;
             return -1;
         }
 
         if (sel.IsException()) {
-            xerror2(TSF"socketselect exception");
+            qm_xerror2(TSF"socketselect exception");
             _errcode = socket_error(sockfd_);
             return -1;
         }
@@ -734,8 +734,8 @@ int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/
 }
     
 int PingQuery::RunPingQuery(int _querycount, int _interval/*S*/, int _timeout/*S*/, const char* _dest, unsigned int _packet_size) {
-    xassert2(_querycount >= 0);
-    xdebug2(TSF"dest=%0", _dest);
+    qm_xassert2(_querycount >= 0);
+    qm_xdebug2(TSF"dest=%0", _dest);
 
     if (_querycount <= 0)
         _querycount = 4;
@@ -755,18 +755,18 @@ int PingQuery::RunPingQuery(int _querycount, int _interval/*S*/, int _timeout/*S
         int ret = getdefaultgateway(&_addr);
 
         if (-1 == ret) {
-            xerror2(TSF"get default gateway error.");
+            qm_xerror2(TSF"get default gateway error.");
             return -1;
         }
 
         _dest = inet_ntoa(_addr);
 
         if (NULL == _dest || 0 == strlen(_dest)) {
-            xerror2(TSF"ping dest host is NULL.");
+            qm_xerror2(TSF"ping dest host is NULL.");
             return -1;
         }
 
-        xinfo2(TSF"get default gateway: %0", _dest);
+        qm_xinfo2(TSF"get default gateway: %0", _dest);
     }
 
     sendcount_ = _querycount;
@@ -793,15 +793,15 @@ int PingQuery::GetPingStatus(struct PingStatus& _ping_status) {
 
     socket_address sock_addr(&sendaddr_);
     const char* pingIP = sock_addr.ip();
-    xdebug2(TSF"pingIP=%0", pingIP);
+    qm_xdebug2(TSF"pingIP=%0", pingIP);
 
     if (pingIP != NULL) {
         strncpy(_ping_status.ip, pingIP, 16);
     } else {
-        xerror2(TSF"pingIP==NULL");
+        qm_xerror2(TSF"pingIP==NULL");
     }
 
-    xinfo2(TSF"getPingStatus():size = %0; m_readCount=%1,m_sendTimes=%2", size, readcount_, sendtimes_);
+    qm_xinfo2(TSF"getPingStatus():size = %0; m_readCount=%1,m_sendTimes=%2", size, readcount_, sendtimes_);
 
     _ping_status.loss_rate = (1 - (double)size / sendtimes_) < 0 ? 0 : (1 - (double)size / sendtimes_);
     char temp[1024] = {0};
@@ -843,7 +843,7 @@ int doPing(const std::string& _destaddr, std::string& _real_pingip, std::string&
     int ret = pingObj.RunPingQuery(_pingcount, _interval, _timeout, _destaddr.c_str(), _packet_size);
 
     if (ret != 0) {
-        xinfo2(TSF"ret=%0", ret);
+        qm_xinfo2(TSF"ret=%0", ret);
         return ret;
     }
 
@@ -860,35 +860,35 @@ int doPing(const std::string& _destaddr, std::string& _real_pingip, std::string&
 
     _resultstr.append(ping_status.res);
 
-    xdebug2(TSF"realPingIP=%0,resultStr=%1,destAddr=%2", _real_pingip.c_str(), _resultstr.c_str(), _destaddr.c_str());
+    qm_xdebug2(TSF"realPingIP=%0,resultStr=%1,destAddr=%2", _real_pingip.c_str(), _resultstr.c_str(), _destaddr.c_str());
 
     return ret2;
 }
 #elif defined _WIN32
 // empty implement
 int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/, const char* dest, unsigned int packetSize) {
-    xerror2(TSF"ping query is not support on win32 now!");
+    qm_xerror2(TSF"ping query is not support on win32 now!");
     return 0;
 }
 
 int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/, 
                     const char* dest, unsigned int packetSize, int* rtt){
-    xerror2(TSF"ping query is not support on win32 now!");
+    qm_xerror2(TSF"ping query is not support on win32 now!");
     return -1;
 }
 
 int PingQuery::GetPingStatus(struct PingStatus& pingStatus) {
-    xerror2(TSF"ping query is not support on win32 now!");
+    qm_xerror2(TSF"ping query is not support on win32 now!");
     return 0;
 }
 #else
 
 int PingQuery::RunPingQuery(int _querycount, int interval/*S*/, int timeout/*S*/, const char* dest, unsigned int packetSize) {
-    xerror2(TSF"ping query is not support  now!");
+    qm_xerror2(TSF"ping query is not support  now!");
     return 0;
 }
 int PingQuery::GetPingStatus(struct PingStatus& pingStatus) {
-    xerror2(TSF"ping query is not support now!");
+    qm_xerror2(TSF"ping query is not support now!");
     return 0;
 }
 // #error "no support!"

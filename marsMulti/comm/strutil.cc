@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <locale>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/openssl/include/openssl/md5.h"
 
 #ifdef WIN32
@@ -256,7 +256,7 @@ std::string Hex2Str(const char* _str, unsigned int _len) {
 
 std::string Str2Hex(const char* _str, unsigned int _len) {
     if (_len > 1024) {
-        xassert2(false, TSF"string length %_ too long.", _len);
+        qm_xassert2(false, TSF"string length %_ too long.", _len);
         return "";
     }
     char outbuffer[512];
@@ -287,7 +287,7 @@ std::string Str2Hex(const char* _str, unsigned int _len) {
 std::string ReplaceChar(const char* const input_str, char be_replaced, char replace_with) {
     std::string output_str(input_str);
     size_t len = output_str.size();
-    xassert2(len<16*1024, TSF"input_str:%_", input_str);
+    qm_xassert2(len<16*1024, TSF"input_str:%_", input_str);
     for(size_t i=0; i<len; ++i) {
         if (be_replaced == output_str[i]) {
             output_str[i] = replace_with;

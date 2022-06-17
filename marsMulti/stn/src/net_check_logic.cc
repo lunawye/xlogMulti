@@ -25,7 +25,7 @@
 
 #include "boost/bind.hpp"
 
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/thread/lock.h"
 #include "marsMulti/comm/comm_frequency_limit.h"
 #include "marsMulti/comm/qm_time_utils.h"
@@ -103,11 +103,11 @@ static const uint32_t kCheckifAboveCount = 5;
 NetCheckLogic::NetCheckLogic()
     : frequency_limit_(new CommFrequencyLimit(kLimitCount, kLimitTimeSpan))
 	, last_netcheck_time_(0) {
-    xinfo_function();
+    qm_xinfo_function();
 }
 
 NetCheckLogic::~NetCheckLogic() {
-    xinfo_function();
+    qm_xinfo_function();
 
     delete frequency_limit_;
 }
@@ -115,7 +115,7 @@ NetCheckLogic::~NetCheckLogic() {
 void NetCheckLogic::UpdateLongLinkInfo(unsigned int _continues_fail_count, bool _task_succ) {
 	if (!_task_succ ) longlink_taskstatus_item_.last_failedtime = ::gettickcount();
 	SET_BIT(_task_succ, longlink_taskstatus_item_.records, kValidBitsFilter);
-	xdebug2("shortlink:_continueFailCount=%d, _isTaskSucc=%d, records=0x%x", _continues_fail_count, _task_succ, longlink_taskstatus_item_.records);
+	qm_xdebug2("shortlink:_continueFailCount=%d, _isTaskSucc=%d, records=0x%x", _continues_fail_count, _task_succ, longlink_taskstatus_item_.records);
 
     if (__ShouldNetCheck()) {
         __StartNetCheck();
@@ -126,7 +126,7 @@ void NetCheckLogic::UpdateShortLinkInfo(unsigned int _continues_fail_count, bool
 
 	if (!_task_succ ) shortlink_taskstatus_item_.last_failedtime = ::gettickcount();
 	SET_BIT(_task_succ, shortlink_taskstatus_item_.records, kValidBitsFilter);
-	xdebug2("shortlink:_continues_fail_count: %d, _task_succ: %d, records=0x%x", _continues_fail_count, _task_succ, shortlink_taskstatus_item_.records);
+	qm_xdebug2("shortlink:_continues_fail_count: %d, _task_succ: %d, records=0x%x", _continues_fail_count, _task_succ, shortlink_taskstatus_item_.records);
 
     if (__ShouldNetCheck()) {
         __StartNetCheck();
@@ -149,13 +149,13 @@ bool NetCheckLogic::__ShouldNetCheck() {
 	if (is_shortlink_bad) { // 最近八次坏，前八次好，就进入netcheck
 		unsigned int valid_record_taskcount = 0;
 		CAL_BIT_COUNT(kValidBitsFilter, valid_record_taskcount);
-		xinfo2(TSF"netcheck: shortlink succ_count: %_, is most recent %_ times. valid_record_taskcount: %_.", succ_count, kMostRecentTaskStartN[1], valid_record_taskcount);
+		qm_xinfo2(TSF"netcheck: shortlink succ_count: %_, is most recent %_ times. valid_record_taskcount: %_.", succ_count, kMostRecentTaskStartN[1], valid_record_taskcount);
 		succ_count = 0;
 		uint32_t second_recent_shorttasks_status = 0;
 		EXTRACT_N_BITS(shortlink_taskstatus_item_.records, kSecondRecentTaskStartN[0], kSecondRecentTaskStartN[1], second_recent_shorttasks_status);
 		CAL_BIT_COUNT(second_recent_shorttasks_status, succ_count);
 		shortlink_shouldcheck = succ_count > kCheckifAboveCount;
-		xinfo2(TSF"netcheck: shortlink_shouldcheck=%_, shortlink succ_count=%_, in sub-recent %_ times. ", shortlink_shouldcheck,
+		qm_xinfo2(TSF"netcheck: shortlink_shouldcheck=%_, shortlink succ_count=%_, in sub-recent %_ times. ", shortlink_shouldcheck,
 				succ_count, kSecondRecentTaskStartN[1]);
 	}
 
@@ -172,13 +172,13 @@ bool NetCheckLogic::__ShouldNetCheck() {
 	if (is_longlink_bad) { // 最近八次坏，前八次好，就进入netcheck
 		unsigned int valid_record_taskcount = 0;
 		CAL_BIT_COUNT(kValidBitsFilter, valid_record_taskcount);
-		xinfo2(TSF"netcheck: longlink succ_count: %_, in most recent %_ times. valid_record_taskcount: %_.", succ_count, kMostRecentTaskStartN[1], valid_record_taskcount);
+		qm_xinfo2(TSF"netcheck: longlink succ_count: %_, in most recent %_ times. valid_record_taskcount: %_.", succ_count, kMostRecentTaskStartN[1], valid_record_taskcount);
 		succ_count = 0;
 		uint32_t second_recent_longtasks_status = 0;
 		EXTRACT_N_BITS(longlink_taskstatus_item_.records, kSecondRecentTaskStartN[0], kSecondRecentTaskStartN[1], second_recent_longtasks_status);
 		CAL_BIT_COUNT(second_recent_longtasks_status, succ_count);
 		longlink_shouldcheck = succ_count > kCheckifAboveCount;
-		xinfo2(TSF"netcheck: longlink_shouldcheck: %_, longlink succ_count: %_, in sub-recent %_ times. ", longlink_shouldcheck,
+		qm_xinfo2(TSF"netcheck: longlink_shouldcheck: %_, longlink succ_count: %_, in sub-recent %_ times. ", longlink_shouldcheck,
 				succ_count, kSecondRecentTaskStartN[1]);
 	}
 
@@ -188,7 +188,7 @@ bool NetCheckLogic::__ShouldNetCheck() {
 	if (ret) {
 		 if (::gettickspan(last_netcheck_time_) < (kMinCheckTimeSpan + increment_steps * kCheckTimeSpanIncrementStep)) {
 			 ret = false;
-			 xinfo2(TSF"continous hit netcheck strategy, skip this. last_netcheck_time_=%_", last_netcheck_time_);
+			 qm_xinfo2(TSF"continous hit netcheck strategy, skip this. last_netcheck_time_=%_", last_netcheck_time_);
 		 } else {
 			 increment_steps ++;
 		 }
@@ -198,7 +198,7 @@ bool NetCheckLogic::__ShouldNetCheck() {
 	}
 
     if (ret && !frequency_limit_->Check()) {
-        xinfo2(TSF"limit, wait!");
+        qm_xinfo2(TSF"limit, wait!");
         return false;
     }
 
@@ -211,14 +211,14 @@ void NetCheckLogic::__StartNetCheck() {
 	CheckIPPorts longlink_check_items;
 	std::vector<std::string> longlink_hosts = NetSource::GetLongLinkHosts();
 	if (longlink_hosts.empty()) {
-		xerror2(TSF"longlink host is empty.");
+		qm_xerror2(TSF"longlink host is empty.");
 		return;
 	}
 
 	std::vector<uint16_t> longlink_portlist;
 	NetSource::GetLonglinkPorts(longlink_portlist);
 	if (longlink_portlist.empty()) {
-		xerror2(TSF"longlink no port");
+		qm_xerror2(TSF"longlink no port");
 		return;
 	}
 
@@ -227,7 +227,7 @@ void NetCheckLogic::__StartNetCheck() {
 		dns_util_.GetNewDNS().GetHostByName(*host_iter, longlink_iplist);
 		if (longlink_iplist.empty()) dns_util_.GetDNS().GetHostByName(*host_iter, longlink_iplist);
 		if (longlink_iplist.empty()) {
-			xerror2(TSF"no dns ip for longlink host: %_", *host_iter);
+			qm_xerror2(TSF"no dns ip for longlink host: %_", *host_iter);
 			continue;
 		}
 
@@ -255,7 +255,7 @@ void NetCheckLogic::__StartNetCheck() {
 		dns_util_.GetNewDNS().GetHostByName(*iter, shortlink_iplist);
 		if (shortlink_iplist.empty()) dns_util_.GetDNS().GetHostByName(*iter, shortlink_iplist);
 		if (shortlink_iplist.empty()) {
-			xerror2(TSF"no dns ip for shortlink host: %_", *iter);
+			qm_xerror2(TSF"no dns ip for shortlink host: %_", *iter);
 			continue;
 		}
 

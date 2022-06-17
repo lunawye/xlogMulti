@@ -25,7 +25,7 @@
 #include "socket/unix_socket.h"
 #include "socket/socket_address.h"
 
-class XLogger;
+class QM_XLogger;
 
 namespace marsMulti {
 namespace comm {
@@ -62,8 +62,8 @@ class TcpClientFSM {
     void Close(bool _notify = true);
     bool RemoteClose() const;
 
-    virtual void PreSelect(SocketSelect& _sel, XLogger& _log);
-    virtual void AfterSelect(SocketSelect& _sel, XLogger& _log);
+    virtual void PreSelect(SocketSelect& _sel, QM_XLogger& _log);
+    virtual void AfterSelect(SocketSelect& _sel, QM_XLogger& _log);
     virtual int Timeout() const;
     int Rtt() const;
 
@@ -72,10 +72,10 @@ class TcpClientFSM {
     TcpClientFSM& operator=(const TcpClientFSM&);
 
   protected:
-    virtual void PreConnectSelect(SocketSelect& _sel, XLogger& _log);
-    virtual void AfterConnectSelect(const SocketSelect& _sel, XLogger& _log);
-    virtual void PreReadWriteSelect(SocketSelect& _sel, XLogger& _log);
-    virtual void AfterReadWriteSelect(const SocketSelect& _sel, XLogger& _log);
+    virtual void PreConnectSelect(SocketSelect& _sel, QM_XLogger& _log);
+    virtual void AfterConnectSelect(const SocketSelect& _sel, QM_XLogger& _log);
+    virtual void PreReadWriteSelect(SocketSelect& _sel, QM_XLogger& _log);
+    virtual void AfterReadWriteSelect(const SocketSelect& _sel, QM_XLogger& _log);
 
     virtual int ConnectTimeout() const;
     virtual int ReadWriteTimeout() const;

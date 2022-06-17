@@ -21,7 +21,7 @@ include_directories(messagequeue)
 include_directories(network)
 include_directories(socket)
 include_directories(thread)
-include_directories(xlogger)
+include_directories(qm_xlogger)
 
 file(GLOB SELF_TEMP_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} *.cc *.c *.h)
 list(APPEND SELF_SRC_FILES ${SELF_TEMP_SRC_FILES})
@@ -43,8 +43,8 @@ file(GLOB SELF_TEMP_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} socket/*.cc socket/
 source_group(socket FILES ${SELF_TEMP_SRC_FILES})
 list(APPEND SELF_SRC_FILES ${SELF_TEMP_SRC_FILES})
 
-file(GLOB SELF_TEMP_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} xlogger/*.c xlogger/*.cc xlogger/*.h)
-source_group(xlogger FILES ${SELF_TEMP_SRC_FILES})
+file(GLOB SELF_TEMP_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} qm_xlogger/*.c qm_xlogger/*.cc qm_xlogger/*.h)
+source_group(qm_xlogger FILES ${SELF_TEMP_SRC_FILES})
 list(APPEND SELF_SRC_FILES ${SELF_TEMP_SRC_FILES})
 
 file(GLOB SELF_TEMP_SRC_FILES RELATIVE ${PROJECT_SOURCE_DIR} corepattern/*.cc corepattern/*.h)

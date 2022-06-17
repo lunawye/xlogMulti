@@ -19,7 +19,7 @@
 #endif // !_WIN32
 
 #include "marsMulti/comm/qm_autobuffer.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/socket/socketselect.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/stn/config.h"
@@ -43,8 +43,8 @@ public:
 	 */
 	static SOCKET makeNonBlockSocket(marsMulti::comm::SocketSelect& sel, const std::string& strIp, int port, unsigned int timeoutInMs, int& errCode)
 	{
-		xverbose_function();
-        xdebug2(TSF"makeNonBlockSocket, ip: %0, port: %1", strIp, port);
+		qm_xverbose_function();
+        qm_xdebug2(TSF"makeNonBlockSocket, ip: %0, port: %1", strIp, port);
 		struct sockaddr_in _addr;
 		bzero(&_addr, sizeof(_addr));
 		_addr.sin_family = AF_INET;
@@ -54,18 +54,18 @@ public:
 		SOCKET fsocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (fsocket == INVALID_SOCKET) {
 			errCode = socket_errno;
-			xerror2(TSF"socket create error, socket_errno:%0", socket_strerror(errCode));
+			qm_xerror2(TSF"socket create error, socket_errno:%0", socket_strerror(errCode));
 			return INVALID_SOCKET;
 		}
         
         if (0 != socket_ipv6only(fsocket, 0)){
-            xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno));
+            qm_xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno));
         }
 		//set the socket to unblocked model
 		int ret = socket_set_nobio(fsocket);
 		if (ret != 0) {
 			errCode = socket_errno;
-			xerror2(TSF"nobio:%0", socket_strerror(errCode));
+			qm_xerror2(TSF"nobio:%0", socket_strerror(errCode));
 			::socket_close(fsocket);
 			return INVALID_SOCKET;
 		}
@@ -76,7 +76,7 @@ public:
 		if (connectRet < 0 && !IS_NOBLOCK_CONNECT_ERRNO(socket_errno))
 		{
 			errCode = socket_errno;
-			xerror2(TSF"connect error, socket_errno:%0", socket_strerror(errCode));
+			qm_xerror2(TSF"connect error, socket_errno:%0", socket_strerror(errCode));
 			::socket_close(fsocket);
 			return INVALID_SOCKET;
 		}
@@ -100,12 +100,12 @@ public:
                 
 				if (selectRet == 0) {
 					errCode = socket_errno;
-					xerror2(TSF"connect timeout, use time:%0 ms to connect", (gettickcount() - lastTime));
+					qm_xerror2(TSF"connect timeout, use time:%0 ms to connect", (gettickcount() - lastTime));
 					::socket_close(fsocket);
 					return -2;
 				} else if (selectRet < 0) {
 					errCode = socket_errno;
-					xerror2(TSF"select errror, ret:%0, socket_errno:%1, use time:%2 ms",
+					qm_xerror2(TSF"select errror, ret:%0, socket_errno:%1, use time:%2 ms",
                            selectRet, socket_strerror(errCode), (gettickcount() - lastTime));
                     
 					if (selectRet == -1 && EINTR == errCode && intrCount < 3)
@@ -119,13 +119,13 @@ public:
 				if (sel.IsException())
 				{
 					errCode = errno;
-					xerror2(TSF"select breaker exception");
+					qm_xerror2(TSF"select breaker exception");
 					::socket_close(fsocket);
 					return INVALID_SOCKET;
 				}
 				if (sel.IsBreak())
 				{
-					xinfo2(TSF"Breaker INTR");
+					qm_xinfo2(TSF"Breaker INTR");
 					::socket_close(fsocket);
 					return INVALID_SOCKET;
 				}
@@ -137,11 +137,11 @@ public:
 					if (ret == 0)
 					{
 						errCode = error;
-						xerror2(TSF"select socket exception error:%0", strerror(errCode));
+						qm_xerror2(TSF"select socket exception error:%0", strerror(errCode));
 					}
 					else
 						errCode = errno;
-					xerror2(TSF"select socket exception");
+					qm_xerror2(TSF"select socket exception");
                     
 					::socket_close(fsocket);
 					return INVALID_SOCKET;
@@ -149,13 +149,13 @@ public:
 				if (!sel.Write_FD_ISSET(fsocket))
 				{
 					errCode = errno;
-					xerror2(TSF"select return but not set, return:%0, errno:%1", selectRet, errno);
+					qm_xerror2(TSF"select return but not set, return:%0, errno:%1", selectRet, errno);
 					::socket_close(fsocket);
-					xassert2(false);
+					qm_xassert2(false);
 					return INVALID_SOCKET;
 				}
                 
-				xdebug2(TSF"use time:%0 ms to connect", (gettickcount() - lastTime));
+				qm_xdebug2(TSF"use time:%0 ms to connect", (gettickcount() - lastTime));
                 
 				sockaddr addr;
 				socklen_t len = sizeof(addr);
@@ -169,15 +169,15 @@ public:
 					if (ret == 0)
 					{
 						errCode = error;
-						xerror2(TSF"connect error:%0", socket_strerror(errCode));
+						qm_xerror2(TSF"connect error:%0", socket_strerror(errCode));
 					}
 					else
-						xerror2(TSF"getsockopt error");
+						qm_xerror2(TSF"getsockopt error");
 					::socket_close(fsocket);
 					return INVALID_SOCKET;
 				}
                 
-				xdebug2(TSF"connect success");
+				qm_xdebug2(TSF"connect success");
 				break;
 			}
 		}
@@ -192,12 +192,12 @@ public:
 	 */
 	static TcpErrCode writenWithNonBlock(int fdSocket, marsMulti::comm::SocketSelect& sel, unsigned int timeoutMs, const unsigned char* buff, unsigned int unSize, int &errcode)
 	{
-		xverbose_function();
-        xinfo2(TSF"writenWithNonBlock with Socket:%0, timeoutMs:%1, unSize:%2", fdSocket, timeoutMs, unSize);
-		xassert2(unSize > 0);
+		qm_xverbose_function();
+        qm_xinfo2(TSF"writenWithNonBlock with Socket:%0, timeoutMs:%1, unSize:%2", fdSocket, timeoutMs, unSize);
+		qm_xassert2(unSize > 0);
 		if (unSize == 0)
 		{
-			xwarn2(TSF"writen size == 0");
+			qm_xwarn2(TSF"writen size == 0");
 			return kTcpSucc;
 		}
         
@@ -208,7 +208,7 @@ public:
 		{
 			unsigned int remainLen = unSize - nSent;
 			int ret = -1;
-			xassert2(remainLen > 0);
+			qm_xassert2(remainLen > 0);
             
 			sel.PreSelect();
 			sel.Write_FD_SET(fdSocket);
@@ -233,7 +233,7 @@ public:
 			if (ret == -1)
 			{
 				errcode = errno;
-				xerror2(TSF"select return -1, error:%0", strerror(errcode));
+				qm_xerror2(TSF"select return -1, error:%0", strerror(errcode));
                 if (EINTR == errcode && intrCount < 3)
                 {
                 	intrCount += 1;
@@ -243,19 +243,19 @@ public:
 			}
 			if (ret == 0)
 			{
-				xerror2(TSF"select timeout");
+				qm_xerror2(TSF"select timeout");
 				errcode = -1;
 				return kTimeoutErr;
 			}
 			if (sel.IsException())
 			{
-				xerror2(TSF"select pipe error");
+				qm_xerror2(TSF"select pipe error");
 				errcode = errno;
 				return kPipeExp;
 			}
 			if (sel.IsBreak())
 			{
-				xwarn2(TSF"INTR by pipe");
+				qm_xwarn2(TSF"INTR by pipe");
 				return kPipeIntr;
 			}
 			if (sel.Exception_FD_ISSET(fdSocket))
@@ -266,11 +266,11 @@ public:
 				if (ret == 0)
 				{
 					errcode = error;
-					xerror2(TSF"select socket exception error:%0", strerror(errcode));
+					qm_xerror2(TSF"select socket exception error:%0", strerror(errcode));
 				}
 				else
 					errcode = errno;
-				xerror2(TSF"select socket exception");
+				qm_xerror2(TSF"select socket exception");
                 
 				return kSelectExpErr;
 			}
@@ -278,10 +278,10 @@ public:
 			{
 				ssize_t nwrite =::send(fdSocket, buff, remainLen, 0);
 				errcode = errno;		//never do other things after send, otherwise errno will change
-				xdebug2(TSF"sendWithNonBlock ::send return:%0", nwrite);
+				qm_xdebug2(TSF"sendWithNonBlock ::send return:%0", nwrite);
 				if (nwrite == 0 || (0 > nwrite && !IS_NOBLOCK_SEND_ERRNO(socket_errno)))
 				{
-					xerror2(TSF"sendWithNonBlock send <= 0, errno:%0", strerror(errcode));
+					qm_xerror2(TSF"sendWithNonBlock send <= 0, errno:%0", strerror(errcode));
 					return kSndRcvErr;
 				}
                 
@@ -297,8 +297,8 @@ public:
 				continue;
 			}
             
-			xerror2(TSF"select return but none is select");
-			xassert2(false);
+			qm_xerror2(TSF"select return but none is select");
+			qm_xassert2(false);
 			return kAssertErr;
 		}
 		return kTcpSucc;
@@ -314,8 +314,8 @@ public:
 	 */
 	static TcpErrCode readnWithNonBlock(int fdSocket, marsMulti::comm::SocketSelect& sel, unsigned int timeoutMs, AutoBuffer& recvBuf, unsigned int unSize, int &errcode)
 	{
-	    xverbose_function();
-		xdebug2(TSF"readnWithNonBlock socket:%0, timeoutMs:%1", fdSocket, timeoutMs);
+	    qm_xverbose_function();
+		qm_xdebug2(TSF"readnWithNonBlock socket:%0, timeoutMs:%1", fdSocket, timeoutMs);
 		if (unSize == 0)
 			return kTcpSucc;
         if (timeoutMs == 0) timeoutMs = DEFAULT_TCP_RECV_TIMEOUT;
@@ -355,7 +355,7 @@ public:
 			if (ret == -1)
 			{
 				errcode = errno;
-				xerror2(TSF"select return -1, error:%0", strerror(errcode));
+				qm_xerror2(TSF"select return -1, error:%0", strerror(errcode));
 				if (EINTR == errcode && intrCount < 3)
 				{
 					intrCount += 1;
@@ -365,19 +365,19 @@ public:
 			}
 			if (ret == 0)
 			{
-				xerror2(TSF"select timeout");
+				qm_xerror2(TSF"select timeout");
 				errcode = -1;
 				return kTimeoutErr;
 			}
 			if (sel.IsException())
 			{
-				xerror2(TSF"select pipe exception");
+				qm_xerror2(TSF"select pipe exception");
 				errcode = errno;
 				return kPipeExp;
 			}
 			if (sel.IsBreak())
 			{
-				xwarn2(TSF"INTR by pipe");
+				qm_xwarn2(TSF"INTR by pipe");
 				return kPipeIntr;
 			}
 			if (sel.Exception_FD_ISSET(fdSocket))
@@ -388,11 +388,11 @@ public:
 				if (ret == 0)
 				{
 					errcode = error;
-					xerror2(TSF"select socket exception error:%0", strerror(errcode));
+					qm_xerror2(TSF"select socket exception error:%0", strerror(errcode));
 				}
 				else
 					errcode = errno;
-				xerror2(TSF"select socket exception");
+				qm_xerror2(TSF"select socket exception");
                 
 				return kSelectExpErr;
 			}
@@ -400,15 +400,15 @@ public:
 			{
 				ssize_t nrecv = ::recv(fdSocket, recvBuf.PosPtr(), length, 0);
 				errcode = errno;			//never do other things after recv, otherwise errno will be changed
-				xdebug2(TSF"readnWithNonBlock recv :%0", nrecv);
+				qm_xdebug2(TSF"readnWithNonBlock recv :%0", nrecv);
 				if (nrecv < 0)
 				{
-					xerror2(TSF"readnWithNonBlock readn nrecv < 0, errno:%0", strerror(errcode));
+					qm_xerror2(TSF"readnWithNonBlock readn nrecv < 0, errno:%0", strerror(errcode));
 					return kSelectErr;
 				}
 				else if (nrecv == 0)
 				{
-					xinfo2(TSF"nrecv==0, socket close:%0", errno);
+					qm_xinfo2(TSF"nrecv==0, socket close:%0", errno);
 					return kTcpNonErr;
 				}
                 
@@ -416,7 +416,7 @@ public:
                 
 				if ((recvBuf.Length() - oldLength) >= unSize)
 				{
-					xdebug2(TSF"recvBuf.Length()=%0, oldLength=%1, unSize=%2",recvBuf.Length(), oldLength, unSize);
+					qm_xdebug2(TSF"recvBuf.Length()=%0, oldLength=%1, unSize=%2",recvBuf.Length(), oldLength, unSize);
 					return kTcpNonErr;
 				}
 			}

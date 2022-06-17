@@ -14,7 +14,7 @@
 
 #include <algorithm>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 namespace marsMulti {
 namespace comm {

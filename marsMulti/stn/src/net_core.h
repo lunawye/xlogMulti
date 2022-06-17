@@ -123,7 +123,7 @@ public:
   private:
     void    __InitLongLink();
     void    __InitShortLink();
-    bool    __ValidAndInitDefault(Task& _task, XLogger& _group);
+    bool    __ValidAndInitDefault(Task& _task, QM_XLogger& _group);
     
     int     __CallBack(int _from, ErrCmdType _err_type, int _err_code, int _fail_handle, const Task& _task, unsigned int _taskcosttime);
     void    __OnShortLinkNetworkError(int _line, ErrCmdType _err_type, int _err_code, const std::string& _ip, const std::string& _host, uint16_t _port);

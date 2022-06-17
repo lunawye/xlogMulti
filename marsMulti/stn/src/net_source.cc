@@ -30,7 +30,7 @@
 
 #include "marsMulti/comm/marcotoolkit.h"
 #include "marsMulti/comm/socket/unix_socket.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/qm_time_utils.h"
 #include "marsMulti/comm/qm_strutil.h"
 #include "marsMulti/comm/thread/lock.h"
@@ -90,11 +90,11 @@ NetSource::NetSource(ActiveLogic& _active_logic)
     , v4_timeout_(0)
     , v6_timeout_(0)
 {
-    xinfo_function();
+    qm_xinfo_function();
 }
 
 NetSource::~NetSource() {
-    xinfo_function();
+    qm_xinfo_function();
 }
 
 /**
@@ -104,21 +104,21 @@ void NetSource::SetLongLink(const std::vector<std::string>& _hosts, const std::v
 	ScopedLock lock(sg_ip_mutex);
 
 	xgroup2_define(addr_print);
-	xinfo2(TSF"task set longlink server addr, ") >> addr_print;
+	qm_xinfo2(TSF"task set longlink server addr, ") >> addr_print;
 	for (std::vector<std::string>::const_iterator host_iter = _hosts.begin(); host_iter != _hosts.end(); ++host_iter) {
-		xinfo2(TSF "host:%_ ", *host_iter) >> addr_print;
+		qm_xinfo2(TSF "host:%_ ", *host_iter) >> addr_print;
 	}
 	for (std::vector<uint16_t>::const_iterator port_iter = _ports.begin(); port_iter != _ports.end(); ++port_iter) {
-		xinfo2(TSF "port:%_ ", *port_iter) >> addr_print;
+		qm_xinfo2(TSF "port:%_ ", *port_iter) >> addr_print;
 	}
-	xinfo2(TSF"debugip:%_", _debugip) >> addr_print;
+	qm_xinfo2(TSF"debugip:%_", _debugip) >> addr_print;
 
     sg_longlink_debugip = _debugip;
     if (!_hosts.empty()) {
     	sg_longlink_hosts = _hosts;
     }
     else {
-    	xerror2(TSF"host list should not be empty");
+    	qm_xerror2(TSF"host list should not be empty");
     }
 	sg_longlink_ports = _ports;
 }
@@ -126,7 +126,7 @@ void NetSource::SetLongLink(const std::vector<std::string>& _hosts, const std::v
 void NetSource::SetShortlink(const uint16_t _port, const std::string& _debugip) {
 	ScopedLock lock(sg_ip_mutex);
 
-	xinfo2(TSF "task set shortlink server addr, port:%_, debugip:%_", _port, _debugip);
+	qm_xinfo2(TSF "task set shortlink server addr, port:%_, debugip:%_", _port, _debugip);
 
 	sg_shortlink_port = _port;
     sg_shortlink_debugip = _debugip;
@@ -134,7 +134,7 @@ void NetSource::SetShortlink(const uint16_t _port, const std::string& _debugip) 
 
 void NetSource::SetMinorLongDebugIP(const std::string& _ip, const uint16_t _port) {
     ScopedLock lock(sg_ip_mutex);
-    xinfo2(TSF "task set minorlong server addr, port:%_, debugip:%_", _port, _ip);
+    qm_xinfo2(TSF "task set minorlong server addr, port:%_, debugip:%_", _port, _ip);
     sg_minorlong_debugip = _ip;
     sg_minorlong_port = _port;
 }
@@ -143,9 +143,9 @@ void NetSource::SetBackupIPs(const std::string& _host, const std::vector<std::st
 	ScopedLock lock(sg_ip_mutex);
 
 	xgroup2_define(addr_print);
-	xinfo2(TSF"task set backup server addr, host:%_", _host) >> addr_print;
+	qm_xinfo2(TSF"task set backup server addr, host:%_", _host) >> addr_print;
 	for (std::vector<std::string>::const_iterator ip_iter = _ips.begin(); ip_iter != _ips.end(); ++ip_iter) {
-		xinfo2(TSF "ip:%_ ", *ip_iter) >> addr_print;
+		qm_xinfo2(TSF "ip:%_ ", *ip_iter) >> addr_print;
 	}
 
 	sg_host_backupips_mapping[_host] = _ips;
@@ -154,7 +154,7 @@ void NetSource::SetBackupIPs(const std::string& _host, const std::vector<std::st
 void NetSource::SetDebugIP(const std::string& _host, const std::string& _ip) {
 	ScopedLock lock(sg_ip_mutex);
 
-	xinfo2(TSF "task set debugip:%_ for host:%_", _ip, _host);
+	qm_xinfo2(TSF "task set debugip:%_ for host:%_", _ip, _host);
     
     if (_ip.empty()){
         sg_host_debugip_mapping.erase(_host);
@@ -199,7 +199,7 @@ void NetSource::GetLonglinkPorts(std::vector<uint16_t>& _ports) {
 }
 
 bool NetSource::GetLongLinkItems(const struct LonglinkConfig& _config, DnsUtil& _dns_util, std::vector<IPPortItem>& _ipport_items) {
-    xinfo_function();
+    qm_xinfo_function();
     ScopedLock lock(sg_ip_mutex);
 
     if (__GetLonglinkDebugIPPort(_config, _ipport_items)) {
@@ -212,7 +212,7 @@ bool NetSource::GetLongLinkItems(const struct LonglinkConfig& _config, DnsUtil& 
     if(longlink_hosts.empty())
         longlink_hosts = NetSource::GetLongLinkHosts();
  	if (longlink_hosts.empty()) {
- 		xerror2("longlink host empty.");
+ 		qm_xerror2("longlink host empty.");
  		return false;
  	}
 
@@ -267,7 +267,7 @@ void NetSource::GetBackupIPs(std::string _host, std::vector<std::string>& _iplis
 }
 
 void NetSource::ReportLongIP(bool _is_success, const std::string& _ip, uint16_t _port) {
-    xinfo2_if(!_is_success, TSF"_is_success=%0, ip=%1, port=%2", _is_success, _ip, _port);
+    qm_xinfo2_if(!_is_success, TSF"_is_success=%0, ip=%1, port=%2", _is_success, _ip, _port);
 
     if (_ip.empty() || 0 == _port) return;
 
@@ -412,7 +412,7 @@ size_t NetSource::__MakeIPPorts(std::vector<IPPortItem>& _ip_items, const std::s
 		ReportDnsProfile(dns_profile);
 
 		xgroup2_define(dnsxlog);
-		xdebug2(TSF"link host:%_, new dns ret:%_, size:%_ ", _host, ret, iplist.size()) >> dnsxlog;
+		qm_xdebug2(TSF"link host:%_, new dns ret:%_, size:%_ ", _host, ret, iplist.size()) >> dnsxlog;
 
 		if (iplist.empty()) {
 			dns_profile.Reset();
@@ -425,7 +425,7 @@ size_t NetSource::__MakeIPPorts(std::vector<IPPortItem>& _ip_items, const std::s
 			if (!ret) dns_profile.OnFailed();
 			ReportDnsProfile(dns_profile);
 
-			xdebug2(TSF "dns ret:%_, size:%_,", ret, iplist.size()) >> dnsxlog;
+			qm_xdebug2(TSF "dns ret:%_, size:%_,", ret, iplist.size()) >> dnsxlog;
 		}
 		else {
 			ist = kIPSourceNewDns;
@@ -440,7 +440,7 @@ size_t NetSource::__MakeIPPorts(std::vector<IPPortItem>& _ip_items, const std::s
 	}
 	else {
 		NetSource::GetBackupIPs(_host, iplist);
-		xdebug2(TSF"link host:%_, backup ips size:%_", _host, iplist.size());
+		qm_xdebug2(TSF"link host:%_, backup ips size:%_", _host, iplist.size());
         
         if (iplist.empty() && _dns_util.GetDNS().GetHostByName(_host, iplist)) {
             ScopedLock lock(sg_ip_mutex);
@@ -516,7 +516,7 @@ size_t NetSource::__MakeIPPorts(std::vector<IPPortItem>& _ip_items, const std::s
 }
 
 void NetSource::ReportShortIP(bool _is_success, const std::string& _ip, const std::string& _host, uint16_t _port) {
-    xinfo2_if(!_is_success, TSF"_is_success=%0, ip=%1, port=%2 host=%3", _is_success, _ip, _port, _host);
+    qm_xinfo2_if(!_is_success, TSF"_is_success=%0, ip=%1, port=%2 host=%3", _is_success, _ip, _port, _host);
 
     if (_ip.empty()) return;
 
@@ -526,7 +526,7 @@ void NetSource::ReportShortIP(bool _is_success, const std::string& _ip, const st
 }
 
 void NetSource::ClearCache() {
-    xinfo_function();
+    qm_xinfo_function();
     ipportstrategy_.InitHistory2BannedList(true);
     
     ScopedLock lock(sg_ip_mutex);
@@ -569,18 +569,18 @@ std::string NetSource::DumpTable(const std::vector<IPPortItem>& _ipport_items) {
 
 void NetSource::SetCgiDebugIP(const std::string &_cgi, const std::string &_ip, const uint16_t _port) {
     if (_cgi.empty()) {
-        xinfo2(TSF"cgi is empty. ignore");
+        qm_xinfo2(TSF"cgi is empty. ignore");
         return;
     }
     if (_ip.empty()) {
-        xinfo2(TSF"ip is empty. remove cgi %_ debug ip", _cgi);
+        qm_xinfo2(TSF"ip is empty. remove cgi %_ debug ip", _cgi);
         std::map<std::string, std::pair<std::string, uint16_t>>::iterator it = sg_cgi_debug_mapping.find(_cgi);
         if( it != sg_cgi_debug_mapping.end()) {
             sg_cgi_debug_mapping.erase(it);
         }
         return;
     }
-    xinfo2(TSF "set debug ip:%_ for cgi :%_", _ip, _cgi);
+    qm_xinfo2(TSF "set debug ip:%_ for cgi :%_", _ip, _cgi);
     uint64_t port = 80;
     if (_port > 0 ){
         port = _port;
@@ -589,7 +589,7 @@ void NetSource::SetCgiDebugIP(const std::string &_cgi, const std::string &_ip, c
 }
 
 bool NetSource::GetLongLinkSpeedTestIPs(std::vector<IPPortItem>& _ip_vec) {
-    xverbose_function();
+    qm_xverbose_function();
 
     return true;
 }

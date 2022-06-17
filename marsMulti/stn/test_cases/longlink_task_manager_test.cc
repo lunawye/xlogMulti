@@ -24,7 +24,7 @@
 #include "../../mmcomm/active_logic.h"
 
 #include "../../../log/qm_appender.h"
-#include "../../../comm/xlogger/qm_xloggerbase.h"
+#include "../../../comm/qm_xlogger/qm_xloggerbase.h"
 
 #include "TestUtils.h"
 #include "GtestEx.h"
@@ -38,7 +38,7 @@ static unsigned long  __ReadWriteTimeout(unsigned long  _first_pkg_timeout)
 
 static unsigned long  __FirstPkgTimeout(unsigned long  _init_first_pkg_timeout, unsigned int _sendlen, int _send_count)
 {
-	xassert2(3600*1000 >= _init_first_pkg_timeout);
+	qm_xassert2(3600*1000 >= _init_first_pkg_timeout);
 
 	unsigned int rate = (kMobile != getNetInfo())?kWifiMinRate:kGPRSMinRate;
 	unsigned int base_rw_timeout = (kMobile != getNetInfo())?kBaseFirstPackageWifiTimeout:kBaseFirstPackageGPRSTimeout;

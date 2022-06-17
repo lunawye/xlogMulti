@@ -29,7 +29,7 @@
 #include "marsMulti/baseevent/baseprjevent.h"
 #include "marsMulti/baseevent/active_logic.h"
 #include "marsMulti/baseevent/baseevent.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/messagequeue/message_queue.h"
 #include "marsMulti/comm/singleton.h"
 #include "marsMulti/comm/bootrun.h"
@@ -58,7 +58,7 @@ static const std::string kLibName = "stn";
 #define STN_WEAK_CALL(func) \
     boost::shared_ptr<NetCore> stn_ptr = NetCore::Singleton::Instance_Weak().lock();\
     if (!stn_ptr) {\
-        xwarn2(TSF"stn uncreate");\
+        qm_xwarn2(TSF"stn uncreate");\
         return;\
     }\
     stn_ptr->func
@@ -66,7 +66,7 @@ static const std::string kLibName = "stn";
 #define STN_RETURN_WEAK_CALL(func) \
     boost::shared_ptr<NetCore> stn_ptr = NetCore::Singleton::Instance_Weak().lock();\
     if (!stn_ptr) {\
-        xwarn2(TSF"stn uncreate");\
+        qm_xwarn2(TSF"stn uncreate");\
         return false;\
     }\
     stn_ptr->func;\
@@ -80,7 +80,7 @@ static const std::string kLibName = "stn";
     }
 
 static void onInitConfigBeforeOnCreate(int _packer_encoder_version) {
-    xinfo2(TSF"stn oninit: %_", _packer_encoder_version);
+    qm_xinfo2(TSF"stn oninit: %_", _packer_encoder_version);
     LongLinkEncoder::SetEncoderVersion(_packer_encoder_version);
 }
 
@@ -88,13 +88,13 @@ static void onCreate() {
 #if !UWP && !defined(WIN32)
     signal(SIGPIPE, SIG_IGN);
 #endif
-    xinfo2(TSF"stn oncreate");
+    qm_xinfo2(TSF"stn oncreate");
     ActiveLogic::Instance();
     NetCore::Singleton::Instance();
 }
 
 static void onDestroy() {
-    xinfo2(TSF"stn onDestroy");
+    qm_xinfo2(TSF"stn onDestroy");
 
     NetCore::Singleton::Release();
     SINGLETON_RELEASE_ALL();
@@ -119,7 +119,7 @@ static void onNetworkChange() {
 static void OnNetworkDataChange(const char* _tag, ssize_t _send, ssize_t _recv) {
     
     if (NULL == _tag || strnlen(_tag, 1024) == 0) {
-        xassert2(false);
+        qm_xassert2(false);
         return;
     }
     
@@ -202,14 +202,14 @@ void (*ClearTasks)()
 
 void (*Reset)()
 = []() {
-	xinfo2(TSF "stn reset");
+	qm_xinfo2(TSF "stn reset");
 	NetCore::Singleton::Release();
 	NetCore::Singleton::Instance();
 };
 
 void (*ResetAndInitEncoderVersion)(int _packer_encoder_version)
 = [](int _packer_encoder_version) {
-	xinfo2(TSF "stn reset, encoder version: %_", _packer_encoder_version);
+	qm_xinfo2(TSF "stn reset, encoder version: %_", _packer_encoder_version);
     LongLinkEncoder::SetEncoderVersion(_packer_encoder_version);
 	NetCore::Singleton::Release();
 	NetCore::Singleton::Instance();
@@ -217,7 +217,7 @@ void (*ResetAndInitEncoderVersion)(int _packer_encoder_version)
 
 void (*MakesureLonglinkConnected)()
 = []() {
-    xinfo2(TSF "make sure longlink connect");
+    qm_xinfo2(TSF "make sure longlink connect");
    STN_WEAK_CALL(MakeSureLongLinkConnect());
 };
 

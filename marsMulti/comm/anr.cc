@@ -31,7 +31,7 @@
 #include "comm/thread/thread.h"
 #include "comm/thread/lock.h"
 #include "comm/qm_time_utils.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 #ifdef ANDROID
 #include "android/fatal_assert.h"
@@ -111,7 +111,7 @@ static void __anr_checker_thread() {
         } else {
             wait_timeout = iOS_style? (sg_check_heap.front().timeout - sg_check_heap.front().used_cpu_time) : (sg_check_heap.front().end_time - clock_app_monotonic());
             if (wait_timeout<0) {
-                xwarn2("@%p", (void*)sg_check_heap.front().ptr)(TSF"wait_timeout:%_, end_time:%_, used_cpu_time:%_, timeout:%_ now:%_, iOS_style：%_, anr_checker_size:%_", wait_timeout,
+                qm_xwarn2("@%p", (void*)sg_check_heap.front().ptr)(TSF"wait_timeout:%_, end_time:%_, used_cpu_time:%_, timeout:%_ now:%_, iOS_style：%_, anr_checker_size:%_", wait_timeout,
                       sg_check_heap.front().end_time, sg_check_heap.front().used_cpu_time, sg_check_heap.front().timeout, iOS_style, clock_app_monotonic(), sg_check_heap.size());
                 wait_timeout = 0;
             }
@@ -125,14 +125,14 @@ static void __anr_checker_thread() {
         clock_t use_cpu_clock_2 = clock();
         uint64_t use_cpu_time_2 = (uint64_t)(((double)use_cpu_clock_2/CLOCKS_PER_SEC) * 1000); //ms
         if (is_wait_timeout && round_tick_elapse > (wait_timeout+kTimeDeviation)) {
-            xwarn2("@%p", (void*)sg_check_heap.front().ptr)(TSF"now:%_, round_tick_start:%_, round_tick_elapse:%_, wait_timeout:%_, round cputime:%_, anr_checker_size:%_", clock_app_monotonic(), round_tick_start, round_tick_elapse, wait_timeout, use_cpu_time_2-use_cpu_time_1, sg_check_heap.size());
+            qm_xwarn2("@%p", (void*)sg_check_heap.front().ptr)(TSF"now:%_, round_tick_start:%_, round_tick_elapse:%_, wait_timeout:%_, round cputime:%_, anr_checker_size:%_", clock_app_monotonic(), round_tick_start, round_tick_elapse, wait_timeout, use_cpu_time_2-use_cpu_time_1, sg_check_heap.size());
             iOS_style = true;
         }
         for (std::vector<check_content>::iterator it = sg_check_heap.begin(); it != sg_check_heap.end(); ++it) {
             if (use_cpu_time_2>=use_cpu_time_1) {
                 it->used_cpu_time += (use_cpu_time_2-use_cpu_time_1);
             } else {
-                xerror2(TSF"use_cpu_time_2:%_, use_cpu_time_1:%_, use_cpu_clock_2:%_, use_cpu_clock_1:%_, CLOCKS_PER_SEC:%_", use_cpu_time_2, use_cpu_time_1,
+                qm_xerror2(TSF"use_cpu_time_2:%_, use_cpu_time_1:%_, use_cpu_clock_2:%_, use_cpu_clock_1:%_, CLOCKS_PER_SEC:%_", use_cpu_time_2, use_cpu_time_1,
                          use_cpu_clock_2, use_cpu_clock_1, CLOCKS_PER_SEC);
             }
         }
@@ -141,7 +141,7 @@ static void __anr_checker_thread() {
             if (!sg_check_heap.empty() && (uint64_t)sg_check_heap.front().timeout <= sg_check_heap.front().used_cpu_time) {
                 check_hit = true;
                 GetSignalCheckHit()(true, sg_check_heap.front());
-                xassert2(sg_check_heap.front().end_time <= clock_app_monotonic(),
+                qm_xassert2(sg_check_heap.front().end_time <= clock_app_monotonic(),
                          "end_time:%" PRIu64", now:%" PRIu64", anr_checker_size:%d, @%p", sg_check_heap.front().end_time, clock_app_monotonic(), (int)sg_check_heap.size(), (void*)sg_check_heap.front().ptr); //old logic is strict than new logic
             }
         } else {

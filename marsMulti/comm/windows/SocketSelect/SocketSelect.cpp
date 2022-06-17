@@ -2,7 +2,7 @@
 #include "SocketSelect.h"
 #include <ws2tcpip.h>
 
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 #include "socket/unix_socket.h"
 
 using namespace marsMulti::comm;
@@ -32,7 +32,7 @@ bool SocketSelectBreaker::ReCreate() {
     m_socket_w = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     if (INVALID_SOCKET == m_socket_w) {
-        xerror2("INVALID_SOCKET with  m_socket_w=%d", WSAGetLastError());
+        qm_xerror2("INVALID_SOCKET with  m_socket_w=%d", WSAGetLastError());
         m_create_success = false;
         return m_create_success;
     }
@@ -40,7 +40,7 @@ bool SocketSelectBreaker::ReCreate() {
     m_socket_r = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     if (INVALID_SOCKET == m_socket_r) {
-        xerror2("INVALID_SOCKET with m_socket_r=%d", WSAGetLastError());
+        qm_xerror2("INVALID_SOCKET with m_socket_r=%d", WSAGetLastError());
         socket_close(m_socket_w);
         m_create_success = false;
         return m_create_success;
@@ -49,7 +49,7 @@ bool SocketSelectBreaker::ReCreate() {
     Ret = socket_set_nobio(m_socket_w);
 
     if (SOCKET_ERROR == Ret) {
-        xerror2("ioctlsocket failed with m_socket_w: %d\n", WSAGetLastError());
+        qm_xerror2("ioctlsocket failed with m_socket_w: %d\n", WSAGetLastError());
         socket_close(m_socket_r);
         socket_close(m_socket_w);
         m_create_success = false;
@@ -59,7 +59,7 @@ bool SocketSelectBreaker::ReCreate() {
     Ret = socket_set_nobio(m_socket_r);
 
     if (SOCKET_ERROR == Ret) {
-        xerror2("ioctlsocket failed with m_socket_r: %d\n", WSAGetLastError());
+        qm_xerror2("ioctlsocket failed with m_socket_r: %d\n", WSAGetLastError());
         socket_close(m_socket_r);
         socket_close(m_socket_w);
         m_create_success = false;
@@ -77,7 +77,7 @@ bool SocketSelectBreaker::ReCreate() {
     Ret = bind(m_socket_w, (struct sockaddr*)&local_b, sizeof(local_b));
 
     if (SOCKET_ERROR == Ret) {
-        xerror2("bind failed with m_socket_w: %d\n", WSAGetLastError());
+        qm_xerror2("bind failed with m_socket_w: %d\n", WSAGetLastError());
         socket_close(m_socket_r);
         socket_close(m_socket_w);
         m_create_success = false;
@@ -87,7 +87,7 @@ bool SocketSelectBreaker::ReCreate() {
     Ret = bind(m_socket_r, (struct sockaddr*)&local_b, sizeof(local_b));
 
     if (SOCKET_ERROR == Ret) {
-        xerror2("bind failed with m_socket_r: %d\n", WSAGetLastError());
+        qm_xerror2("bind failed with m_socket_r: %d\n", WSAGetLastError());
         socket_close(m_socket_r);
         socket_close(m_socket_w);
         m_create_success = false;
@@ -97,7 +97,7 @@ bool SocketSelectBreaker::ReCreate() {
     Ret = getsockname(m_socket_r, &m_sendin, &m_sendinlen);
 
     if (SOCKET_ERROR == Ret) {
-        xerror2("getsockname failed %d\n", WSAGetLastError());
+        qm_xerror2("getsockname failed %d\n", WSAGetLastError());
         socket_close(m_socket_r);
         socket_close(m_socket_w);
         m_create_success = false;
@@ -122,7 +122,7 @@ bool SocketSelectBreaker::Break() {
     m_broken = true;
 
     if (ret < 0 || ret != strlen(dummy)) {
-        xerror2(TSF"sendto Ret:%_, errno:(%_, %_)", ret, errno, WSAGetLastError());
+        qm_xerror2(TSF"sendto Ret:%_, errno:(%_, %_)", ret, errno, WSAGetLastError());
         m_broken =  false;
         ReCreate();
     }
@@ -145,7 +145,7 @@ bool SocketSelectBreaker::Clear() {
     m_broken = false;
 
     if (ret < 0) {
-        xerror2(TSF"recvfrom Ret:%_, errno:(%_, %_)", ret, errno, WSAGetLastError());
+        qm_xerror2(TSF"recvfrom Ret:%_, errno:(%_, %_)", ret, errno, WSAGetLastError());
         ReCreate();
         return false;
     }
@@ -182,7 +182,7 @@ SocketSelect::~SocketSelect()
 {}
 
 void SocketSelect::PreSelect() {
-    xassert2(!IsBreak(), "Already break!");
+    qm_xassert2(!IsBreak(), "Already break!");
     FD_ZERO(&readfd_);
     FD_ZERO(&writefd_);
     FD_ZERO(&exceptionfd_);

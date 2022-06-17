@@ -25,7 +25,7 @@
 
 #include "marsMulti/app/app.h"
 #include "marsMulti/comm/thread/lock.h"
-#include "marsMulti/comm/xlogger/qm_xlogger.h"
+#include "marsMulti/comm/qm_xlogger/qm_xlogger.h"
 #include "marsMulti/comm/platform_comm.h"
 #include "marsMulti/stn/stn.h"
 
@@ -83,7 +83,7 @@ TimingSync::~TimingSync()
 
 void TimingSync::OnActiveChanged(bool _is_actived)
 {
-    xdebug_function();
+    qm_xdebug_function();
     if (alarm_.IsWaiting())
     {
         alarm_.Cancel();
@@ -102,7 +102,7 @@ void TimingSync::OnNetworkChange()
 
 void TimingSync::OnLongLinkStatuChanged(LongLink::TLongLinkStatus _status, const std::string& _channel_id)
 {
-    xverbose_function();
+    qm_xverbose_function();
     if (_status == LongLink::kConnected)
         alarm_.Cancel();
     else if (_status == LongLink::kDisConnected)
@@ -111,11 +111,11 @@ void TimingSync::OnLongLinkStatuChanged(LongLink::TLongLinkStatus _status, const
 
 void TimingSync::__OnAlarm()
 {
-    xdebug_function();
+    qm_xdebug_function();
 
     if (kNoNet !=::getNetInfo())
     {
-        xinfo2(TSF"timing sync onRequestDoSync netinfo:%_", ::getNetInfo());
+        qm_xinfo2(TSF"timing sync onRequestDoSync netinfo:%_", ::getNetInfo());
         ::RequestSync();
     }
 

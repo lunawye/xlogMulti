@@ -9,7 +9,7 @@
 
 #include <windows.h>
 #include <stdint.h>
-#include "comm/xlogger/qm_xloggerbase.h"
+#include "comm/qm_xlogger/qm_xloggerbase.h"
 
 
 extern "C"

@@ -23,7 +23,7 @@
 
 #include <boost/bind.hpp>
 #include "messagequeue/message_queue.h"
-#include "comm/xlogger/qm_xlogger.h"
+#include "comm/qm_xlogger/qm_xlogger.h"
 
 #ifdef ANDROID
 #include "android/wakeuplock.h"
@@ -57,7 +57,7 @@ class Alarm {
         , type_(-1)
 #endif
     {
-        xinfo2(TSF"handler:(%_,%_)", reg_async_.Get().queue, reg_async_.Get().seq);
+        qm_xinfo2(TSF"handler:(%_,%_)", reg_async_.Get().queue, reg_async_.Get().seq);
     }
 
     template<class T>
@@ -75,7 +75,7 @@ class Alarm {
         , type_(-1)
 #endif
     {
-        xinfo2(TSF"handler:(%_,%_)", reg_async_.Get().queue, reg_async_.Get().seq);
+        qm_xinfo2(TSF"handler:(%_,%_)", reg_async_.Get().queue, reg_async_.Get().seq);
     }
 
     virtual ~Alarm() {

@@ -20,7 +20,7 @@
 #include "../../mmcomm/active_logic.h"
 #include "../../../comm/utils.h"
 #include "../../../log/qm_appender.h"
-#include "../../../comm/xlogger/qm_xloggerbase.h"
+#include "../../../comm/qm_xlogger/qm_xloggerbase.h"
 
 #include "TestUtils.h"
 
