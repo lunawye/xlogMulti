@@ -6,57 +6,7 @@ duplicate symbol '_OBJC_CLASS_$_MarsReachability' in:
 duplicate symbol '_OBJC_METACLASS_$_MarsReachability' in:
     /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(Reachability.o)
     /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(Reachability.mm.o)
-duplicate symbol '_OBJC_IVAR_$_MarsReachability.reachabilityRef' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(Reachability.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(Reachability.mm.o)
-duplicate symbol '_OBJC_IVAR_$_MarsReachability.localWiFiRef' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(Reachability.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(Reachability.mm.o)
 ########################################################################################################################
-duplicate symbol '_OBJC_IVAR_$___ThreadWarp.m_target' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_CLASS_$___ThreadWarp' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_METACLASS_$___ThreadWarp' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_CLASS_$___CThreadWarp' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_METACLASS_$___CThreadWarp' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_IVAR_$___CThreadWarp.m_funp' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_IVAR_$___CThreadWarp.m_fun' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_IVAR_$___ThreadWarp.m_sel' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_IVAR_$___ThreadWarp.m_arg' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_IVAR_$___CThreadWarp.m_arg' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_CLASS_$_ThreadQueue' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-duplicate symbol '_OBJC_METACLASS_$_ThreadQueue' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(ThreadOperationQueue.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(ThreadOperationQueue.mm.o)
-######################################################################################################################## 
-ERROR 4   
-duplicate symbol '_OBJC_CLASS_$_TimerRuner' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(objc_timer.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(qm_objc_timer.mm.o)
-duplicate symbol '_OBJC_METACLASS_$_TimerRuner' in:
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/QMXlog/Classes/mars.framework/mars(objc_timer.o)
-    /Users/peiyuwang/Desktop/QQMusic_Proj/LocalLib/marsMulti/Classes/marsMulti.framework/marsMulti(qm_objc_timer.mm.o)
-########################################################################################################################    
+########################################################################################################################   
 ld: 52 duplicate symbols for architecture x86_64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)

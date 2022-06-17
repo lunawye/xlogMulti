@@ -115,10 +115,10 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 {
     BOOL retVal = NO;
     SCNetworkReachabilityContext    context = {0, self, NULL, NULL, NULL};
-    if(SCNetworkReachabilitySetCallback(reachabilityRef, ReachabilityCallback, &context))
+    if(SCNetworkReachabilitySetCallback(qm_reachabilityRef, ReachabilityCallback, &context))
     {
         //use CFRunLoopGetMain instead of CFRunLoopGetCurrent, because threads created by pthread do not have runloop
-        if(SCNetworkReachabilityScheduleWithRunLoop(reachabilityRef, CFRunLoopGetMain(), kCFRunLoopDefaultMode))
+        if(SCNetworkReachabilityScheduleWithRunLoop(qm_reachabilityRef, CFRunLoopGetMain(), kCFRunLoopDefaultMode))
         {
             retVal = YES;
         }
@@ -128,19 +128,19 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 
 - (void) MarsstopNotifier
 {
-    if(reachabilityRef!= NULL)
+    if(qm_reachabilityRef!= NULL)
     {
         //use CFRunLoopGetMain instead of CFRunLoopGetCurrent, because threads created by pthread do not have runloop
-        SCNetworkReachabilityUnscheduleFromRunLoop(reachabilityRef, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+        SCNetworkReachabilityUnscheduleFromRunLoop(qm_reachabilityRef, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
     }
 }
 
 - (void) dealloc
 {
     [self MarsstopNotifier];
-    if(reachabilityRef!= NULL)
+    if(qm_reachabilityRef!= NULL)
     {
-        CFRelease(reachabilityRef);
+        CFRelease(qm_reachabilityRef);
     }
     [super dealloc];
 }
@@ -154,8 +154,8 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
         retVal= [[[self alloc] init] autorelease];
         if(retVal!= NULL)
         {
-            retVal->reachabilityRef = reachability;
-            retVal->localWiFiRef = NO;
+            retVal->qm_reachabilityRef = reachability;
+            retVal->qm_localWiFiRef = NO;
         }
     }
     return retVal;
@@ -170,8 +170,8 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
         retVal= [[[self alloc] init] autorelease];
         if(retVal!= NULL)
         {
-            retVal->reachabilityRef = reachability;
-            retVal->localWiFiRef = NO;
+            retVal->qm_reachabilityRef = reachability;
+            retVal->qm_localWiFiRef = NO;
         }
     }
     return retVal;
@@ -206,7 +206,7 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
     qm_MarsReachability* retVal = [self reachabilityWithAddress: (const struct sockaddr*)&localWifiAddress];
     if(retVal!= NULL)
     {
-        retVal->localWiFiRef = YES;
+        retVal->qm_localWiFiRef = YES;
     }
     return retVal;
 }
@@ -276,9 +276,9 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 
 - (BOOL) connectionRequired;
 {
-    NSAssert(reachabilityRef != NULL, @"connectionRequired called with NULL reachabilityRef");
+    NSAssert(qm_reachabilityRef != NULL, @"connectionRequired called with NULL qm_reachabilityRef");
     SCNetworkReachabilityFlags flags;
-    if (SCNetworkReachabilityGetFlags(reachabilityRef, &flags))
+    if (SCNetworkReachabilityGetFlags(qm_reachabilityRef, &flags))
     {
         return (flags & kSCNetworkReachabilityFlagsConnectionRequired);
     }
@@ -287,12 +287,12 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target, SCNetworkReach
 
 - (MarsNetworkStatus) currentReachabilityStatus
 {
-    NSAssert(reachabilityRef != NULL, @"currentNetworkStatus called with NULL reachabilityRef");
+    NSAssert(qm_reachabilityRef != NULL, @"currentNetworkStatus called with NULL qm_reachabilityRef");
     MarsNetworkStatus retVal = NotReachable;
     SCNetworkReachabilityFlags flags;
-    if (SCNetworkReachabilityGetFlags(reachabilityRef, &flags))
+    if (SCNetworkReachabilityGetFlags(qm_reachabilityRef, &flags))
     {
-        if(localWiFiRef)
+        if(qm_localWiFiRef)
         {
             retVal = [self localWiFiStatusForFlags: flags];
         }

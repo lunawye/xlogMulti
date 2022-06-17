@@ -38,7 +38,7 @@ public:
     NSOperationQueue* m_operationQueue;
 } gs_threadrunonstart;
 
-@interface __CThreadWarp : NSObject
+@interface qm__CThreadWarp : NSObject
 {
     void (*qm_m_funp)(void*);
     void* qm_m_arg;
@@ -52,7 +52,7 @@ public:
 @property (nonatomic, assign)  void* qm_m_arg;
 @end
 
-@implementation __CThreadWarp
+@implementation qm__CThreadWarp
 
 @synthesize qm_m_funp;
 @synthesize qm_m_fun;
@@ -82,7 +82,7 @@ public:
 @end
 
 
-@interface __ThreadWarp : NSObject
+@interface qm__ThreadWarp : NSObject
 {
     id qm_m_target;
     SEL qm_m_sel;
@@ -95,7 +95,7 @@ public:
 @property (nonatomic, retain)  id qm_m_arg;
 @end
 
-@implementation __ThreadWarp
+@implementation qm__ThreadWarp
 
 @synthesize qm_m_target;
 @synthesize qm_m_sel;
@@ -112,10 +112,10 @@ public:
     return self;
 }
 
-- (void)qm_dealloc {
+- (void)dealloc {
     self.qm_m_target = nil;
     self.qm_m_arg = nil;
-    [super qm_dealloc];
+    [super dealloc];
 }
 
 -(void) qm_Run
@@ -130,7 +130,7 @@ public:
 +(BOOL) qm_RunWithTarget:(id)target selector:(SEL)sel object:(id)arg
 {
     SCOPE_POOL();
-    __ThreadWarp* warp = [[__ThreadWarp alloc] init];
+    qm__ThreadWarp* warp = [[qm__ThreadWarp alloc] init];
     warp.qm_m_target= target;
     warp.qm_m_sel= sel;
     warp.qm_m_arg = arg;
@@ -154,7 +154,7 @@ public:
 extern "C" BOOL qm_RunWithTarget(void (*_funp)(void*), void* _arg)
 {
     SCOPE_POOL();
-    __CThreadWarp* warp = [[__CThreadWarp alloc] init];
+    qm__CThreadWarp* warp = [[qm__CThreadWarp alloc] init];
     warp.qm_m_funp = _funp;
     warp.qm_m_arg = _arg;
     
@@ -175,7 +175,7 @@ extern "C" BOOL qm_RunWithTarget(void (*_funp)(void*), void* _arg)
 extern "C" BOOL qm_RunWithTargetNoParam(void (*_fun)())
 {
     SCOPE_POOL();
-    __CThreadWarp* warp = [[__CThreadWarp alloc] init];
+    qm__CThreadWarp* warp = [[qm__CThreadWarp alloc] init];
     warp.qm_m_fun = _fun;
     
     NSInvocationOperation* invocation = [[NSInvocationOperation alloc]
