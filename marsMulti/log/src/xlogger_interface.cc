@@ -31,7 +31,7 @@ using namespace marsMulti::comm;
 namespace marsMulti {
 namespace xlog {
 
-static Mutex sg_mutex;
+static Mutex qm_sg_mutex;
 static std::map<std::string, XloggerCategory*> sg_map;
 XloggerCategory* NewXloggerInstance(const XLogConfig& _config, TLogLevel _level) {
 
@@ -39,7 +39,7 @@ XloggerCategory* NewXloggerInstance(const XLogConfig& _config, TLogLevel _level)
         return nullptr;
     }
 
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     auto it = sg_map.find(_config.nameprefix_);
     if (it != sg_map.end()) {
         return it->second;
@@ -60,7 +60,7 @@ marsMulti::comm::XloggerCategory* GetXloggerInstance(const char* _nameprefix) {
         return nullptr;
     }
 
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     auto it = sg_map.find(_nameprefix);
     if (it != sg_map.end()) {
         return it->second;
@@ -74,7 +74,7 @@ void ReleaseXloggerInstance(const char* _nameprefix) {
         return;
     }
 
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     auto it = sg_map.find(_nameprefix);
     if (it == sg_map.end()) {
         return;

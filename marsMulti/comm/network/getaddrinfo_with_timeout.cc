@@ -70,7 +70,7 @@ struct DnsItem {
 
 static std::vector<DnsItem> sg_dnsitem_vec;
 static Condition sg_condition;
-static Mutex sg_mutex;
+static Mutex qm_sg_mutex;
 
 
 static void __WorkerFunc() {
@@ -84,7 +84,7 @@ static void __WorkerFunc() {
     struct addrinfo *worker_res0= NULL;
 	memset(&worker_hints, 0, sizeof(worker_hints));
 
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     std::vector<DnsItem>::iterator iter = sg_dnsitem_vec.begin();
     
     for (; iter != sg_dnsitem_vec.end(); ++iter) {
@@ -159,7 +159,7 @@ int getaddrinfo_with_timeout(const char *node, const char *service, const struct
     qm_xverbose_function();
     //Check param
     
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     
     
     Thread thread(&__WorkerFunc, node);

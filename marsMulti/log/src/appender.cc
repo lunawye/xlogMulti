@@ -1087,122 +1087,122 @@ bool XloggerAppender::MakeLogfileName(int _timespan, const char* _prefix,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-static XloggerAppender* sg_default_appender = nullptr;
-static bool sg_release_guard = true; 
-static bool sg_default_console_log_open = false;
-static Mutex sg_mutex;
+static XloggerAppender* qm_sg_default_appender = nullptr;
+static bool qm_sg_release_guard = true; 
+static bool qm_sg_default_console_log_open = false;
+static Mutex qm_sg_mutex;
 void xlogger_appender(const XLoggerInfo* _info, const char* _log) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->Write(_info, _log);
+    qm_sg_default_appender->Write(_info, _log);
 }
 
 static void appender_release_default_appender() {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_release_guard = true;
-    sg_default_appender->Close();
+    qm_sg_release_guard = true;
+    qm_sg_default_appender->Close();
     //  本函数只会在 exit 的时候调用，所以干脆不释放对象了，防止多线程导致的 crash
-    // XloggerAppender::Release(sg_default_appender);
+    // XloggerAppender::Release(qm_sg_default_appender);
 }
 
 void qm_appender_open(const XLogConfig& _config) {
     assert(!_config.logdir_.empty());
 
-    if (nullptr != sg_default_appender) {
-        sg_default_appender->WriteTips2File("appender has already been opened. _dir:%s _nameprefix:%s", _config.logdir_.c_str(), _config.nameprefix_.c_str());
+    if (nullptr != qm_sg_default_appender) {
+        qm_sg_default_appender->WriteTips2File("appender has already been opened. _dir:%s _nameprefix:%s", _config.logdir_.c_str(), _config.nameprefix_.c_str());
         return; 
     }
 
-    sg_default_appender = XloggerAppender::NewInstance(_config);
-    sg_default_appender->SetConsoleLog(sg_default_console_log_open);
-    sg_release_guard = false;
+    qm_sg_default_appender = XloggerAppender::NewInstance(_config);
+    qm_sg_default_appender->SetConsoleLog(qm_sg_default_console_log_open);
+    qm_sg_release_guard = false;
     xlogger_SetAppender(&xlogger_appender);
     BOOT_RUN_EXIT(appender_release_default_appender);
 }
 
 void qm_appender_flush() {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->Flush();
+    qm_sg_default_appender->Flush();
 }
 
 void qm_appender_flush_sync() {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->FlushSync();
+    qm_sg_default_appender->FlushSync();
 }
 
 void qm_appender_close() {
-    ScopedLock lock(sg_mutex);
-    if (sg_release_guard) {
+    ScopedLock lock(qm_sg_mutex);
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_release_guard = true;
-    sg_default_appender->Close();
-    XloggerAppender::DelayRelease(sg_default_appender);
-    sg_default_appender = nullptr;
+    qm_sg_release_guard = true;
+    qm_sg_default_appender->Close();
+    XloggerAppender::DelayRelease(qm_sg_default_appender);
+    qm_sg_default_appender = nullptr;
 }
 
 void qm_appender_setmode(TAppenderMode _mode) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->SetMode(_mode);
+    qm_sg_default_appender->SetMode(_mode);
 }
 
 bool qm_appender_get_current_log_path(char* _log_path, unsigned int _len) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return false;
     }
-    return sg_default_appender->GetCurrentLogPath(_log_path, _len);
+    return qm_sg_default_appender->GetCurrentLogPath(_log_path, _len);
 }
 
 bool qm_appender_get_current_log_cache_path(char* _logPath, unsigned int _len) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return false;
     }
-    return sg_default_appender->GetCurrentLogCachePath(_logPath, _len);
+    return qm_sg_default_appender->GetCurrentLogCachePath(_logPath, _len);
 }
 
 void qm_appender_set_console_log(bool _is_open) {
-    sg_default_console_log_open = _is_open;
-    if (sg_release_guard) {
+    qm_sg_default_console_log_open = _is_open;
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->SetConsoleLog(_is_open);
+    qm_sg_default_appender->SetConsoleLog(_is_open);
 }
 
 void qm_appender_set_max_file_size(uint64_t _max_byte_size) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->SetMaxFileSize(_max_byte_size);
+    qm_sg_default_appender->SetMaxFileSize(_max_byte_size);
 }
 
 void qm_appender_set_max_alive_duration(long _max_time) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return;
     }
-    sg_default_appender->SetMaxAliveDuration(_max_time);
+    qm_sg_default_appender->SetMaxAliveDuration(_max_time);
 }
 
 bool qm_appender_getfilepath_from_timespan(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return false;
     }
-    return sg_default_appender->GetfilepathFromTimespan(_timespan, _prefix, _filepath_vec);
+    return qm_sg_default_appender->GetfilepathFromTimespan(_timespan, _prefix, _filepath_vec);
 }
 
 bool qm_appender_make_logfile_name(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return false;
     }
-    return sg_default_appender->MakeLogfileName(_timespan, _prefix, _filepath_vec);
+    return qm_sg_default_appender->MakeLogfileName(_timespan, _prefix, _filepath_vec);
 }
 
 }
@@ -1211,10 +1211,10 @@ bool qm_appender_make_logfile_name(int _timespan, const char* _prefix, std::vect
 using namespace marsMulti::xlog;
 
 const char* xlogger_dump(const void* _dumpbuffer, size_t _len) {
-    if (sg_release_guard) {
+    if (qm_sg_release_guard) {
         return "";
     }
-    return sg_default_appender->Dump(_dumpbuffer, _len);
+    return qm_sg_default_appender->Dump(_dumpbuffer, _len);
 }
 
 const char* xlogger_memory_dump(const void* _dumpbuffer, size_t _len) {

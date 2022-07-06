@@ -58,7 +58,7 @@ static std::string DNSInfoToString(const struct dnsinfo& _info) {
 }
 static std::vector<dnsinfo> sg_dnsinfo_vec;
 static Condition sg_condition;
-static Mutex sg_mutex;
+static Mutex qm_sg_mutex;
 
 static void __GetIP() {
     qm_xverbose_function();
@@ -69,7 +69,7 @@ static void __GetIP() {
     DNS::DNSFunc dnsfunc = NULL;
     bool longlink_host = false;
 
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     std::vector<dnsinfo>::iterator iter = sg_dnsinfo_vec.begin();
 
     for (; iter != sg_dnsinfo_vec.end(); ++iter) {
@@ -204,7 +204,7 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
         return false;
     }
 
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
 
     if (_breaker && _breaker->isbreak) return false;
 
@@ -297,7 +297,7 @@ bool DNS::GetHostByName(const std::string& _host_name, std::vector<std::string>&
 
 void DNS::Cancel(const std::string& _host_name) {
     qm_xverbose_function();
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
 
     for (unsigned int i = 0; i < sg_dnsinfo_vec.size(); ++i) {
         dnsinfo& info = sg_dnsinfo_vec.at(i);
@@ -315,7 +315,7 @@ void DNS::Cancel(const std::string& _host_name) {
 }
 
 void DNS::Cancel(DNSBreaker& _breaker) {
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     _breaker.isbreak = true;
 
     if (_breaker.dnsstatus) *(_breaker.dnsstatus) = kGetIPCancel;

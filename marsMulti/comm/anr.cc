@@ -51,7 +51,7 @@ namespace {
 
 
 static std::vector<check_content> sg_check_heap;
-static Mutex             sg_mutex;
+static Mutex             qm_sg_mutex;
 static Condition          sg_cond;
 static bool               sg_exit = false;
 
@@ -67,13 +67,13 @@ static void __unregister_anr_impl(uintptr_t _ptr) {
 }
 
 static void __unregister_anr(uintptr_t _ptr) {
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     __unregister_anr_impl(_ptr);
     sg_cond.notifyAll(lock);
 }
 
 static void __register_anr(uintptr_t _ptr, const char* _file, const char* _func, int _line, int _timeout, int _call_id, void* extra_info) {
-    ScopedLock lock(sg_mutex);
+    ScopedLock lock(qm_sg_mutex);
     __unregister_anr_impl(_ptr);
 
     if (0 >= _timeout) return;
@@ -94,7 +94,7 @@ static bool iOS_style = false;
 
 static void __anr_checker_thread() {
     while (true) {
-        ScopedLock lock(sg_mutex);
+        ScopedLock lock(qm_sg_mutex);
 
     	uint64_t round_tick_start = clock_app_monotonic();
         clock_t use_cpu_clock_1 = clock();
@@ -167,7 +167,7 @@ static class startup {
     }
 
     ~startup() {
-        ScopedLock lock(sg_mutex);
+        ScopedLock lock(qm_sg_mutex);
         sg_exit = true;
         sg_cond.notifyAll(lock);
         lock.unlock();
