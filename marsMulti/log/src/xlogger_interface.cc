@@ -126,7 +126,7 @@ void SetLevel(uintptr_t _instance_ptr, TLogLevel _level) {
 
 void SetAppenderMode(uintptr_t _instance_ptr, TAppenderMode _mode) {
     if (0 == _instance_ptr) {
-        appender_setmode(_mode);
+        qm_appender_setmode(_mode);
     } else {
         XloggerCategory* category  = reinterpret_cast<XloggerCategory*>(_instance_ptr);
         XloggerAppender* appender = reinterpret_cast<XloggerAppender*>(category->GetAppender());
@@ -136,7 +136,7 @@ void SetAppenderMode(uintptr_t _instance_ptr, TAppenderMode _mode) {
 
 void Flush(uintptr_t _instance_ptr, bool _is_sync) {
     if (0 == _instance_ptr) {
-        _is_sync ? appender_flush_sync() : appender_flush();
+        _is_sync ? qm_appender_flush_sync() : qm_appender_flush();
     } else {
         XloggerCategory* category  = reinterpret_cast<XloggerCategory*>(_instance_ptr);
         XloggerAppender* appender = reinterpret_cast<XloggerAppender*>(category->GetAppender());
@@ -146,7 +146,7 @@ void Flush(uintptr_t _instance_ptr, bool _is_sync) {
 
 void SetConsoleLogOpen(uintptr_t _instance_ptr, bool _is_open) {
     if (0 == _instance_ptr) {
-       appender_set_console_log(_is_open);
+       qm_appender_set_console_log(_is_open);
     } else {
         XloggerCategory* category  = reinterpret_cast<XloggerCategory*>(_instance_ptr);
         XloggerAppender* appender = reinterpret_cast<XloggerAppender*>(category->GetAppender());
@@ -156,7 +156,7 @@ void SetConsoleLogOpen(uintptr_t _instance_ptr, bool _is_open) {
 
 void SetMaxFileSize(uintptr_t _instance_ptr, long _max_file_size) {
     if (0 == _instance_ptr) {
-       appender_set_max_file_size(_max_file_size);
+       qm_appender_set_max_file_size(_max_file_size);
     } else {
         XloggerCategory* category  = reinterpret_cast<XloggerCategory*>(_instance_ptr);
         XloggerAppender* appender = reinterpret_cast<XloggerAppender*>(category->GetAppender());
@@ -166,7 +166,7 @@ void SetMaxFileSize(uintptr_t _instance_ptr, long _max_file_size) {
 
 void SetMaxAliveTime(uintptr_t _instance_ptr, long _alive_seconds) {
     if (0 == _instance_ptr) {
-       appender_set_max_alive_duration(_alive_seconds);
+       qm_appender_set_max_alive_duration(_alive_seconds);
     } else {
         XloggerCategory* category  = reinterpret_cast<XloggerCategory*>(_instance_ptr);
         XloggerAppender* appender = reinterpret_cast<XloggerAppender*>(category->GetAppender());

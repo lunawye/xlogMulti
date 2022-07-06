@@ -198,10 +198,10 @@ setxattr([logPath UTF8String], attrName, &attrValue, sizeof(attrValue), 0, 0);
 // init qm_xlogger
 #if DEBUG
 xlogger_SetLevel(kLevelDebug);
-appender_set_console_log(true);
+qm_appender_set_console_log(true);
 #else
 xlogger_SetLevel(kLevelInfo);
-appender_set_console_log(false);
+qm_appender_set_console_log(false);
 #endif
 XLogConfig config;
 config.mode_ = kAppenderAsync;
@@ -212,14 +212,14 @@ config.compress_mode_ = kZlib;
 config.compress_level_ = 0;
 config.cachedir_ = "";
 config.cache_days_ = 0;
-appender_open(config);
+qm_appender_open(config);
 ```
 
 Close xlog in function "applicationWillTerminate"
 
 
 ```cpp
-appender_close();
+qm_appender_close();
 ```
 
 #### <a name="STN">STN Init</a>
@@ -324,19 +324,19 @@ std::string pubKey = ""; //use you pubkey for log encrypt
 // init xlog
 #if DEBUG
 xlogger_SetLevel(kLevelDebug);
-appender_set_console_log(true);
+qm_appender_set_console_log(true);
 #else
 xlogger_SetLevel(kLevelInfo);
-appender_set_console_log(false);
+qm_appender_set_console_log(false);
 #endif
-appender_open(kAppenderAsync, logPath.c_str(), "Test", 0, pubKey.c_str());
+qm_appender_open(kAppenderAsync, logPath.c_str(), "Test", 0, pubKey.c_str());
 ```
 
 Uninitialized xlog before your app exits
 
 
 ```cpp
-appender_close();
+qm_appender_close();
 ```
 
 #### <a name="STN">STN Init</a>
@@ -601,10 +601,10 @@ setxattr([logPath UTF8String], attrName, &attrValue, sizeof(attrValue), 0, 0);
 // init qm_xlogger
 #if DEBUG
 xlogger_SetLevel(kLevelDebug);
-appender_set_console_log(true);
+qm_appender_set_console_log(true);
 #else
 xlogger_SetLevel(kLevelInfo);
-appender_set_console_log(false);
+qm_appender_set_console_log(false);
 #endif
 
 XLogConfig config;
@@ -616,13 +616,13 @@ config.compress_mode_ = kZlib;
 config.compress_level_ = 0;
 config.cachedir_ = "";
 config.cache_days_ = 0;
-appender_open(config);
+qm_appender_open(config);
 ```
 
 在函数 "applicationWillTerminate" 中反初始化 Xlog
 
 ```cpp
-appender_close();
+qm_appender_close();
 ```
 
 #### <a name="STN">STN Init</a>
@@ -726,18 +726,18 @@ std::string pubKey = ""; //use you pubkey for log encrypt
 // init xlog
 #if DEBUG
 xlogger_SetLevel(kLevelDebug);
-appender_set_console_log(true);
+qm_appender_set_console_log(true);
 #else
 xlogger_SetLevel(kLevelInfo);
-appender_set_console_log(false);
+qm_appender_set_console_log(false);
 #endif
-appender_open(kAppenderAsync, logPath.c_str(), "Test", 0,  pubKey.c_str());
+qm_appender_open(kAppenderAsync, logPath.c_str(), "Test", 0,  pubKey.c_str());
 ```
 
 在程序退出前反初始化 Xlog
 
 ```cpp
-appender_close();
+qm_appender_close();
 ```
 
 #### <a name="STN">STN Init</a>

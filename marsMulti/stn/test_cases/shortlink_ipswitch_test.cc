@@ -422,7 +422,7 @@ static void shortIpSwitchTest(TestCaseInfo *m_testCaseInfo, const IpSwitchParam&
 	SINGLETON_STRONG(ActiveLogic).m_isactive = true;
 	UtilFunc::del_files(CONFIG_PATH);
 	xlogger_SetLevel(ELevelDebug);
-	appender_open(EAppednerSync, "C:\\log", "GTEST");
+	qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	Hook();
 	HookPrivate();
 	ChangeBindFunc(CMMNetCore::Singleton());

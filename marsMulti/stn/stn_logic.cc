@@ -104,11 +104,11 @@ static void onDestroy() {
 }
 
 static void onSingalCrash(int _sig) {
-    marsMulti::xlog::appender_close();
+    marsMulti::xlog::qm_appender_close();
 }
 
 static void onExceptionCrash() {
-    marsMulti::xlog::appender_close();
+    marsMulti::xlog::qm_appender_close();
 }
 
 static void onNetworkChange() {

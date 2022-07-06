@@ -147,12 +147,12 @@ JNIEXPORT void JNICALL Java_com_tencent_mars_xlog_Xlog_appenderOpen
 
     marsMulti::xlog::XLogConfig config = {(marsMulti::xlog::TAppenderMode)mode, logdir_str, nameprefix_str, pubkey_str,
                                      (marsMulti::xlog::TCompressMode)compressmode, compresslevel, cachedir_str, cachedays};
-    appender_open(config);
+    qm_appender_open(config);
 	xlogger_SetLevel((TLogLevel)level);
 }
 
 JNIEXPORT void JNICALL Java_com_tencent_mars_xlog_Xlog_appenderClose(JNIEnv *env, jobject) {
-    marsMulti::xlog::appender_close();
+    marsMulti::xlog::qm_appender_close();
 }
 
 JNIEXPORT void JNICALL Java_com_tencent_mars_xlog_Xlog_appenderFlush(JNIEnv *env, jobject, jlong _log_instance_ptr, jboolean _is_sync) {

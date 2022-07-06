@@ -1108,7 +1108,7 @@ static void appender_release_default_appender() {
     // XloggerAppender::Release(sg_default_appender);
 }
 
-void appender_open(const XLogConfig& _config) {
+void qm_appender_open(const XLogConfig& _config) {
     assert(!_config.logdir_.empty());
 
     if (nullptr != sg_default_appender) {
@@ -1123,21 +1123,21 @@ void appender_open(const XLogConfig& _config) {
     BOOT_RUN_EXIT(appender_release_default_appender);
 }
 
-void appender_flush() {
+void qm_appender_flush() {
     if (sg_release_guard) {
         return;
     }
     sg_default_appender->Flush();
 }
 
-void appender_flush_sync() {
+void qm_appender_flush_sync() {
     if (sg_release_guard) {
         return;
     }
     sg_default_appender->FlushSync();
 }
 
-void appender_close() {
+void qm_appender_close() {
     ScopedLock lock(sg_mutex);
     if (sg_release_guard) {
         return;
@@ -1148,28 +1148,28 @@ void appender_close() {
     sg_default_appender = nullptr;
 }
 
-void appender_setmode(TAppenderMode _mode) {
+void qm_appender_setmode(TAppenderMode _mode) {
     if (sg_release_guard) {
         return;
     }
     sg_default_appender->SetMode(_mode);
 }
 
-bool appender_get_current_log_path(char* _log_path, unsigned int _len) {
+bool qm_appender_get_current_log_path(char* _log_path, unsigned int _len) {
     if (sg_release_guard) {
         return false;
     }
     return sg_default_appender->GetCurrentLogPath(_log_path, _len);
 }
 
-bool appender_get_current_log_cache_path(char* _logPath, unsigned int _len) {
+bool qm_appender_get_current_log_cache_path(char* _logPath, unsigned int _len) {
     if (sg_release_guard) {
         return false;
     }
     return sg_default_appender->GetCurrentLogCachePath(_logPath, _len);
 }
 
-void appender_set_console_log(bool _is_open) {
+void qm_appender_set_console_log(bool _is_open) {
     sg_default_console_log_open = _is_open;
     if (sg_release_guard) {
         return;
@@ -1177,28 +1177,28 @@ void appender_set_console_log(bool _is_open) {
     sg_default_appender->SetConsoleLog(_is_open);
 }
 
-void appender_set_max_file_size(uint64_t _max_byte_size) {
+void qm_appender_set_max_file_size(uint64_t _max_byte_size) {
     if (sg_release_guard) {
         return;
     }
     sg_default_appender->SetMaxFileSize(_max_byte_size);
 }
 
-void appender_set_max_alive_duration(long _max_time) {
+void qm_appender_set_max_alive_duration(long _max_time) {
     if (sg_release_guard) {
         return;
     }
     sg_default_appender->SetMaxAliveDuration(_max_time);
 }
 
-bool appender_getfilepath_from_timespan(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec) {
+bool qm_appender_getfilepath_from_timespan(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec) {
     if (sg_release_guard) {
         return false;
     }
     return sg_default_appender->GetfilepathFromTimespan(_timespan, _prefix, _filepath_vec);
 }
 
-bool appender_make_logfile_name(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec) {
+bool qm_appender_make_logfile_name(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec) {
     if (sg_release_guard) {
         return false;
     }

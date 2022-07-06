@@ -57,17 +57,17 @@ enum TConsoleFun {
 };
 #endif
 
-void appender_open(const XLogConfig& _config);
+void qm_appender_open(const XLogConfig& _config);
 
-void appender_flush();
-void appender_flush_sync();
-void appender_close();
-void appender_setmode(TAppenderMode _mode);
-bool appender_getfilepath_from_timespan(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec);
-bool appender_make_logfile_name(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec);
-bool appender_get_current_log_path(char* _log_path, unsigned int _len);
-bool appender_get_current_log_cache_path(char* _logPath, unsigned int _len);
-void appender_set_console_log(bool _is_open);
+void qm_appender_flush();
+void qm_appender_flush_sync();
+void qm_appender_close();
+void qm_appender_setmode(TAppenderMode _mode);
+bool qm_appender_getfilepath_from_timespan(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec);
+bool qm_appender_make_logfile_name(int _timespan, const char* _prefix, std::vector<std::string>& _filepath_vec);
+bool qm_appender_get_current_log_path(char* _log_path, unsigned int _len);
+bool qm_appender_get_current_log_cache_path(char* _logPath, unsigned int _len);
+void qm_appender_set_console_log(bool _is_open);
 
 #ifdef __APPLE__
 void appender_set_console_fun(TConsoleFun _fun);
@@ -77,14 +77,14 @@ void appender_set_console_fun(TConsoleFun _fun);
  * 
  * @param _max_byte_size    Max byte size of single log file, default is 0, meaning do not split.
  */
-void appender_set_max_file_size(uint64_t _max_byte_size);
+void qm_appender_set_max_file_size(uint64_t _max_byte_size);
 
 /*
  * By default, all logs lives 10 days at most.
  *
  * @param _max_time    Max alive duration of a single log file in seconds, default is 10 days
  */
-void appender_set_max_alive_duration(long _max_time);
+void qm_appender_set_max_alive_duration(long _max_time);
 
 }
 }

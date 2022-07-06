@@ -21,7 +21,7 @@ void Cs2Runtime_Comm::OnCreate() {
 #endif
     appender_SetConsoleLog(true);  // just for test  //TODO
     qm_xwarn2(TSF"onCreate");
-    appender_open(EAppednerAsync, (::getAppFilePath() + "\\log").c_str(), "MM");
+    qm_appender_open(EAppednerAsync, (::getAppFilePath() + "\\log").c_str(), "MM");
     MMLogLogic::InitLogInfo();
 #ifndef NDEBUG
     xlogger_SetLevel(ELevelDebug);
@@ -36,17 +36,17 @@ void Cs2Runtime_Comm::OnDestroy() {
 
     SINGLETON_RELEASE_ALL();
     qm_xwarn2(TSF"ReleaseXLogger---------------------------------------------------------");
-    appender_close();
+    qm_appender_close();
 }
 
 void Cs2Runtime_Comm::OnSingalCrash(int _sig) {
     qm_xverbose2(TSF"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc=%0", _sig);
-    appender_close();
+    qm_appender_close();
 }
 
 void Cs2Runtime_Comm::OnExceptionCrash() {
     qm_xverbose2(TSF"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
-    appender_close();
+    qm_appender_close();
 }
 
 void Cs2Runtime_Comm::OnForeground(bool _isforeground) {

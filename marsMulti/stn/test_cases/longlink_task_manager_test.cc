@@ -150,7 +150,7 @@ PUBC_TEST(MMLongLinkTaskMangerTest, test0)
 {
 	UtilFunc::execute_cmd();
 	//xlogger_SetLevel(ELevelDebug);
-	//appender_open(EAppednerSync, "C:\\log", "GTEST");
+	//qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	m_testCaseInfo->m_TestCaseName = "task default time out:60000ms";
 
 	CMMNetSource netsource;
@@ -222,7 +222,7 @@ PUBC_TEST(MMLongLinkTaskMangerTest, test2)
 {
 
 	//xlogger_SetLevel(ELevelDebug);
-	//appender_open(EAppednerSync, "C:\\log", "GTEST");
+	//qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	m_testCaseInfo->m_TestCaseName = "default first pkg timeout";
 
 	HookSingleRespHandle();
@@ -266,7 +266,7 @@ PUBC_TEST(MMLongLinkTaskMangerTest, test2)
 PUBC_TEST(MMLongLinkTaskMangerTest, test3)
 {
 	//xlogger_SetLevel(ELevelDebug);
-	//appender_open(EAppednerSync, "C:\\log", "GTEST");
+	//qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	m_testCaseInfo->m_TestCaseName = "user define first pkg timeout";
 
 	HookSingleRespHandle();

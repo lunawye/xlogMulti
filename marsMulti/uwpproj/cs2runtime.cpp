@@ -236,7 +236,7 @@ void marsMulti::LogComponent::AppenderOpen(TAppenderModeRuntime _mode, Platform:
 	string stdStrNameprefix;
 	String2stdstring(stdStrNameprefix, _nameprefix);
 
-	appender_open((TAppenderMode)_mode, stdStrDir.c_str(), stdStrNameprefix.c_str());
+	qm_appender_open((TAppenderMode)_mode, stdStrDir.c_str(), stdStrNameprefix.c_str());
 }
 
 void marsMulti::LogComponent::AppenderOpenWithCache(TAppenderModeRuntime _mode, Platform::String ^ _cachedir, Platform::String ^ _logdir, Platform::String ^ _nameprefix)
@@ -251,27 +251,27 @@ void marsMulti::LogComponent::AppenderOpenWithCache(TAppenderModeRuntime _mode, 
 	string stdStrPrefix;
 	String2stdstring(stdStrPrefix, _nameprefix);
 
-	appender_open_with_cache((TAppenderMode)_mode, stdStrCache, stdStrDir, stdStrPrefix.c_str());
+	qm_appender_open_with_cache((TAppenderMode)_mode, stdStrCache, stdStrDir, stdStrPrefix.c_str());
 }
 
 void marsMulti::LogComponent::AppenderFlush()
 {
-	appender_flush();
+	qm_appender_flush();
 }
 
 void marsMulti::LogComponent::AppenderFlushSync()
 {
-	appender_flush_sync();
+	qm_appender_flush_sync();
 }
 
 void marsMulti::LogComponent::AppenderClose()
 {
-	appender_close();
+	qm_appender_close();
 }
 
 void marsMulti::LogComponent::AppenderSetMode(TAppenderModeRuntime _mode)
 {
-	appender_setmode((TAppenderMode)_mode);
+	qm_appender_setmode((TAppenderMode)_mode);
 }
 
 bool marsMulti::LogComponent::AppenderGetFilePathFromTimeSpan(int _timespan, Platform::String ^ _prefix, const Platform::Array<Platform::String^>^ _filepath_vec)
@@ -283,7 +283,7 @@ bool marsMulti::LogComponent::AppenderGetFilePathFromTimeSpan(int _timespan, Pla
 	vector<string> stdArrPaths;
 	_FillStdStrArray(stdArrPaths, _filepath_vec);
 
-	return appender_getfilepath_from_timespan(_timespan, stdStrPrefix.c_str(), stdArrPaths);
+	return qm_appender_getfilepath_from_timespan(_timespan, stdStrPrefix.c_str(), stdArrPaths);
 }
 
 
@@ -295,7 +295,7 @@ LogGetPathRet^ marsMulti::LogComponent::AppenderGetCurrentLogPath()
 	char* logPath = new char[nLen+1];
 	memset(logPath, 0, nLen + 1);
 
-	retInfo->bRet = appender_get_current_log_path(logPath, nLen);
+	retInfo->bRet = qm_appender_get_current_log_path(logPath, nLen);
 
 	string strLogPath(logPath, nLen);
 	delete[] logPath;
@@ -313,7 +313,7 @@ LogGetPathRet^ marsMulti::LogComponent::AppenderGetCurrentLogCachePath()
 	char* logPath = new char[nLen + 1];
 	memset(logPath, 0, nLen + 1);
 
-	retInfo->bRet = appender_get_current_log_cache_path(logPath, nLen);
+	retInfo->bRet = qm_appender_get_current_log_cache_path(logPath, nLen);
 
 	string strLogPath(logPath, nLen);
 	delete[] logPath;
@@ -325,7 +325,7 @@ LogGetPathRet^ marsMulti::LogComponent::AppenderGetCurrentLogCachePath()
 
 void marsMulti::LogComponent::AppenderSetConsoleLog(bool _is_open)
 {
-	return appender_set_console_log(_is_open);
+	return qm_appender_set_console_log(_is_open);
 }
 
 void marsMulti::LogComponent::SetLogLevel(TLogLevelRuntime _level)

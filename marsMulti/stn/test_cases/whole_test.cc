@@ -807,7 +807,7 @@ static void funcSwitchIpTest(TestCaseInfo *m_testCaseInfo, const WholeTestParam&
 	if(param.isForeGround) SINGLETON_STRONG(ActiveLogic).m_lastforegroundchangetime -= param.timeAccelerateMilliSec;
 	UtilFunc::del_files(CONFIG_PATH);
 	xlogger_SetLevel(ELevelDebug);
-	appender_open(EAppednerSync, "C:\\log", "GTEST");
+	qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	Hook();
 	HookPrivateMemberFn();
 	ChangeBindFunc(CMMNetCore::Singleton());

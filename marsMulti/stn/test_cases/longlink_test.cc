@@ -353,7 +353,7 @@ TEST(MMLongLink2_test, longlinkconnect_test0)
 	static void (CDetour::* Mine_Target3)(bool _isSuccess, const std::string& _ip, unsigned int _port) = &CDetour::Mine_ReportLongIP;
 
 //	xlogger_SetLevel(ELevelDebug);
-//	appender_open(EAppednerSync, "C:\\log", "GTEST");
+//	qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)CDetour::Real_GetLongLinkItems, *(PBYTE*)&Mine_Target1);

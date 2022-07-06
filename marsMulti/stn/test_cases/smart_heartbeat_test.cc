@@ -68,7 +68,7 @@ PUBC_TEST(SmartHeartBeat, test0)
 	UtilFunc::del_files(getAppFilePath() + "/" + "config");
 
 	//xlogger_SetLevel(ELevelDebug);
-	//appender_open(EAppednerSync, "C:\\log", "GTEST");
+	//qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 	HookIsActive();
 
 	sg_active = false;

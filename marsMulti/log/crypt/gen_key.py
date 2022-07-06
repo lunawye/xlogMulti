@@ -14,6 +14,6 @@ print("save private key")
 
 print(hexlify(svr_privkey))
 
-print("\nappender_open's parameter:")
+print("\nqm_appender_open's parameter:")
 print("%s%s" %(hexlify(svr.pubkey_x),  hexlify(svr.pubkey_y)))
 

@@ -52,7 +52,7 @@ PUBC_TEST(MMNetSourceTest, test0)
 	m_testCaseInfo->m_TestCaseName = "history record's num < 5, ReportLongIP false, successRate reduce";
 
 //	xlogger_SetLevel(ELevelDebug);
-//	appender_open(EAppednerSync, "C:\\log", "GTEST");
+//	qm_appender_open(EAppednerSync, "C:\\log", "GTEST");
 
 	
 	UtilFunc::del_files(CONFIG_PATH);
