@@ -52,6 +52,11 @@ XloggerCategory* NewXloggerInstance(const XLogConfig& _config, TLogLevel _level)
                                                                 std::bind(&XloggerAppender::Write, appender, _1, _2));
     category->SetLevel(_level);
     sg_map[_config.nameprefix_] = category;
+
+    auto ittest = sg_map.find(_config.nameprefix_);
+    if (ittest != sg_map.end()) {
+        return ittest->second;
+    }
     return category;
 }
 
